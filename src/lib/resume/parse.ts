@@ -374,6 +374,110 @@ export async function parseResumeWithAI(
     };
   }
 
+  return finishParse(response, input.userId, { input_chars: text.length });
+}
+
+/**
+ * OCR fallback (2026-07-10) — parse a SCANNED/image-only PDF by sending the
+ * file itself to the model as a document block. The API renders each page
+ * as an image and the model reads it visually, so this is the OCR path —
+ * no separate OCR service, same extraction prompt, same schema, same
+ * confidence tiers. Called by parse-on-apply when text extraction fails
+ * on a PDF; costs ~0.2-0.3¢/page extra on Haiku, only on this path.
+ *
+ * Same guardrails as the text path: the system prompt's redaction rules
+ * (no SSN/DOB/DEA) apply identically, usage lands in ai_usage_events
+ * under the same resume_parse feature (vision: true in metadata).
+ */
+export interface ParseResumeFromPdfInput {
+  /** Raw PDF bytes (from the resumes bucket download). */
+  pdfBytes: ArrayBuffer | Uint8Array | Buffer;
+  /** auth.users.id (or candidates.id for guests) for usage logging. */
+  userId: string;
+}
+
+/** Mirror of extract.ts's cap — same 10MB posture as the upload validators. */
+const MAX_PDF_BYTES = 10 * 1024 * 1024;
+
+export async function parseResumeFromPdfWithAI(
+  input: ParseResumeFromPdfInput
+): Promise<ParseResumeResult> {
+  const bytes =
+    input.pdfBytes instanceof Uint8Array
+      ? input.pdfBytes
+      : new Uint8Array(input.pdfBytes);
+  if (bytes.byteLength > MAX_PDF_BYTES) {
+    return {
+      ok: false,
+      errorCode: "input_too_long",
+      error: "This resume file is too large for the visual parser.",
+    };
+  }
+
+  const systemPrompt = buildSystemPrompt();
+  let response: Anthropic.Messages.Message;
+  try {
+    response = await getAnthropic().messages.create({
+      model: HAIKU_MODEL,
+      max_tokens: 4000,
+      system: systemPrompt,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "document",
+              source: {
+                type: "base64",
+                media_type: "application/pdf",
+                data: Buffer.from(bytes).toString("base64"),
+              },
+            },
+            {
+              type: "text",
+              text: "This resume is a scanned or image-based PDF — read it visually. Parse it into the JSON schema specified in the system prompt. Output only the JSON object — no surrounding prose.",
+            },
+          ],
+        },
+      ],
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "AI request failed";
+    await logAiUsage({
+      dsoId: null,
+      userId: input.userId,
+      feature: "resume_parse",
+      model: HAIKU_MODEL,
+      inputTokens: 0,
+      outputTokens: 0,
+      costUsdEstimate: 0,
+      requestMetadata: { error: message, vision: true, pdf_bytes: bytes.byteLength },
+      succeeded: false,
+      errorMessage: message,
+    });
+    return {
+      ok: false,
+      errorCode: "ai_request_failed",
+      error: "We couldn't reach the parsing service. Try again in a moment.",
+    };
+  }
+
+  return finishParse(response, input.userId, {
+    vision: true,
+    pdf_bytes: bytes.byteLength,
+  });
+}
+
+/**
+ * Shared post-response pipeline for both parse modes: extract the JSON,
+ * normalize Haiku's shape drift, validate against the strict schema, and
+ * log usage — success or failure — with mode-specific metadata merged in.
+ */
+async function finishParse(
+  response: Anthropic.Messages.Message,
+  userId: string,
+  inputMeta: Record<string, unknown>
+): Promise<ParseResumeResult> {
   const rawText = response.content
     .filter((b): b is Anthropic.Messages.TextBlock => b.type === "text")
     .map((b) => b.text)
@@ -404,7 +508,7 @@ export async function parseResumeWithAI(
         : null;
     await logAiUsage({
       dsoId: null,
-      userId: input.userId,
+      userId,
       feature: "resume_parse",
       model: HAIKU_MODEL,
       inputTokens: response.usage.input_tokens,
@@ -417,7 +521,7 @@ export async function parseResumeWithAI(
         parse_error: message,
         zod_issues: zodIssues,
         raw_preview: rawText.slice(0, 500),
-        input_chars: text.length,
+        ...inputMeta,
       },
       succeeded: false,
       errorMessage: message,
@@ -437,14 +541,14 @@ export async function parseResumeWithAI(
 
   await logAiUsage({
     dsoId: null,
-    userId: input.userId,
+    userId,
     feature: "resume_parse",
     model: HAIKU_MODEL,
     inputTokens: response.usage.input_tokens,
     outputTokens: response.usage.output_tokens,
     costUsdEstimate: cost,
     requestMetadata: {
-      input_chars: text.length,
+      ...inputMeta,
       work_entries: parsed.work_history.length,
       license_entries: parsed.licenses.length,
       had_redactions: parsed.flagged_redactions.length > 0,

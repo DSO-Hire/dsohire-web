@@ -25,7 +25,10 @@ import {
   extractResumeText,
   ResumeExtractionError,
 } from "@/lib/resume/extract";
-import { parseResumeWithAI } from "@/lib/resume/parse";
+import {
+  parseResumeWithAI,
+  parseResumeFromPdfWithAI,
+} from "@/lib/resume/parse";
 
 const MIME_BY_EXT: Record<string, string> = {
   pdf: "application/pdf",
@@ -89,27 +92,61 @@ export async function parseResumeForApplication(
     const filename = input.resumePath.split("/").pop() ?? "resume";
     const ext = filename.split(".").pop()?.toLowerCase() ?? "";
     const mimeType = MIME_BY_EXT[ext] ?? blob.type ?? "application/octet-stream";
+    const bytes = await blob.arrayBuffer();
 
-    let text: string;
+    let text: string | null = null;
+    let textFailure: { kind: string; message: string } | null = null;
     try {
       const extraction = await extractResumeText({
-        bytes: await blob.arrayBuffer(),
+        bytes,
         mimeType,
         filename,
       });
       text = extraction.text;
     } catch (err) {
-      const kind =
-        err instanceof ResumeExtractionError ? err.kind : "extraction_failed";
-      await writeResult("failed", {
-        error_kind: kind,
+      textFailure = {
+        kind:
+          err instanceof ResumeExtractionError ? err.kind : "extraction_failed",
         message: err instanceof Error ? err.message : String(err),
+      };
+    }
+
+    if (textFailure) {
+      // OCR fallback (2026-07-10) — a PDF with no extractable text is
+      // almost always a scan. Send the file itself to the model as a
+      // document block (pages rendered as images = built-in OCR), same
+      // prompt and schema as the text path. Only fires on PDFs whose
+      // text extraction failed, so the extra ~0.2-0.3¢/page rides a
+      // small minority of applications.
+      const isPdf = mimeType === "application/pdf";
+      const visionWorthy =
+        textFailure.kind === "empty_text" ||
+        textFailure.kind === "extraction_failed";
+      if (isPdf && visionWorthy) {
+        const visionResult = await parseResumeFromPdfWithAI({
+          pdfBytes: bytes,
+          userId: input.userIdForUsageLog,
+        });
+        if (visionResult.ok) {
+          await writeResult("ok", visionResult.parsed);
+          return;
+        }
+        await writeResult("failed", {
+          error_kind: textFailure.kind,
+          message: textFailure.message,
+          vision_error_kind: visionResult.errorCode,
+        });
+        return;
+      }
+      await writeResult("failed", {
+        error_kind: textFailure.kind,
+        message: textFailure.message,
       });
       return;
     }
 
     const result = await parseResumeWithAI({
-      text,
+      text: text ?? "",
       userId: input.userIdForUsageLog,
     });
     if (!result.ok) {

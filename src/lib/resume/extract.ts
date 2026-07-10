@@ -17,8 +17,12 @@
  *   • .doc legacy          → reject  ('format_unsupported')
  *   • >8 pages             → warn but proceed; surfaces in `warnings[]`
  *   • Empty / no text      → reject  ('empty_text')  — likely a scanned
- *                            image-only resume; parser can't help here
- *                            until we add OCR (Phase 5+)
+ *                            image-only resume. Text extraction can't
+ *                            help; parse-on-apply catches this and falls
+ *                            back to a VISION read of the PDF (2026-07-10,
+ *                            parse.ts parseResumeFromPdfWithAI). The
+ *                            candidate-initiated import wizard still
+ *                            surfaces this error directly.
  *   • 30-second timeout    → reject  ('timeout')
  *   • Parser throws        → reject  ('extraction_failed')
  * ─────────────────────────────────────────────────────────────────

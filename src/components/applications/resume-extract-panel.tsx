@@ -62,8 +62,10 @@ function strArr(x: unknown): string[] {
 }
 
 const FAILURE_COPY: Record<string, string> = {
+  // Scanned PDFs get a visual (OCR) read automatically — this state now
+  // only renders when BOTH the text extraction and the visual read failed.
   empty_text:
-    "This file has no extractable text — likely a scanned image. Open the original above.",
+    "This file has no extractable text, and the visual read couldn't parse it either. Open the original above.",
   format_unsupported:
     "This file format can't be machine-read. Open the original above.",
   download_failed: "The resume file couldn't be retrieved for extraction.",
