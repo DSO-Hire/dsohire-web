@@ -7,7 +7,7 @@ verbatim from the canon SVGs.
 
 | File | Dimensions | Duration | Intended use |
 |------|-----------|----------|--------------|
-| `launch-video-final.mp4` | 1920x1080 | 63s | Hero. LinkedIn native upload + site embed. Music + VO (Brian, ElevenLabs). |
+| `launch-video-final.mp4` | 1920x1080 | 63s | Hero (V2 animated flyover). LinkedIn native upload + site embed. Music + VO (Brian, ElevenLabs). |
 | `linkedin-feed-1x1.mp4` | 1080x1080 | 28s | LinkedIn feed workhorse. Captions burned, music-only — works muted. |
 | `linkedin-vertical-9x16.mp4` | 1080x1920 | 24s | LinkedIn vertical / mobile. Captions clear of the bottom UI safe area. |
 | `logo-reveal.mp4` | 1920x1080 | 5s | Brand sting. Also the source of the end-card motif on every clip. |
