@@ -750,6 +750,28 @@ html, body {
   }
 }
 
+/* ── mk-hero — above-the-fold entrance (2026-07-10) ──
+   The hero must NEVER wait for JavaScript: [data-reveal] hides content
+   until hydration + IntersectionObserver, which on a cold first visit
+   means seconds of blank ivory where the headline should be (and a
+   scroll during hydration could strand it hidden). mk-hero is a pure
+   CSS animation — it paints and settles the moment the stylesheet
+   arrives, works with JS disabled, and keeps the exact same motion
+   personality (rise 12px, 450ms, ease-settle, staggered via
+   --mk-delay). Reduced motion: no animation, content simply visible. */
+@media (prefers-reduced-motion: no-preference) {
+  .mk-hero {
+    animation: mk-hero-rise 0.45s var(--ease-settle) both;
+    animation-delay: var(--mk-delay, 0ms);
+  }
+}
+@keyframes mk-hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
 /* ── Brand lockup draw-on (opt-in via BrandLockup `draw`) ──
    The D-form arch sweeps on, the heritage crossbar follows, the
    wordmark + divider fade up last. Pure CSS — runs on load. */

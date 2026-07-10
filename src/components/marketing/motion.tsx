@@ -59,6 +59,21 @@ export function MotionMount() {
       return;
     }
 
+    // Scrolled-past guard (2026-07-10): if the user scrolled during
+    // hydration, elements already ABOVE the viewport will never
+    // intersect again on the way down — without this they'd stay
+    // invisible forever. Reveal them instantly (no entrance; they were
+    // never on screen to entrance anyway).
+    const remaining: HTMLElement[] = [];
+    for (const el of els) {
+      if (el.getBoundingClientRect().bottom < 0) {
+        el.removeAttribute("data-reveal");
+        el.style.removeProperty("--mk-delay");
+      } else {
+        remaining.push(el);
+      }
+    }
+
     const timeouts: number[] = [];
     const io = new IntersectionObserver(
       (entries) => {
@@ -83,7 +98,7 @@ export function MotionMount() {
       },
       { threshold: 0.15, rootMargin: "0px 0px -5% 0px" }
     );
-    for (const el of els) io.observe(el);
+    for (const el of remaining) io.observe(el);
     return () => {
       io.disconnect();
       for (const t of timeouts) clearTimeout(t);

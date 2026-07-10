@@ -108,9 +108,10 @@ function Hero() {
       />
 
       <div className="relative z-10 max-w-[1180px] mx-auto text-center">
+        {/* Above-the-fold hero uses mk-hero (pure CSS entrance) instead of
+            data-reveal — the first paint must never wait for hydration. */}
         <span
-          data-reveal
-          className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-ink border border-heritage/35 mb-5"
+          className="mk-hero inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-ink border border-heritage/35 mb-5"
           style={{
             background: "var(--heritage-tint)",
             boxShadow: "0 0 0 4px var(--heritage-glow)",
@@ -121,17 +122,15 @@ function Hero() {
         </span>
 
         <h1
-          data-reveal
           style={{ "--mk-delay": "70ms" } as React.CSSProperties}
-          className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-0.025em] leading-[1.02] text-ink mb-4"
+          className="mk-hero text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-0.025em] leading-[1.02] text-ink mb-4"
         >
           Dental hiring,{" "}
           <em className="not-italic text-heritage-light">done direct.</em>
         </h1>
         <p
-          data-reveal
           style={{ "--mk-delay": "140ms" } as React.CSSProperties}
-          className="text-base sm:text-lg text-slate-body leading-relaxed max-w-[600px] mx-auto mb-9"
+          className="mk-hero text-base sm:text-lg text-slate-body leading-relaxed max-w-[600px] mx-auto mb-9"
         >
           Multi-location dental groups and dental professionals, connected
           directly. No agencies, no per-listing fees, no middlemen.
@@ -286,8 +285,7 @@ function DoorwayPanel({
   const fgHover = isInk ? "hover:text-hero-foreground" : "hover:text-primary-foreground";
   return (
     <div
-      data-reveal
-      className={`group relative flex flex-col p-7 sm:p-8 ${fg} motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 overflow-hidden ${
+      className={`mk-hero group relative flex flex-col p-7 sm:p-8 ${fg} motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 overflow-hidden ${
         isInk ? "bg-hero" : "bg-heritage"
       }`}
       style={
