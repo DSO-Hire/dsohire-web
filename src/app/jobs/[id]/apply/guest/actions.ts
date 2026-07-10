@@ -322,11 +322,15 @@ export async function submitGuestApplication(
     applicationId = inserted.id as string;
   }
 
-  // 7. Screening answers — delete + insert to keep idempotent.
-  await admin
-    .from("application_screening_answers")
+  // 7. Screening answers — delete + insert to keep idempotent. Same table
+  // as the auth'd apply path (application_question_answers).
+  const { error: answerDeleteErr } = await admin
+    .from("application_question_answers")
     .delete()
     .eq("application_id", applicationId);
+  if (answerDeleteErr) {
+    console.warn("[guest-apply] answer delete failed", answerDeleteErr);
+  }
   const answerRows: Array<Record<string, unknown>> = [];
   for (const q of questions) {
     const a = answersByQuestion[q.id];
@@ -345,7 +349,12 @@ export async function submitGuestApplication(
     });
   }
   if (answerRows.length > 0) {
-    await admin.from("application_screening_answers").insert(answerRows);
+    const { error: answerInsertErr } = await admin
+      .from("application_question_answers")
+      .insert(answerRows);
+    if (answerInsertErr) {
+      console.warn("[guest-apply] answer insert failed", answerInsertErr);
+    }
   }
 
   // E2.10 — soft knockout evaluation (same flow as the auth'd apply path).
