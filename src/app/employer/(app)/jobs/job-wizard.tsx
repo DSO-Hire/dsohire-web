@@ -73,6 +73,8 @@ import {
   getAllDentalSkillsPrioritized,
   getJobRequirementsPrioritized,
   BENEFITS,
+  LICENSE_TYPES,
+  CERTIFICATION_KINDS,
 } from "@/lib/candidate/canonical-lists";
 import { HelpDrawer } from "@/components/help/help-drawer";
 import { HelpTip } from "@/components/help/help-tip";
@@ -241,6 +243,10 @@ export interface JobWizardInitial {
   equity_note: string | null;
   // 5G.e Tier 2 (2026-05-14) — verification requirements the role needs.
   verification_requirements: string[];
+  // Punch #3 (2026-07-10) — structured credential requirements. Optional so
+  // older call sites keep compiling; absent = empty.
+  required_license_types?: string[];
+  required_certifications?: string[];
 }
 
 export const SCOPE_OPTIONS: Array<{
@@ -577,6 +583,13 @@ export function JobWizard({
   const [verificationRequirements, setVerificationRequirements] = useState<
     Set<string>
   >(new Set(initial?.verification_requirements ?? []));
+  // Punch #3 — structured credential requirements (canonical values).
+  const [requiredLicenseTypes, setRequiredLicenseTypes] = useState<
+    Set<string>
+  >(new Set(initial?.required_license_types ?? []));
+  const [requiredCertifications, setRequiredCertifications] = useState<
+    Set<string>
+  >(new Set(initial?.required_certifications ?? []));
   function toggleVerificationRequirement(value: VerificationTypeValue) {
     setVerificationRequirements((prev) => {
       const next = new Set(prev);
@@ -653,6 +666,8 @@ export function JobWizard({
         scheduleEvenings,
         scheduleWeekends,
         verificationRequirements: [...verificationRequirements],
+        requiredLicenseTypes: [...requiredLicenseTypes],
+        requiredCertifications: [...requiredCertifications],
         externalLinks,
         corporateFunction,
         compModelState,
@@ -700,6 +715,8 @@ export function JobWizard({
     scheduleEvenings,
     scheduleWeekends,
     verificationRequirements,
+    requiredLicenseTypes,
+    requiredCertifications,
     compModelState,
     stepIdx,
   ]);
@@ -751,6 +768,14 @@ export function JobWizard({
       // default for older drafts that didn't carry the key.
       setVerificationRequirements(
         new Set(((d.verificationRequirements as string[]) ?? []))
+      );
+      // Punch #3 — structured credential requirements. Defensive defaults
+      // for older drafts that didn't carry the keys.
+      setRequiredLicenseTypes(
+        new Set(((d.requiredLicenseTypes as string[]) ?? []))
+      );
+      setRequiredCertifications(
+        new Set(((d.requiredCertifications as string[]) ?? []))
       );
       // E1.12 Slice B + 5G.c — restore from draft. Defensive defaults
       // for older drafts that didn't carry these keys.
@@ -1012,6 +1037,14 @@ export function JobWizard({
       formData.append("specialty", sp);
     }
     formData.set("min_years_experience", minYearsExperience);
+    // Punch #3 — repeated entries, same shape as specialty. Server
+    // whitelists against the canonical lists.
+    for (const lt of requiredLicenseTypes) {
+      formData.append("required_license_types", lt);
+    }
+    for (const ck of requiredCertifications) {
+      formData.append("required_certifications", ck);
+    }
     // Track F — schedule overlap inputs. Days are repeated form entries
     // like specialty/skills; evenings/weekends are boolean checkboxes
     // emitted only when on.
@@ -1449,6 +1482,10 @@ export function JobWizard({
             onExternalLinks={setExternalLinks}
             verificationRequirements={verificationRequirements}
             onToggleVerificationRequirement={toggleVerificationRequirement}
+            requiredLicenseTypes={requiredLicenseTypes}
+            onRequiredLicenseTypes={setRequiredLicenseTypes}
+            requiredCertifications={requiredCertifications}
+            onRequiredCertifications={setRequiredCertifications}
             payTransparency={payTransparency}
             payExempt={payExempt}
             onPayExempt={setPayExempt}
@@ -2082,6 +2119,10 @@ function DetailsStep({
   onExternalLinks,
   verificationRequirements,
   onToggleVerificationRequirement,
+  requiredLicenseTypes,
+  onRequiredLicenseTypes,
+  requiredCertifications,
+  onRequiredCertifications,
   payTransparency,
   payExempt,
   onPayExempt,
@@ -2143,6 +2184,11 @@ function DetailsStep({
   onExternalLinks: (v: ExternalLinkPair[]) => void;
   verificationRequirements: Set<string>;
   onToggleVerificationRequirement: (v: VerificationTypeValue) => void;
+  // Punch #3 — structured credential requirements.
+  requiredLicenseTypes: Set<string>;
+  onRequiredLicenseTypes: (v: Set<string>) => void;
+  requiredCertifications: Set<string>;
+  onRequiredCertifications: (v: Set<string>) => void;
   payTransparency: {
     requiresRange: boolean;
     requiresBenefits: boolean;
@@ -2261,6 +2307,79 @@ function DetailsStep({
               );
             })}
           </div>
+        </div>
+        {/* Punch #3 — structured credential requirements. Same chip
+            pattern as specialty; canonical values so the fit engine and
+            future knockout/filter phases read them as data, not text. */}
+        <div className="mt-5">
+          <label className="block text-xs font-semibold text-ink mb-2">
+            Required license{" "}
+            <span className="text-slate-meta font-normal">
+              (pick any that qualify)
+            </span>
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {LICENSE_TYPES.map((opt) => {
+              const checked = requiredLicenseTypes.has(opt.value);
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    const next = new Set(requiredLicenseTypes);
+                    if (checked) next.delete(opt.value);
+                    else next.add(opt.value);
+                    onRequiredLicenseTypes(next);
+                  }}
+                  className={`px-3 py-1.5 text-xs font-medium border transition-colors ${
+                    checked
+                      ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
+                      : "bg-card text-ink border-[var(--rule)] hover:border-heritage"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-1 text-2xs text-slate-meta">
+            Any one of the selected licenses qualifies. Leave empty if the
+            role doesn&apos;t require a license.
+          </p>
+        </div>
+        <div className="mt-5">
+          <label className="block text-xs font-semibold text-ink mb-2">
+            Required certifications{" "}
+            <span className="text-slate-meta font-normal">(optional)</span>
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {CERTIFICATION_KINDS.map((opt) => {
+              const checked = requiredCertifications.has(opt.value);
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    const next = new Set(requiredCertifications);
+                    if (checked) next.delete(opt.value);
+                    else next.add(opt.value);
+                    onRequiredCertifications(next);
+                  }}
+                  className={`px-3 py-1.5 text-xs font-medium border transition-colors ${
+                    checked
+                      ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
+                      : "bg-card text-ink border-[var(--rule)] hover:border-heritage"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-1 text-2xs text-slate-meta">
+            Feeds the match score directly — more reliable than naming certs
+            in the description text.
+          </p>
         </div>
         <div className="mt-5">
           <Input

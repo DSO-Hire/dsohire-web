@@ -66,6 +66,8 @@ import {
   getAllDentalSkillsPrioritized,
   getJobRequirementsPrioritized,
   BENEFITS,
+  LICENSE_TYPES,
+  CERTIFICATION_KINDS,
 } from "@/lib/candidate/canonical-lists";
 import {
   SCOPE_OPTIONS,
@@ -192,6 +194,9 @@ export interface EditSectionsInitial {
   external_links: Array<{ label: string; url: string }>;
   // 5G.e Tier 2 (2026-05-14) — verification requirements the role needs.
   verification_requirements: string[];
+  // Punch #3 (2026-07-10) — structured credential requirements.
+  required_license_types: string[];
+  required_certifications: string[];
 }
 
 interface EditSectionsProps {
@@ -262,6 +267,8 @@ export function EditSections({
         initialScheduleWeekends={initial.schedule_weekends}
         initialExternalLinks={initial.external_links}
         initialVerificationRequirements={initial.verification_requirements}
+        initialRequiredLicenseTypes={initial.required_license_types}
+        initialRequiredCertifications={initial.required_certifications}
       />
       <ScreeningSection
         dsoId={dsoId}
@@ -802,6 +809,8 @@ function DetailsSection({
   initialScheduleWeekends,
   initialExternalLinks,
   initialVerificationRequirements,
+  initialRequiredLicenseTypes,
+  initialRequiredCertifications,
 }: {
   dsoId: string;
   jobId: string;
@@ -833,6 +842,8 @@ function DetailsSection({
   initialScheduleWeekends: boolean;
   initialExternalLinks: Array<{ label: string; url: string }>;
   initialVerificationRequirements: string[];
+  initialRequiredLicenseTypes: string[];
+  initialRequiredCertifications: string[];
 }) {
   // v1.8 — comp type drives input shape.
   const [compType, setCompType] = useState<
@@ -907,6 +918,13 @@ function DetailsSection({
   const [verificationRequirements, setVerificationRequirements] = useState<
     Set<string>
   >(new Set(initialVerificationRequirements));
+  // Punch #3 — structured credential requirements, chip-toggle Sets.
+  const [requiredLicenseTypes, setRequiredLicenseTypes] = useState<
+    Set<string>
+  >(new Set(initialRequiredLicenseTypes));
+  const [requiredCertifications, setRequiredCertifications] = useState<
+    Set<string>
+  >(new Set(initialRequiredCertifications));
 
   const initialSpecialtyKey = [...initialSpecialty].sort().join(",");
   const initialVerificationKey = [...initialVerificationRequirements]
@@ -950,6 +968,8 @@ function DetailsSection({
     scheduleWeekends: initialScheduleWeekends,
     externalLinksKey: JSON.stringify(initialExternalLinks),
     verificationKey: initialVerificationKey,
+    requiredLicenseKey: [...initialRequiredLicenseTypes].sort().join(","),
+    requiredCertsKey: [...initialRequiredCertifications].sort().join(","),
   };
   const [snapshot, setSnapshot] = useState(initialSnapshot);
 
@@ -963,6 +983,8 @@ function DetailsSection({
   const scheduleDaysKey = [...scheduleDays].sort().join(",");
   const externalLinksKey = JSON.stringify(externalLinks);
   const verificationKey = [...verificationRequirements].sort().join(",");
+  const requiredLicenseKey = [...requiredLicenseTypes].sort().join(",");
+  const requiredCertsKey = [...requiredCertifications].sort().join(",");
   const compModelKey = JSON.stringify(compModelState);
   const dirty =
     compModelKey !== snapshot.compModelKey ||
@@ -989,7 +1011,9 @@ function DetailsSection({
     scheduleEvenings !== snapshot.scheduleEvenings ||
     scheduleWeekends !== snapshot.scheduleWeekends ||
     externalLinksKey !== snapshot.externalLinksKey ||
-    verificationKey !== snapshot.verificationKey;
+    verificationKey !== snapshot.verificationKey ||
+    requiredLicenseKey !== snapshot.requiredLicenseKey ||
+    requiredCertsKey !== snapshot.requiredCertsKey;
 
   const touch = () => setSaved(false);
 
@@ -1110,6 +1134,13 @@ function DetailsSection({
     for (const v of verificationRequirements) {
       fd.append("verification_requirements", v);
     }
+    // Punch #3 — structured credential requirements (wizard field shape).
+    for (const lt of requiredLicenseTypes) {
+      fd.append("required_license_types", lt);
+    }
+    for (const ck of requiredCertifications) {
+      fd.append("required_certifications", ck);
+    }
 
     startTransition(async () => {
       const result: JobActionState = await updateJobDetailsSection(
@@ -1146,6 +1177,8 @@ function DetailsSection({
         scheduleWeekends,
         externalLinksKey,
         verificationKey,
+        requiredLicenseKey,
+        requiredCertsKey,
       });
       setSaved(true);
     });
@@ -1308,6 +1341,79 @@ function DetailsSection({
                 );
               })}
             </div>
+          </div>
+          {/* Punch #3 — structured credential requirements (wizard parity). */}
+          <div className="mt-5">
+            <label className="block text-xs font-semibold text-ink mb-2">
+              Required license{" "}
+              <span className="text-slate-meta font-normal">
+                (pick any that qualify)
+              </span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {LICENSE_TYPES.map((opt) => {
+                const checked = requiredLicenseTypes.has(opt.value);
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      const next = new Set(requiredLicenseTypes);
+                      if (checked) next.delete(opt.value);
+                      else next.add(opt.value);
+                      setRequiredLicenseTypes(next);
+                      touch();
+                    }}
+                    className={`px-3 py-1.5 text-xs font-medium border transition-colors ${
+                      checked
+                        ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
+                        : "bg-card text-ink border-[var(--rule)] hover:border-heritage"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-1 text-2xs text-slate-meta">
+              Any one of the selected licenses qualifies. Leave empty if the
+              role doesn&apos;t require a license.
+            </p>
+          </div>
+          <div className="mt-5">
+            <label className="block text-xs font-semibold text-ink mb-2">
+              Required certifications{" "}
+              <span className="text-slate-meta font-normal">(optional)</span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {CERTIFICATION_KINDS.map((opt) => {
+                const checked = requiredCertifications.has(opt.value);
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      const next = new Set(requiredCertifications);
+                      if (checked) next.delete(opt.value);
+                      else next.add(opt.value);
+                      setRequiredCertifications(next);
+                      touch();
+                    }}
+                    className={`px-3 py-1.5 text-xs font-medium border transition-colors ${
+                      checked
+                        ? "bg-heritage-deep text-primary-foreground border-heritage-deep"
+                        : "bg-card text-ink border-[var(--rule)] hover:border-heritage"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-1 text-2xs text-slate-meta">
+              Feeds the match score directly — more reliable than naming
+              certs in the description text.
+            </p>
           </div>
           <div className="mt-5">
             <Input

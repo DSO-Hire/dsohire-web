@@ -410,6 +410,7 @@ async function loadJobAndDso(
     .from("jobs")
     .select(
       `id, dso_id, role_category, corporate_function, employment_type, title, requirements, description,
+       required_license_types, required_certifications,
        authority_level, work_mode, travel_expectation, direct_reports_band, indirect_reports_band,
        industry_experience, domain_preference,
        compensation_min, compensation_max, compensation_period,
@@ -501,11 +502,19 @@ async function loadJobAndDso(
         r.requirements as string | null,
         r.description as string | null
       ),
-      certs_required: detectJobCerts(
-        r.title as string | null,
-        r.requirements as string | null,
-        r.description as string | null
-      ),
+      // Punch #3 (2026-07-10) — structured requirements win over text
+      // detection when the posting sets them. certs_required is a hashed
+      // input, so jobs that adopt the structured field self-invalidate
+      // their cached scores; legacy jobs keep byte-identical inputs (no
+      // MODEL_VERSION bump needed — same posture as #128 comp mapping).
+      certs_required:
+        ((r.required_certifications as string[] | null) ?? []).length > 0
+          ? (r.required_certifications as string[])
+          : detectJobCerts(
+              r.title as string | null,
+              r.requirements as string | null,
+              r.description as string | null
+            ),
       specialty: ((r.specialty as string[] | null) ?? []) as string[],
       // v3.1 — benefits the posting lists (feeds the benefits dim).
       benefits: ((r.benefits as string[] | null) ?? []) as string[],

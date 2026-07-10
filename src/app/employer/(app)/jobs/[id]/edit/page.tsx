@@ -76,7 +76,7 @@ export default async function EditJobPage({ params }: PageProps) {
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, bonus_structure, equity_offered, equity_note, benefits, requirements, status, posted_at, expires_at, scheduled_publish_at, applications_count, views, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends, corporate_function, external_links, confidential, comp_model, guarantee_kind, guarantee_amount, guarantee_duration, percent_rate_min, percent_rate_max, percent_basis, percent_tiers_note, hygiene_exam_credited, hygienist_work_credited, lab_fee_policy, basis_exclusions_note, pay_cadence, est_annual_min, est_annual_max, worker_classification"
+      "id, dso_id, title, slug, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, variable_comp_enabled, variable_comp_target, variable_comp_structure, bonus_enabled, bonus_target, bonus_structure, equity_offered, equity_note, benefits, requirements, status, posted_at, expires_at, scheduled_publish_at, applications_count, views, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends, corporate_function, external_links, confidential, required_license_types, required_certifications, comp_model, guarantee_kind, guarantee_amount, guarantee_duration, percent_rate_min, percent_rate_max, percent_basis, percent_tiers_note, hygiene_exam_credited, hygienist_work_credited, lab_fee_policy, basis_exclusions_note, pay_cadence, est_annual_min, est_annual_max, worker_classification"
     )
     .eq("id", jobId)
     .eq("dso_id", dsoUser.dso_id)
@@ -288,6 +288,11 @@ export default async function EditJobPage({ params }: PageProps) {
     verification_requirements: (
       (jobVerifications ?? []) as Array<{ verification_type: string }>
     ).map((v) => v.verification_type),
+    // Punch #3 — structured credential requirements.
+    required_license_types: (((job as Record<string, unknown>)
+      .required_license_types as string[] | null) ?? []) as string[],
+    required_certifications: (((job as Record<string, unknown>)
+      .required_certifications as string[] | null) ?? []) as string[],
   };
 
   // Load attachments + active subscription tier in parallel with the

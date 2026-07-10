@@ -3761,6 +3761,8 @@ export type Database = {
           min_years_corporate_experience: number | null
           min_years_experience: number | null
           openings: number
+          required_certifications: string[]
+          required_license_types: string[]
           pay_cadence: Database["public"]["Enums"]["comp_pay_cadence"] | null
           percent_basis:
             | Database["public"]["Enums"]["comp_percent_basis"]
@@ -3855,6 +3857,8 @@ export type Database = {
           min_years_corporate_experience?: number | null
           min_years_experience?: number | null
           openings?: number
+          required_certifications?: string[]
+          required_license_types?: string[]
           pay_cadence?: Database["public"]["Enums"]["comp_pay_cadence"] | null
           percent_basis?:
             | Database["public"]["Enums"]["comp_percent_basis"]
@@ -3949,6 +3953,8 @@ export type Database = {
           min_years_corporate_experience?: number | null
           min_years_experience?: number | null
           openings?: number
+          required_certifications?: string[]
+          required_license_types?: string[]
           pay_cadence?: Database["public"]["Enums"]["comp_pay_cadence"] | null
           percent_basis?:
             | Database["public"]["Enums"]["comp_percent_basis"]

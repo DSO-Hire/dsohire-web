@@ -32,6 +32,10 @@ import {
   guardJobUpdatePublish,
 } from "@/lib/compliance/pay-transparency-guard";
 import { recordAuditEvent } from "@/lib/audit/record";
+import {
+  LICENSE_TYPES,
+  CERTIFICATION_KINDS,
+} from "@/lib/candidate/canonical-lists";
 import { recordGoal } from "@/lib/analytics/record-goal";
 import { after } from "next/server";
 import { SUPPORT_EMAIL } from "@/lib/contact";
@@ -173,6 +177,8 @@ export async function createJob(
       hide_stages_from_candidate: parsed.hideStagesFromCandidate,
       specialty: parsed.specialty,
       min_years_experience: parsed.minYearsExperience,
+      required_license_types: parsed.requiredLicenseTypes,
+      required_certifications: parsed.requiredCertifications,
       schedule_days: parsed.scheduleDays,
       schedule_evenings: parsed.scheduleEvenings,
       schedule_weekends: parsed.scheduleWeekends,
@@ -410,6 +416,8 @@ export async function updateJob(
       hide_stages_from_candidate: parsed.hideStagesFromCandidate,
       specialty: parsed.specialty,
       min_years_experience: parsed.minYearsExperience,
+      required_license_types: parsed.requiredLicenseTypes,
+      required_certifications: parsed.requiredCertifications,
       schedule_days: parsed.scheduleDays,
       schedule_evenings: parsed.scheduleEvenings,
       schedule_weekends: parsed.scheduleWeekends,
@@ -803,6 +811,17 @@ export async function updateJobDetailsSection(
     .getAll("specialty")
     .map((v) => String(v).trim())
     .filter(Boolean);
+  // Punch #3 — structured credential requirements, canonical-whitelisted.
+  const sectionValidLicenses = new Set(LICENSE_TYPES.map((l) => l.value));
+  const requiredLicenseTypes = formData
+    .getAll("required_license_types")
+    .map((v) => String(v).trim())
+    .filter((v) => sectionValidLicenses.has(v));
+  const sectionValidCerts = new Set(CERTIFICATION_KINDS.map((c) => c.value));
+  const requiredCertifications = formData
+    .getAll("required_certifications")
+    .map((v) => String(v).trim())
+    .filter((v) => sectionValidCerts.has(v));
   const minYearsRaw = String(formData.get("min_years_experience") ?? "").trim();
   const minYearsExperience = minYearsRaw ? parseInt(minYearsRaw, 10) : null;
   if (minYearsExperience !== null && Number.isNaN(minYearsExperience)) {
@@ -911,6 +930,8 @@ export async function updateJobDetailsSection(
       hide_stages_from_candidate: hideStagesFromCandidate,
       specialty,
       min_years_experience: minYearsExperience,
+      required_license_types: requiredLicenseTypes,
+      required_certifications: requiredCertifications,
       schedule_days: scheduleDays,
       schedule_evenings: scheduleEvenings,
       schedule_weekends: scheduleWeekends,
@@ -1561,7 +1582,7 @@ export async function cloneJob(formData: FormData): Promise<void> {
   const { data: src, error: srcErr } = await supabase
     .from("jobs")
     .select(
-      "id, dso_id, title, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, benefits, requirements, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends, external_links, corporate_function"
+      "id, dso_id, title, description, employment_type, role_category, compensation_min, compensation_max, compensation_period, compensation_type, compensation_visible, benefits, requirements, hide_stages_from_candidate, scope, specialty, min_years_experience, schedule_days, schedule_evenings, schedule_weekends, external_links, corporate_function, required_license_types, required_certifications"
     )
     .eq("id", jobId)
     .maybeSingle();
@@ -1616,6 +1637,14 @@ export async function cloneJob(formData: FormData): Promise<void> {
       scope: src.scope,
       specialty: src.specialty,
       min_years_experience: src.min_years_experience,
+      required_license_types:
+        ((src as Record<string, unknown>).required_license_types as
+          | string[]
+          | null) ?? [],
+      required_certifications:
+        ((src as Record<string, unknown>).required_certifications as
+          | string[]
+          | null) ?? [],
       schedule_days: (src as Record<string, unknown>).schedule_days ?? [],
       schedule_evenings: Boolean(
         (src as Record<string, unknown>).schedule_evenings
@@ -1801,6 +1830,10 @@ interface ParsedJobInput {
   // v1.1 — Practice Fit scoring inputs
   specialty: string[];
   minYearsExperience: number | null;
+  // Punch #3 (2026-07-10) — structured credential requirements,
+  // whitelisted against the canonical lists (bad values dropped).
+  requiredLicenseTypes: string[];
+  requiredCertifications: string[];
   // Track F (2026-05-12) — Practice Fit schedule overlap inputs
   scheduleDays: string[];
   scheduleEvenings: boolean;
@@ -2171,6 +2204,20 @@ function parseJobFormData(
     .map((v) => String(v).trim())
     .filter(Boolean);
 
+  // Punch #3 — structured credential requirements. Repeated entries like
+  // specialty; whitelisted against the canonical lists so a tampered form
+  // can't write arbitrary strings.
+  const validLicenseTypes = new Set(LICENSE_TYPES.map((l) => l.value));
+  const requiredLicenseTypes = formData
+    .getAll("required_license_types")
+    .map((v) => String(v).trim())
+    .filter((v) => validLicenseTypes.has(v));
+  const validCertKinds = new Set(CERTIFICATION_KINDS.map((c) => c.value));
+  const requiredCertifications = formData
+    .getAll("required_certifications")
+    .map((v) => String(v).trim())
+    .filter((v) => validCertKinds.has(v));
+
   const minYearsRaw = String(formData.get("min_years_experience") ?? "").trim();
   const minYearsExperience = minYearsRaw ? parseInt(minYearsRaw, 10) : null;
   if (minYearsExperience !== null && Number.isNaN(minYearsExperience)) {
@@ -2363,6 +2410,8 @@ function parseJobFormData(
     scope,
     specialty,
     minYearsExperience,
+    requiredLicenseTypes,
+    requiredCertifications,
     scheduleDays,
     scheduleEvenings,
     scheduleWeekends,
