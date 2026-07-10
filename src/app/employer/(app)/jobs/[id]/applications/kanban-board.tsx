@@ -144,6 +144,14 @@ interface KanbanBoardProps {
    * omits this (no per-application location exists to lane by).
    */
   laneAccessor?: (app: KanbanApplication) => string;
+  /**
+   * Punch #8 — the job's status (active/closed/archived/...). When the
+   * job is no longer accepting candidates but live applications remain
+   * in open stages, the board shows a close-out banner with a one-click
+   * select-all feeding the existing bulk reject/archive toolbar.
+   * Omitted on Pipeline HQ (cross-job board has no single job status).
+   */
+  jobStatus?: string;
 }
 
 interface OptimisticMove {
@@ -207,6 +215,7 @@ export function KanbanBoard({
   realtimeJobIds,
   dwellNorms,
   laneAccessor,
+  jobStatus,
 }: KanbanBoardProps) {
   const [closedExpanded, setClosedExpanded] = useState(false);
 
@@ -960,6 +969,23 @@ export function KanbanBoard({
     if (!app) return;
     if (app.stage_id === nextStage.id) return;
 
+    // Punch #8 guardrail — reversing a terminal decision (un-hire,
+    // un-reject back into the open lane) is legal but rarely intended
+    // from a stray drag. Confirm before running; the audit trail records
+    // the move either way.
+    const isTerminalReversal =
+      (app.kind === "hired" || app.kind === "rejected") &&
+      nextStage.kind !== "hired" &&
+      nextStage.kind !== "rejected" &&
+      nextStage.kind !== "withdrawn";
+    if (isTerminalReversal) {
+      const label = app.kind === "hired" ? "hired" : "rejected";
+      const confirmed = window.confirm(
+        `${app.candidate?.full_name ?? "This candidate"} is marked ${label}. Move them back to ${nextStage.label}? The reversal is recorded in the audit trail.`
+      );
+      if (!confirmed) return;
+    }
+
     const candidateName = app.candidate?.full_name ?? "Anonymous candidate";
     runMove(
       applicationId,
@@ -1343,6 +1369,42 @@ export function KanbanBoard({
           onConfirm={handleBulkMessage}
         />
 
+
+        {/* Punch #8 — closed-req close-out banner. Deliberately NOT an
+            auto-disposition: mass-rejecting on close would blast N
+            rejection emails with no human in the loop. One click selects
+            every open-lane candidate; the existing bulk toolbar (reject
+            with documented disposition, archive, message) does the rest. */}
+        {(jobStatus === "closed" || jobStatus === "archived") &&
+          canBulkAct &&
+          (() => {
+            const openLaneIds = kanbanStages
+              .filter((s) => s.kind !== "hired")
+              .flatMap((s) =>
+                (byStageId.get(s.id) ?? []).map((a) => a.id)
+              );
+            if (openLaneIds.length === 0) return null;
+            return (
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border border-warning/50 bg-warning/10 px-4 py-3">
+                <p className="text-xs text-ink leading-relaxed">
+                  <span className="font-bold">
+                    This job is {jobStatus} —
+                  </span>{" "}
+                  {openLaneIds.length}{" "}
+                  {openLaneIds.length === 1 ? "candidate is" : "candidates are"}{" "}
+                  still in open stages. Close them out so no one is left
+                  waiting.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => selection.selectAll(openLaneIds)}
+                  className="px-3 py-1.5 text-xs font-semibold border border-[var(--rule-strong)] bg-card text-ink hover:bg-cream transition-colors"
+                >
+                  Select all {openLaneIds.length} open
+                </button>
+              </div>
+            );
+          })()}
 
         {/* Lane 5 — board toolbar: modes (left) + aging legend (right).
             Pure chrome; mirrors the card edge + pill thresholds

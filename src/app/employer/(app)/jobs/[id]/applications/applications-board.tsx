@@ -63,6 +63,8 @@ interface ApplicationsBoardProps {
    * next to the work). Optional so older call sites keep compiling.
    */
   funnel?: JobFunnel;
+  /** Punch #8 — job status; drives the closed-req close-out banner. */
+  jobStatus?: string;
 }
 
 const VIEW_STORAGE_PREFIX = "dsohire.applications.view.";
@@ -77,6 +79,7 @@ export function ApplicationsBoard({
   canBulkAct = true,
   dwellNorms,
   funnel,
+  jobStatus,
 }: ApplicationsBoardProps) {
   const [view, setView] = useState<BoardView>(initialView);
   const [hydrated, setHydrated] = useState(false);
@@ -166,6 +169,7 @@ export function ApplicationsBoard({
           aiSuggesterContextByAppId={aiSuggesterContextByAppId}
           canBulkAct={canBulkAct}
           dwellNorms={dwellNorms}
+          jobStatus={jobStatus}
         />
       ) : isMobile ? (
         <MobileStageTabs
@@ -181,6 +185,7 @@ export function ApplicationsBoard({
           aiSuggesterContextByAppId={aiSuggesterContextByAppId}
           canBulkAct={canBulkAct}
           dwellNorms={dwellNorms}
+          jobStatus={jobStatus}
         />
       )}
     </div>

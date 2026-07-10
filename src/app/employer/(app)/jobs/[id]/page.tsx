@@ -505,6 +505,7 @@ export default async function PerJobPipelinePage({
           canBulkAct={canBulkAct}
           dwellNorms={dwellNorms}
           funnel={funnel}
+          jobStatus={status}
         />
       </div>
 
