@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>DSO Hire — launch asset contact sheet</title>
+<style>
+  :root { --navy:#14233F; --ivory:#F7F4ED; --ivory-deep:#ECE7DB; --heritage:#4D7A60; --bright:#8DB8A3; --slate:#4A6278; }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--ivory); color:var(--navy); font-family:Manrope,-apple-system,"Segoe UI",sans-serif; padding:56px 24px 80px; }
+  .wrap { max-width:1060px; margin:0 auto; }
+  .eyebrow { font-size:12px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--heritage); margin-bottom:10px; }
+  h1 { font-size:clamp(28px,4vw,40px); font-weight:800; letter-spacing:-0.025em; margin-bottom:8px; text-wrap:balance; }
+  .sub { color:var(--slate); font-size:15px; line-height:1.6; max-width:62ch; margin-bottom:40px; }
+  .asset { background:#FDFCF9; border:1px solid var(--ivory-deep); margin-bottom:28px; overflow:hidden; }
+  .asset header { display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap; padding:18px 22px 14px; }
+  .asset h2 { font-size:19px; font-weight:800; letter-spacing:-0.02em; }
+  .meta { font-size:13px; color:var(--slate); font-variant-numeric:tabular-nums; }
+  .meta b { color:var(--navy); font-weight:700; }
+  video, .imgbox img { display:block; width:100%; background:var(--navy); }
+  .row { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:28px; margin-bottom:28px; }
+  .row .asset { margin-bottom:0; }
+  .use { padding:12px 22px 16px; font-size:13.5px; line-height:1.55; color:var(--slate); border-top:1px solid var(--ivory-deep); }
+  .use b { color:var(--heritage); font-weight:700; }
+  .vertwrap { max-width:380px; margin:0 auto; }
+  footer { margin-top:44px; font-size:13px; color:var(--slate); line-height:1.7; }
+  code { background:var(--ivory-deep); padding:1px 6px; font-size:12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">DSO Hire · launch suite · 2026-07-10</div>
+  <h1>Launch asset contact sheet</h1>
+  <p class="sub">Everything the marketing run produced, embedded at full quality. Palette is product-repo canon, Manrope throughout, logo geometry verbatim from the canon SVGs. LinkedIn videos should always be uploaded natively, never linked.</p>
+
+  <div class="asset">
+    <header><h2>Launch video — the hero</h2><span class="meta"><b>launch-video-final.mp4</b> · 1920×1080 · 63s · music + VO (Brian)</span></header>
+    <video src="launch-video-final.mp4" controls preload="metadata"></video>
+    <div class="use"><b>Use:</b> LinkedIn launch post (native upload) and site embed. Cold open on the kanban drag, one problem card, four captioned walkthrough beats, logo close. Audio: −16.6 LUFS, VO script approved, music bed generated + looped.</div>
+  </div>
+
+  <div class="row">
+    <div class="asset">
+      <header><h2>LinkedIn feed 1:1</h2><span class="meta"><b>linkedin-feed-1x1.mp4</b> · 1080×1080 · 28s</span></header>
+      <video src="linkedin-feed-1x1.mp4" controls preload="metadata"></video>
+      <div class="use"><b>Use:</b> the feed workhorse. Captions burned; fully works muted. Music-only sting from the same bed.</div>
+    </div>
+    <div class="asset">
+      <header><h2>LinkedIn vertical 9:16</h2><span class="meta"><b>linkedin-vertical-9x16.mp4</b> · 1080×1920 · 24s</span></header>
+      <div class="vertwrap"><video src="linkedin-vertical-9x16.mp4" controls preload="metadata"></video></div>
+      <div class="use"><b>Use:</b> mobile/vertical placements. Captions sit above LinkedIn's bottom UI safe area.</div>
+    </div>
+  </div>
+
+  <div class="asset">
+    <header><h2>Logo reveal</h2><span class="meta"><b>logo-reveal.mp4</b> · 1920×1080 · 5s</span></header>
+    <video src="logo-reveal.mp4" controls preload="metadata"></video>
+    <div class="use"><b>Use:</b> brand sting for video intros/outros. Its end-card motif closes every clip in the suite.</div>
+  </div>
+
+  <div class="asset">
+    <header><h2>README demo GIF</h2><span class="meta"><b>readme-demo.gif</b> · 1000px · 7s loop · 2.2MB</span></header>
+    <div class="imgbox"><img src="readme-demo.gif" alt="Kanban drag demo loop"></div>
+    <div class="use"><b>Use:</b> GitHub README / docs. Kanban drag with navy loop fades so the restart never pops.</div>
+  </div>
+
+  <div class="row">
+    <div class="asset">
+      <header><h2>OG image</h2><span class="meta"><b>og-image.png</b> · 1200×630</span></header>
+      <div class="imgbox"><img src="og-image.png" alt="OG image: logo and value prop on navy"></div>
+      <div class="use"><b>Use:</b> LinkedIn post imagery. The site's live <code>og:image</code> stays on the dynamic <code>opengraph-image.tsx</code> route — intentionally not replaced.</div>
+    </div>
+    <div class="asset">
+      <header><h2>LinkedIn banner</h2><span class="meta"><b>linkedin-banner.png</b> · 1128×191</span></header>
+      <div class="imgbox"><img src="linkedin-banner.png" alt="LinkedIn company banner"></div>
+      <div class="use"><b>Use:</b> company page header. Mark + wordmark only — taglines die at this render size.</div>
+    </div>
+  </div>
+
+  <footer>
+    Source comps, raw footage, VO stems, and the run manifest live in <code>~/dsohire-studio</code> (out/marketing/2026-07-10/).
+    Re-render anything with <code>npx remotion render src/index.ts &lt;CompId&gt; out.mp4</code>.
+  </footer>
+</div>
+</body>
+</html>
