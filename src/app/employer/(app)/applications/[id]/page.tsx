@@ -107,6 +107,7 @@ import {
 // Lane 3 commit 1 — workspace chrome extracted from this file (markup
 // unchanged): hero, section shell, screening/verification rows, timeline.
 import { CandidateHero } from "./candidate-hero";
+import { ResumeExtractPanel } from "@/components/applications/resume-extract-panel";
 import {
   DetailRow,
   DetailSection,
@@ -229,7 +230,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const { data: rawApp } = await supabase
     .from("applications")
     .select(
-      "id, job_id, candidate_id, stage_id, assigned_to_dso_user_id, cover_letter, resume_url, employer_notes, created_at, updated_at, affiliation_revealed, affiliation_revealed_at, affiliation_revealed_by_dso_user_id, knockout_failed_questions, knockout_failed_at"
+      "id, job_id, candidate_id, stage_id, assigned_to_dso_user_id, cover_letter, resume_url, employer_notes, created_at, updated_at, affiliation_revealed, affiliation_revealed_at, affiliation_revealed_by_dso_user_id, knockout_failed_questions, knockout_failed_at, resume_parse, resume_parse_status"
     )
     .eq("id", appId)
     .maybeSingle();
@@ -1641,6 +1642,16 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 No resume on file.
               </p>
             )}
+            {/* Parse-on-apply — AI-read snapshot of the SUBMITTED file.
+                Renders nothing for applications that predate the feature. */}
+            <ResumeExtractPanel
+              status={
+                ((app as Record<string, unknown>).resume_parse_status as
+                  | string
+                  | null) ?? null
+              }
+              parse={(app as Record<string, unknown>).resume_parse}
+            />
           </DetailSection>
 
           {/* 04 · Candidate Snapshot — folds in cover letter + summary +

@@ -34,6 +34,7 @@ import { isKnockoutFailure } from "@/lib/screening/evaluate-knockout";
 import { composeName } from "@/lib/candidate/name";
 import { recordGoal } from "@/lib/analytics/record-goal";
 import { after } from "next/server";
+import { parseResumeForApplication } from "@/lib/resume/parse-on-apply";
 
 export interface GuestApplyState {
   ok: boolean;
@@ -467,6 +468,23 @@ export async function submitGuestApplication(
   // Vantage goal — guest application submitted. after() so the write survives
   // the serverless freeze (fail-silent).
   after(() => recordGoal("apply_submit", { guest: true }));
+
+  // Parse-on-apply (2026-07-10) — guests are the population that NEVER
+  // runs the profile import wizard, so this is where the employer-side
+  // extraction earns its keep. Guests have no auth user; the usage-log
+  // insert FK-fails and is warn-swallowed (documented in parse-on-apply).
+  {
+    const parseAppId = applicationId;
+    const parseResumePath = resumeUrl;
+    const parseLogId = candidateId;
+    after(async () => {
+      await parseResumeForApplication({
+        applicationId: parseAppId,
+        resumePath: parseResumePath,
+        userIdForUsageLog: parseLogId,
+      });
+    });
+  }
 
   revalidatePath(`/jobs/${jobId}`);
   return {

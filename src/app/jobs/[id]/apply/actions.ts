@@ -39,6 +39,7 @@ import type { ScreeningQuestion } from "./types";
 import { composeName } from "@/lib/candidate/name";
 import { isKnockoutFailure } from "@/lib/screening/evaluate-knockout";
 import { recordGoal } from "@/lib/analytics/record-goal";
+import { parseResumeForApplication } from "@/lib/resume/parse-on-apply";
 import {
   isVerificationType,
   getVerificationType,
@@ -538,6 +539,22 @@ export async function applyToJob(
   // Vantage goal — count only true first submissions, not re-submits. after()
   // so the write survives the serverless freeze (fail-silent).
   if (!alreadyApplied) after(() => recordGoal("apply_submit"));
+
+  // Parse-on-apply (2026-07-10) — background extraction snapshot for the
+  // employer's AI-read resume panel. Fire-and-forget; a failed parse never
+  // touches the submission. Runs on re-submits too (the resume may have
+  // changed). Never writes to the candidate profile (R8).
+  {
+    const parseAppId = applicationId;
+    const parseResumePath = resumeUrl;
+    after(async () => {
+      await parseResumeForApplication({
+        applicationId: parseAppId,
+        resumePath: parseResumePath,
+        userIdForUsageLog: user.id,
+      });
+    });
+  }
 
   revalidatePath(`/candidate/dashboard`);
   revalidatePath(`/candidate/applications`);

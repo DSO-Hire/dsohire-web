@@ -799,6 +799,9 @@ export type Database = {
           moved_from_application_id: string | null
           pipeline_position: number | null
           resume_url: string | null
+          resume_parse: Json | null
+          resume_parse_status: string | null
+          resume_parsed_at: string | null
           self_reported_status: string | null
           source: string | null
           stage_entered_at: string
@@ -825,6 +828,9 @@ export type Database = {
           moved_from_application_id?: string | null
           pipeline_position?: number | null
           resume_url?: string | null
+          resume_parse?: Json | null
+          resume_parse_status?: string | null
+          resume_parsed_at?: string | null
           self_reported_status?: string | null
           source?: string | null
           stage_entered_at?: string
@@ -851,6 +857,9 @@ export type Database = {
           moved_from_application_id?: string | null
           pipeline_position?: number | null
           resume_url?: string | null
+          resume_parse?: Json | null
+          resume_parse_status?: string | null
+          resume_parsed_at?: string | null
           self_reported_status?: string | null
           source?: string | null
           stage_entered_at?: string
