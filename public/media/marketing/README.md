@@ -1,13 +1,14 @@
 # DSO Hire launch marketing assets
 
 Produced 2026-07-10 by the dsohire-marketing pipeline (source comps + raw
-footage live in the sibling `dsohire-studio` repo). Palette: product-repo
+footage live in the sibling `dsohire-studio` repo); hero re-cut 2026-07-13
+(clean-line motion pass + natural-tempo VO). Palette: product-repo
 canon (#14233F / #F7F4ED / #4D7A60 / #8DB8A3), Manrope only, logo geometry
 verbatim from the canon SVGs.
 
 | File | Dimensions | Duration | Intended use |
 |------|-----------|----------|--------------|
-| `launch-video-final.mp4` | 1920x1080 | 1:55 | THE hero (V4 flagship film). LinkedIn native upload + site embed. Licensed music (Aylex, freetouse.com) + expressive VO (Brian, ElevenLabs v3). |
+| `launch-video-final.mp4` | 1920x1080 | 1:55 | THE hero (V4 r2, re-cut 2026-07-13: all cards move on clean lines, VO rewritten for speech and regenerated at natural tempo). LinkedIn native upload + site embed. Licensed music (Aylex, freetouse.com) + VO (Brian, ElevenLabs v3). Alternate-voice masters (Eric, Chris) live in the studio repo at `out/marketing/2026-07-13/`. |
 | `launch-video-v2.mp4` | 1920x1080 | 63s | Library cut: dark 3D flyover. Site embeds, feature posts. |
 | `launch-video-v3.mp4` | 1920x1080 | 63s | Library cut: light macro, short. Quick follow-up posts. |
 | `linkedin-feed-1x1.mp4` | 1080x1080 | 28s | LinkedIn feed workhorse. Captions burned, music-only — works muted. |
