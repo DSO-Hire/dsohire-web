@@ -501,14 +501,15 @@ function MarqueeCard({ job, ariaHidden }: { job: MarqueeJob; ariaHidden?: boolea
    MACHINE BAND — the back office, named and numbered
    (Day 32 port, FOH 100x Model 01. Supersedes the old
    employer proof strip — same depth claim, with receipts.
-   Stats are REAL: 30+ can()-guarded actions, 12 PF dims,
+   Stats are REAL: 30+ can()-guarded actions, 20 PF dims
+   (FitDimensionKey clinical track; +5 DSOFit corporate = 25),
    18 seeded automation rules, 6 résumé templates.)
 ═══════════════════════════════════════════════════════ */
 
 function MachineBand() {
   const stats = [
     { value: 30, suffix: "+", label: "Permission-gated team actions" },
-    { value: 12, suffix: "", label: "PracticeFit scoring dimensions" },
+    { value: 20, suffix: "", label: "PracticeFit scoring dimensions" },
     { value: 18, suffix: "", label: "Automation rules out of the box" },
     { value: 6, suffix: "", label: "ATS-safe résumé templates, free for candidates" },
   ];

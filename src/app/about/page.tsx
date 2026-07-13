@@ -160,7 +160,7 @@ function FounderLetter() {
           </div>
           <SideFact n="10" label="Years in the dental industry" delay={160} />
           <SideFact n="$0" label="Placement fees, ever" delay={220} />
-          <SideFact n="12" label="PracticeFit dimensions scoring real compatibility" delay={280} />
+          <SideFact n="20" label="PracticeFit dimensions scoring real compatibility" delay={280} />
         </aside>
       </div>
     </section>
