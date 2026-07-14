@@ -8,7 +8,8 @@ verbatim from the canon SVGs.
 
 | File | Dimensions | Duration | Intended use |
 |------|-----------|----------|--------------|
-| `launch-video-final.mp4` | 1920x1080 | 1:55 | THE hero (V4 r2, re-cut 2026-07-13: all cards move on clean lines, VO rewritten for speech and regenerated at natural tempo). LinkedIn native upload + site embed. Licensed music (Aylex, freetouse.com) + VO (Brian, ElevenLabs v3). Alternate-voice masters (Eric, Chris) live in the studio repo at `out/marketing/2026-07-13/`. |
+| `launch-video-final.mp4` | 1920x1080 | 1:43 | THE hero (V5, 2026-07-13 evening: chapters timed to the read — no dead air; square surfaces per product brand; anonymity chapter; no inventory claims). Site embed + direct sends. Licensed music (Aylex, freetouse.com) + VO (Eric, ElevenLabs v3, one-take). Prior cuts (V4 r2 Brian/Eric/Chris masters) live in the studio repo at `out/marketing/2026-07-13/`. |
+| `launch-video-final-captioned.mp4` | 1920x1080 | 1:43 | Same V5 cut with the VO burned in as captions — use THIS ONE for native LinkedIn upload (feed autoplays muted). |
 | `launch-video-v2.mp4` | 1920x1080 | 63s | Library cut: dark 3D flyover. Site embeds, feature posts. |
 | `launch-video-v3.mp4` | 1920x1080 | 63s | Library cut: light macro, short. Quick follow-up posts. |
 | `linkedin-feed-1x1.mp4` | 1080x1080 | 28s | LinkedIn feed workhorse. Captions burned, music-only — works muted. |
