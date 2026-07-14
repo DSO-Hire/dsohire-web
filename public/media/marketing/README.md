@@ -8,8 +8,8 @@ verbatim from the canon SVGs.
 
 | File | Dimensions | Duration | Intended use |
 |------|-----------|----------|--------------|
-| `launch-video-final.mp4` | 1920x1080 | 1:43 | THE hero (V5, 2026-07-13 evening: chapters timed to the read — no dead air; square surfaces per product brand; anonymity chapter; no inventory claims). Site embed + direct sends. Licensed music (Aylex, freetouse.com) + VO (Eric, ElevenLabs v3, one-take). Prior cuts (V4 r2 Brian/Eric/Chris masters) live in the studio repo at `out/marketing/2026-07-13/`. |
-| `launch-video-final-captioned.mp4` | 1920x1080 | 1:43 | Same V5 cut with the VO burned in as captions — use THIS ONE for native LinkedIn upload (feed autoplays muted). |
+| `launch-video-final.mp4` | 1920x1080 | 1:24 | THE hero (V5.2, 2026-07-13 late: Eric VO plays as ONE unbroken take so the read flows — no inter-line dead air; picture timed to the words; square surfaces per product brand; anonymity chapter; no inventory claims). Site embed + direct sends. Licensed music (Aylex, freetouse.com) + VO (Eric, ElevenLabs v3, one-take). Prior cuts (V4 r2 Brian/Eric/Chris masters) live in the studio repo at `out/marketing/2026-07-13/`. |
+| `launch-video-final-captioned.mp4` | 1920x1080 | 1:24 | Same V5.2 cut with the VO burned in as captions — use THIS ONE for native LinkedIn upload (feed autoplays muted). |
 | `launch-video-v2.mp4` | 1920x1080 | 63s | Library cut: dark 3D flyover. Site embeds, feature posts. |
 | `launch-video-v3.mp4` | 1920x1080 | 63s | Library cut: light macro, short. Quick follow-up posts. |
 | `linkedin-feed-1x1.mp4` | 1080x1080 | 28s | LinkedIn feed workhorse. Captions burned, music-only — works muted. |
