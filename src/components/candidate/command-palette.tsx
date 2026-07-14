@@ -97,7 +97,7 @@ const CANDIDATE_PALETTE: PaletteConfig = {
   hintItems: [
     "A job title (e.g. “hygienist”)",
     "One of your applications",
-    "A shortcut (e.g. “résumé” or “privacy”)",
+    "A shortcut (e.g. “resume” or “privacy”)",
   ],
   commands: CANDIDATE_COMMANDS,
 };

@@ -461,7 +461,7 @@ export function CheckCard({
 }
 
 /* ──────────────────────────────────────────────────────────────
- * FileField — styled file picker (résumé upload).
+ * FileField — styled file picker (resume upload).
  * ─────────────────────────────────────────────────────────── */
 
 export function FileField({

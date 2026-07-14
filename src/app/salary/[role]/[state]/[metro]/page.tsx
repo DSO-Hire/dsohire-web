@@ -155,10 +155,10 @@ export default async function MetroSalaryPage({ params }: { params: Promise<Para
         <div className="max-w-[1100px] mx-auto bg-cream p-8 sm:p-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="max-w-[560px]">
             <p className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-2">For dental pros in {city}</p>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-1px] text-ink">Build a free résumé and get matched to practices that fit you.</h2>
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-1px] text-ink">Build a free resume and get matched to practices that fit you.</h2>
           </div>
           <div className="flex flex-wrap gap-3 shrink-0">
-            <Link href="/resume-templates" className="inline-flex items-center px-7 py-3.5 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors">Build a free résumé</Link>
+            <Link href="/resume-templates" className="inline-flex items-center px-7 py-3.5 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors">Build a free resume</Link>
             <Link href="/jobs" className="inline-flex items-center px-7 py-3.5 border border-[var(--rule-strong)] text-ink text-xs font-bold tracking-[2px] uppercase hover:border-ink transition-colors">Browse jobs</Link>
           </div>
         </div>

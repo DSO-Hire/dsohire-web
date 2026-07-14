@@ -1,13 +1,13 @@
 /**
- * /candidate/resume — #87a one-click résumé render.
+ * /candidate/resume — #87a one-click resume render.
  *
- * Renders the candidate's canonical profile into a clean, ATS-safe résumé
+ * Renders the candidate's canonical profile into a clean, ATS-safe resume
  * (the "Classic" template) on a print-optimized page. "Download PDF" prints
  * to the browser's PDF engine — real text, no server PDF dependency. This is
  * the render core the editable wizard (87b) and template gallery (87c) build
  * on. The persistent candidate nav comes from the (app) group layout; the shell
  * chrome is hidden in print (print:hidden) plus PRINT_CSS below, so Cmd/Ctrl+P
- * still yields just the résumé sheet.
+ * still yields just the resume sheet.
  */
 
 import type { Metadata } from "next";
@@ -23,7 +23,7 @@ import { ResumeDocument } from "@/components/resume/resume-document";
 import { ResumeToolbar } from "./resume-toolbar";
 import { TemplatePicker } from "./template-picker";
 
-export const metadata: Metadata = { title: "Your résumé" };
+export const metadata: Metadata = { title: "Your resume" };
 
 const PRINT_CSS = `
 @media print {
@@ -42,17 +42,17 @@ export default async function CandidateResumePage() {
   if (!data) redirect("/candidate/profile");
   const sparse = !resumeHasContent(data);
 
-  // No résumé on file yet → a friendly two-path landing. The nav comes from the
+  // No resume on file yet → a friendly two-path landing. The nav comes from the
   // (app) layout; the print-clean view below is only for an actual rendered
-  // résumé. Build-for-free is the emphasized path.
+  // resume. Build-for-free is the emphasized path.
   if (sparse) {
     return (
       <div className="mx-auto max-w-[680px] py-4">
           <h1 className="text-2xl font-extrabold tracking-tight text-ink">
-            Let’s get your résumé ready
+            Let’s get your resume ready
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-slate-body">
-            You don’t have a résumé on file yet. Start whichever way is easier —
+            You don’t have a resume on file yet. Start whichever way is easier —
             you can switch anytime, and anything you add flows straight onto your
             profile.
           </p>
@@ -71,8 +71,8 @@ export default async function CandidateResumePage() {
                 Build one for free
               </h2>
               <p className="mt-1 text-xs leading-relaxed text-slate-body">
-                No résumé yet? We’ll guide you through a polished, ATS-ready
-                résumé in a few minutes — completely free.
+                No resume yet? We’ll guide you through a polished, ATS-ready
+                resume in a few minutes — completely free.
               </p>
               <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-heritage-deep">
                 Start building
@@ -97,7 +97,7 @@ export default async function CandidateResumePage() {
                 profile automatically — then refine it here.
               </p>
               <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-ink">
-                Upload résumé
+                Upload resume
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </span>
             </Link>
@@ -111,7 +111,7 @@ export default async function CandidateResumePage() {
             >
               Edit your profile
             </Link>{" "}
-            and your résumé fills in automatically.
+            and your resume fills in automatically.
           </p>
       </div>
     );

@@ -893,7 +893,7 @@ const MISC: Record<string, HelpEntry> = {
 
 /* ────────────────────────────────────────────────────────────────────
  * Day 25–32 feature wave (#81 refresh, 2026-06-11) — permissions &
- * confidential search (#83), seat packs (#88), résumé builder (#87),
+ * confidential search (#83), seat packs (#88), resume builder (#87),
  * DSOFit candidate side, the rebuilt apply wizard (#62), and Pipeline
  * HQ (FOH-10). One banner section so the re-embed diff reads clean;
  * fold entries into home sections on the next tidy pass.
@@ -957,8 +957,8 @@ const DAY32: Record<string, HelpEntry> = {
     ],
   },
   "cand.resume_builder": {
-    title: "Free résumé builder",
-    tip: "Build a polished, ATS-safe résumé from your DSO Hire profile in minutes — six templates, clean PDF download, yours to use anywhere. Free forever, no watermarks.",
+    title: "Free resume builder",
+    tip: "Build a polished, ATS-safe resume from your DSO Hire profile in minutes — six templates, clean PDF download, yours to use anywhere. Free forever, no watermarks.",
     format: "drawer",
     lens: "candidate",
     videoId: null,
@@ -973,7 +973,7 @@ const DAY32: Record<string, HelpEntry> = {
       },
       {
         heading: "Use it everywhere",
-        body: "Download the PDF, and it attaches automatically when you apply on DSO Hire. Mid-application without a résumé? The apply flow offers to build one free on the spot.",
+        body: "Download the PDF, and it attaches automatically when you apply on DSO Hire. Mid-application without a resume? The apply flow offers to build one free on the spot.",
       },
     ],
   },
@@ -991,12 +991,12 @@ const DAY32: Record<string, HelpEntry> = {
   },
   "cand.apply": {
     title: "Applying on DSO Hire",
-    tip: "Applications are one clear question at a time — about three minutes, with your answers saving as you go. Upload or build a résumé and we pre-fill what we can, so you never type what we can read.",
+    tip: "Applications are one clear question at a time — about three minutes, with your answers saving as you go. Upload or build a resume and we pre-fill what we can, so you never type what we can read.",
     format: "disclosure",
     lens: "candidate",
     bullets: [
       "Progress saves automatically — leave mid-application and pick up where you stopped.",
-      "Résumé autofill pulls your experience and skills in; you review everything before it's used.",
+      "Resume autofill pulls your experience and skills in; you review everything before it's used.",
       "Some questions use sliders or tap-to-rank — answer honestly, they feed your fit scoring both ways.",
       "Applying shares your profile with that employer only. Browsing stays private, and anonymous mode keeps masking you everywhere else.",
     ],

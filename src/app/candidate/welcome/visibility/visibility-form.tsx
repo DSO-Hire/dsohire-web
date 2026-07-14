@@ -5,7 +5,7 @@
  *
  * Three stacked, tappable choices — Stay private (default) · Discoverable with
  * my name · Discoverable but anonymous — plus a plain-language note that
- * contact info + résumé stay hidden until apply and demographic/EEO answers are
+ * contact info + resume stay hidden until apply and demographic/EEO answers are
  * never shown. One submit stamps the choice and routes onward. Client-safe
  * imports only (no server/site-shell deps), mirroring track-chooser.
  */
@@ -138,7 +138,7 @@ export function VisibilityForm() {
         <p className="mt-6 flex items-start gap-2 text-xs leading-relaxed text-slate-meta">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-heritage" />
           <span>
-            Whatever you choose, your contact info and résumé stay hidden until
+            Whatever you choose, your contact info and resume stay hidden until
             you apply. Your demographic / EEO answers are never shown to anyone.
           </span>
         </p>

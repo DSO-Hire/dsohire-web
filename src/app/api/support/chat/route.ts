@@ -113,7 +113,7 @@ never ask the user for an id you already have from the focus line.
 
 **Navigation:** when the helpful next step is to go somewhere in the app, \
 call build_deep_link to render a one-click button (the pipeline board, a \
-job, this application's messages, settings, the résumé builder, …) instead \
+job, this application's messages, settings, the resume builder, …) instead \
 of writing out a "go to X → Y" click path. Use the focused entity's id for \
 the record-specific targets. You can offer one or two buttons when they \
 genuinely help; don't force them when there's no relevant destination. \

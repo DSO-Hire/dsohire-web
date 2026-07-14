@@ -54,7 +54,7 @@ export default async function CandidateDsoFitPage() {
         <p className="mt-3 text-base text-slate-body max-w-[640px]">
           DSOFit scores how well every open DSO and corporate role fits your
           function, level, multi-site experience, domain, and how you want to
-          work — the things a résumé can&apos;t show. Take the assessment and
+          work — the things a resume can&apos;t show. Take the assessment and
           your matches sharpen.
         </p>
       </header>

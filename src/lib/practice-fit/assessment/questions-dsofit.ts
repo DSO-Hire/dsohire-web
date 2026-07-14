@@ -38,7 +38,7 @@ export interface DsoFitQuestion {
   type: AnswerType;
   options?: AssessmentOption[];
   sliderLabels?: { low: string; high: string };
-  /** True when the résumé parser can pre-fill this (confirm step). */
+  /** True when the resume parser can pre-fill this (confirm step). */
   resumePrefill?: boolean;
   /** Never required (everything here is optional; this is for explicit UI hints). */
   optional?: boolean;
@@ -193,7 +193,7 @@ export const DSOFIT_QUESTIONS: DsoFitQuestion[] = [
     section: "target",
     dimension: "function_fit",
     prompt: "Your current or most recent title",
-    help: "We pre-fill this from your résumé when we can — just confirm or edit.",
+    help: "We pre-fill this from your resume when we can — just confirm or edit.",
     type: "text",
     resumePrefill: true,
     optional: true,
@@ -297,7 +297,7 @@ export const DSOFIT_QUESTIONS: DsoFitQuestion[] = [
     section: "skills",
     dimension: "skills",
     prompt: "Pick your strongest areas",
-    help: "Choose the ones you'd put on a résumé without hesitation.",
+    help: "Choose the ones you'd put on a resume without hesitation.",
     type: "multi",
     options: DSOFIT_SKILLS_OPTIONS,
   },

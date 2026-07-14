@@ -1,11 +1,11 @@
 "use server";
 
 /**
- * #87b — save the generated résumé PDF to the candidate's profile.
+ * #87b — save the generated resume PDF to the candidate's profile.
  *
  * Renders the same @react-pdf document the download route uses, uploads it to
  * the `resumes` storage bucket, and points candidates.resume_url at it — so
- * the built résumé becomes the file attached to applications (same column the
+ * the built resume becomes the file attached to applications (same column the
  * upload path writes). This is what turns "build" into a real, reusable
  * artifact rather than a one-off browser print.
  */
@@ -64,7 +64,7 @@ export async function saveResumePdf(): Promise<{ ok: boolean; error?: string }> 
   return { ok: true };
 }
 
-/** Persist the candidate's chosen résumé template (presentation only). */
+/** Persist the candidate's chosen resume template (presentation only). */
 export async function setResumeTemplate(
   template: ResumeTemplateId
 ): Promise<{ ok: boolean; error?: string }> {
@@ -85,7 +85,7 @@ export async function setResumeTemplate(
   return { ok: true };
 }
 
-/** Persist the candidate's custom résumé sections (title + body + dates). */
+/** Persist the candidate's custom resume sections (title + body + dates). */
 export async function setResumeCustomSections(
   sections: CustomSectionInput[]
 ): Promise<{ ok: boolean; error?: string }> {

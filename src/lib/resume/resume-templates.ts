@@ -1,5 +1,5 @@
 /**
- * #87c — résumé template registry.
+ * #87c — resume template registry.
  *
  * A template is a PRESENTATION LAYER over the same ResumeData — switching one
  * never touches content (TASKS.md #87). Every template here is single-column,

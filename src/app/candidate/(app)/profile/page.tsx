@@ -160,7 +160,7 @@ export default async function CandidateProfilePage() {
           href="/candidate/resume"
           className="inline-flex items-center gap-1.5 bg-heritage px-4 py-2 text-xs font-bold tracking-[1.5px] uppercase text-ivory hover:bg-heritage-deep transition-colors"
         >
-          Build / download my résumé →
+          Build / download my resume →
         </a>
         <a
           href="/candidate/profile/preview"

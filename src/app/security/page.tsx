@@ -155,7 +155,7 @@ export default function SecurityPage() {
               Owners can export their organization&apos;s complete data or
               delete the organization outright from Settings — no support
               ticket required. We don&apos;t sell candidate data, we
-              don&apos;t broker résumés, and candidates can delete their
+              don&apos;t broker resumes, and candidates can delete their
               accounts and data themselves.
             </p>
           </div>

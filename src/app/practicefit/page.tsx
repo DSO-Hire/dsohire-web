@@ -224,7 +224,7 @@ function TwoSides() {
             </p>
             <p className="text-sm text-slate-body leading-[1.7]">
               Your team starts with the best-fit candidates instead of a
-              chronological stack of résumés.
+              chronological stack of resumes.
             </p>
           </div>
         </div>

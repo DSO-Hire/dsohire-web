@@ -1,7 +1,7 @@
 /**
  * GET /candidate/resume/pdf — #87b
  *
- * Server-generates the signed-in candidate's résumé as a real PDF and streams
+ * Server-generates the signed-in candidate's resume as a real PDF and streams
  * it as a download. Runs on the Node runtime (@react-pdf/renderer needs Node
  * APIs). Real selectable text → ATS-safe.
  */
@@ -18,7 +18,7 @@ export async function GET() {
     getResumeTemplateId(),
   ]);
   if (!data) {
-    return new Response("No résumé found", { status: 404 });
+    return new Response("No resume found", { status: 404 });
   }
 
   const buffer = await renderResumePdfBuffer(data, template);

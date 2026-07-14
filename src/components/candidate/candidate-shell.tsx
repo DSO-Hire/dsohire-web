@@ -91,7 +91,7 @@ const NAV: ReadonlyArray<NavItem> = [
   { id: "applications", label: "Applications", href: "/candidate/applications", Icon: FileText },
   { id: "inbox", label: "Inbox", href: "/candidate/inbox", Icon: InboxIcon },
   { id: "profile", label: "Profile", href: "/candidate/profile", Icon: UserCircle },
-  { id: "resume", label: "Résumé", href: "/candidate/resume", Icon: ScrollText },
+  { id: "resume", label: "Resume", href: "/candidate/resume", Icon: ScrollText },
 ];
 
 // Settings + Help live in the footer line (with Sign out), mirroring the
@@ -321,7 +321,7 @@ export function CandidateShell({
           />
         </header>
 
-        {/* print:p-0 — when a résumé is printed the shell chrome is hidden
+        {/* print:p-0 — when a resume is printed the shell chrome is hidden
             (aside + mobile header above); zeroing the main padding lets the
             sheet's own @page margins control the printed layout. */}
         <main className="flex-1 px-6 sm:px-10 py-10 print:p-0">

@@ -2986,7 +2986,7 @@ function CorporateCandidatePreview({
       <p className="mt-6 border-t border-[var(--rule)] pt-4 text-xs text-slate-meta">
         {questionCount > 0
           ? `${questionCount} screening question${questionCount === 1 ? "" : "s"} on apply.`
-          : "Candidates apply with just résumé + cover letter."}
+          : "Candidates apply with just resume + cover letter."}
       </p>
     </div>
   );

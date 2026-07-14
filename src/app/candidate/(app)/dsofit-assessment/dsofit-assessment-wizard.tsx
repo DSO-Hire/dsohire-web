@@ -6,8 +6,8 @@
  * DSOFit question bank section-by-section and saves to the candidate's DSOFit
  * signal columns. Heritage-green branded (PracticeFit = navy).
  *
- * First-timers see a landing with an optional résumé upload (#41 parity): drop
- * a résumé → we parse it, SAVE it to the profile + the file, prefill what we
+ * First-timers see a landing with an optional resume upload (#41 parity): drop
+ * a resume → we parse it, SAVE it to the profile + the file, prefill what we
  * can, and drop into the questions. Re-takers skip straight to the questions.
  */
 
@@ -31,7 +31,7 @@ import {
   type DsoFitQuestion,
 } from "@/lib/practice-fit/assessment/questions-dsofit";
 import { saveDsoFitAssessment } from "./actions";
-// #41 parity — résumé autofill on the landing: parse once, save the file +
+// #41 parity — resume autofill on the landing: parse once, save the file +
 // profile, then drop into the assessment. Reuses the profile-import parser.
 import {
   parseResumeAction,
@@ -60,7 +60,7 @@ export function DsoFitAssessmentWizard({
   const [pending, startTransition] = useTransition();
   const [started, setStarted] = useState(completedBefore);
 
-  // Résumé landing state.
+  // Resume landing state.
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [parsing, setParsing] = useState(false);
   const [autofillNote, setAutofillNote] = useState<string | null>(null);
@@ -100,9 +100,9 @@ export function DsoFitAssessmentWizard({
       if (!res.ok) {
         setAutofillNote(
           res.errorCode === "cap_exceeded"
-            ? "You've imported a résumé recently — your details are already saved. Just hit Start."
+            ? "You've imported a resume recently — your details are already saved. Just hit Start."
             : res.error ||
-                "We couldn't read that résumé. You can start and fill it in as you go."
+                "We couldn't read that resume. You can start and fill it in as you go."
         );
         return;
       }
@@ -121,7 +121,7 @@ export function DsoFitAssessmentWizard({
       if (typeof window !== "undefined")
         window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
-      setAutofillNote("Something went wrong reading that résumé.");
+      setAutofillNote("Something went wrong reading that resume.");
     } finally {
       setParsing(false);
     }
@@ -140,13 +140,13 @@ export function DsoFitAssessmentWizard({
         <p className="text-sm sm:text-[16px] text-slate-body leading-relaxed mb-6 max-w-[580px]">
           DSOFit ranks every open DSO and corporate role by how well it fits
           your function, level, multi-site experience, and how you want to
-          work — the things a résumé can&apos;t show. Take it once and you&apos;ll:
+          work — the things a resume can&apos;t show. Take it once and you&apos;ll:
         </p>
         <ul className="space-y-3 mb-8">
           {[
             "See DSO & corporate roles ranked for you — strongest matches first.",
             "Get surfaced to DSOs hiring for your function, by fit — not keywords.",
-            "Save your résumé to your profile and apply in one click.",
+            "Save your resume to your profile and apply in one click.",
           ].map((line) => (
             <li key={line} className="flex items-start gap-3 text-sm text-slate-body">
               <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-heritage/15">
@@ -157,18 +157,18 @@ export function DsoFitAssessmentWizard({
           ))}
         </ul>
 
-        {/* Prominent résumé drop-zone — the time-saver, hard to miss. */}
+        {/* Prominent resume drop-zone — the time-saver, hard to miss. */}
         <div className="border-2 border-dashed border-heritage/45 bg-cream/50 rounded-xl p-7 mb-6 text-center">
           <UploadCloud className="mx-auto mb-2 h-8 w-8 text-heritage-deep" />
           <div className="text-[16px] font-extrabold text-ink">
-            Drop your résumé to save time
+            Drop your resume to save time
           </div>
           <p className="mx-auto mt-1 mb-4 max-w-[420px] text-xs text-slate-meta">
             We&apos;ll save it to your profile and pre-fill what we can. PDF or
             Word — totally optional.
           </p>
           <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-heritage-deep bg-card px-5 py-2.5 text-sm font-bold text-heritage-deep hover:bg-heritage/5 transition-colors">
-            {resumeFile ? "Choose a different file" : "Choose your résumé"}
+            {resumeFile ? "Choose a different file" : "Choose your resume"}
             <input
               type="file"
               accept=".pdf,.doc,.docx"
@@ -187,7 +187,7 @@ export function DsoFitAssessmentWizard({
                 disabled={parsing}
                 className="inline-flex items-center gap-2 rounded-full bg-heritage-deep px-6 py-2.5 text-sm font-bold text-primary-foreground disabled:opacity-60"
               >
-                {parsing ? "Reading your résumé…" : "Use this résumé & start →"}
+                {parsing ? "Reading your resume…" : "Use this resume & start →"}
               </button>
             </div>
           )}
@@ -202,7 +202,7 @@ export function DsoFitAssessmentWizard({
             onClick={() => setStarted(true)}
             className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors"
           >
-            Start without a résumé →
+            Start without a resume →
           </button>
           {!skipNudge ? (
             <button

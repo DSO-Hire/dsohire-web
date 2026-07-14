@@ -19,7 +19,7 @@
  *      product frames walking the back office, then the named platform
  *      pitch with real numbers. Supersedes the old employer proof strip
  *      (its three cards were a subset). The candidate moat strip stays —
- *      résumé builder + privacy are homepage-grade claims.
+ *      resume builder + privacy are homepage-grade claims.
  *   4. FOUNDER LINE — ten-years-in-the-business-of-dentistry voice (Day 32
  *      reword: the old "built by operators" claim was inaccurate — founder
  *      is business-side, not an operator; see memory), until /about ships.
@@ -503,7 +503,7 @@ function MarqueeCard({ job, ariaHidden }: { job: MarqueeJob; ariaHidden?: boolea
    employer proof strip — same depth claim, with receipts.
    Stats are REAL: 30+ can()-guarded actions, 20 PF dims
    (FitDimensionKey clinical track; +5 DSOFit corporate = 25),
-   18 seeded automation rules, 6 résumé templates.)
+   18 seeded automation rules, 6 resume templates.)
 ═══════════════════════════════════════════════════════ */
 
 function MachineBand() {
@@ -511,7 +511,7 @@ function MachineBand() {
     { value: 30, suffix: "+", label: "Permission-gated team actions" },
     { value: 20, suffix: "", label: "PracticeFit scoring dimensions" },
     { value: 18, suffix: "", label: "Automation rules out of the box" },
-    { value: 6, suffix: "", label: "ATS-safe résumé templates, free for candidates" },
+    { value: 6, suffix: "", label: "ATS-safe resume templates, free for candidates" },
   ];
   const items: Array<{ title: React.ReactNode; body: string; hg?: boolean }> = [
     {
@@ -646,7 +646,7 @@ function CandidateStrip() {
               body: "Five minutes of questions about how you actually like to work — then every opening shows you a fit score and the plain-English why.",
             },
             {
-              title: "A free résumé builder that's actually good",
+              title: "A free resume builder that's actually good",
               body: "Six ATS-safe dental templates, built from your profile, exported as a real PDF. Yours to use anywhere — even off-platform.",
             },
             {
@@ -684,7 +684,7 @@ function CandidateStrip() {
             style={{ "--mk-delay": "140ms" } as React.CSSProperties}
             className="text-base text-slate-body leading-[1.7] max-w-[520px] mb-8"
           >
-            Free forever, no premium tier, no résumé reselling. Apply direct
+            Free forever, no premium tier, no resume reselling. Apply direct
             to the group that posted the job — your application never passes
             through a recruiter taking 20% on the way.
           </p>

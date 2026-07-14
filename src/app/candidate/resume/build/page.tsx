@@ -1,5 +1,5 @@
 /**
- * /candidate/resume/build — #87b.2 guided résumé builder.
+ * /candidate/resume/build — #87b.2 guided resume builder.
  *
  * Loads the FULL editable profile values (not just the render shape) so the
  * wizard can save complete payloads through the existing section-actions
@@ -14,7 +14,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getResumeTemplate } from "@/lib/resume/resume-templates";
 import { ResumeBuilder, type BuilderData } from "./resume-builder";
 
-export const metadata: Metadata = { title: "Build your résumé" };
+export const metadata: Metadata = { title: "Build your resume" };
 
 const arr = (v: unknown): string[] => ((v as string[] | null) ?? []) as string[];
 

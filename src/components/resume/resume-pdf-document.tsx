@@ -1,5 +1,5 @@
 /**
- * #87 — @react-pdf render of the résumé. Template-driven, section-ordered,
+ * #87 — @react-pdf render of the resume. Template-driven, section-ordered,
  * with bullet lists and user custom sections. Mirrors resume-document.tsx
  * using the same tokens, so the PDF and the on-screen preview match. Built-in
  * faces only (sans → Helvetica, serif → Times-Roman) → ATS-safe, no font
@@ -18,7 +18,7 @@ import {
 } from "@react-pdf/renderer";
 
 // @react-pdf auto-hyphenates words at line breaks (e.g. "NetSuite-"). Disable
-// it so words stay whole — résumés should never show invented hyphens.
+// it so words stay whole — resumes should never show invented hyphens.
 Font.registerHyphenationCallback((word) => [word]);
 import {
   type ResumeData,
@@ -270,7 +270,7 @@ export function ResumePdfDocument({
   const customSections = data.customSections.filter((s) => s.title.trim());
 
   return (
-    <Document title={`${data.name || "Résumé"} — Résumé`}>
+    <Document title={`${data.name || "Resume"} — Resume`}>
       <Page size="LETTER" style={styles.page}>
         <View style={styles.header}>
           <Text style={styles.name}>{data.name || "Your Name"}</Text>
@@ -313,7 +313,7 @@ export function ResumePdfDocument({
 }
 
 /**
- * Render the résumé to a PDF buffer with the chosen template. The cast bridges
+ * Render the resume to a PDF buffer with the chosen template. The cast bridges
  * @react-pdf's renderToBuffer type and our wrapping component — type-only.
  */
 export async function renderResumePdfBuffer(

@@ -1,15 +1,15 @@
 /**
  * PracticeFit v3 — the assessment question bank (config, not schema).
  *
- * The approved ~5-minute, résumé-first, minimal-free-text assessment. Tweak
+ * The approved ~5-minute, resume-first, minimal-free-text assessment. Tweak
  * questions/options here freely — none of this touches the database. The
- * résumé-first wizard renders these; the save action maps answers to the
+ * resume-first wizard renders these; the save action maps answers to the
  * candidate signal columns (see assessment-action). Spec: Business Plan &
  * Strategy/PracticeFit_v3_Assessment_Questions_2026-06-04.md.
  *
  * Design rules baked in:
- *   • Part 1 (basics) is résumé-prefilled — shown to confirm, asked only when
- *     missing. Part 2 (deep) is always asked — no résumé contains it.
+ *   • Part 1 (basics) is resume-prefilled — shown to confirm, asked only when
+ *     missing. Part 2 (deep) is always asked — no resume contains it.
  *   • Every experience/confidence item has a positive "new / growing into"
  *     answer that is never a penalty (mirrors the engine's denominator rule).
  *   • Clinical-depth questions gate to clinical roles only (keeps it ~5 min).
@@ -55,7 +55,7 @@ export interface AssessmentQuestion {
   options?: AssessmentOption[];
   /** For slider (1–5). */
   sliderLabels?: { low: string; high: string };
-  /** True when the résumé parser can pre-fill this (Part 1 confirm step). */
+  /** True when the resume parser can pre-fill this (Part 1 confirm step). */
   resumePrefill?: boolean;
   /** Only ask for clinical roles (dentist / hygienist / assistant / specialist). */
   clinicalOnly?: boolean;
@@ -208,7 +208,7 @@ export const PATIENT_POPULATION_OPTIONS: AssessmentOption[] = [
 
 /** The full ordered question list. The wizard sections + role-gates from this. */
 export const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
-  // ── PART 1 — basics (résumé-prefilled) ──
+  // ── PART 1 — basics (resume-prefilled) ──
   {
     key: "desired_roles",
     section: "basics",
@@ -504,7 +504,7 @@ export const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
 
 /**
  * The questions a given candidate sees: drop clinical-depth items for
- * non-clinical roles. (Résumé-prefill confirmation is handled in the wizard.)
+ * non-clinical roles. (Resume-prefill confirmation is handled in the wizard.)
  */
 export function questionsForRoles(
   roleValues: string[]

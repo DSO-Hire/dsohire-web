@@ -235,11 +235,11 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
             <p className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-3">For dental pros</p>
             <h3 className="text-xl font-extrabold text-ink mb-3">Know your worth, then go get it</h3>
             <p className="text-slate-body leading-[1.7] mb-6 text-sm">
-              Build a free, ATS-ready résumé and get matched to practices that fit how you want to work — in {state.name} and beyond.
+              Build a free, ATS-ready resume and get matched to practices that fit how you want to work — in {state.name} and beyond.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link href="/resume-templates" className="inline-flex items-center px-7 py-3.5 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors">
-                Build a free résumé
+                Build a free resume
               </Link>
               <Link href="/jobs" className="inline-flex items-center px-7 py-3.5 border border-[var(--rule-strong)] text-ink text-xs font-bold tracking-[2px] uppercase hover:border-ink transition-colors">
                 Browse dental jobs

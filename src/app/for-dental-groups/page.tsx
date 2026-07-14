@@ -779,7 +779,7 @@ function PracticeFitBand() {
             dentistry. Schedule overlap, PMS fluency, clinical mix, pace and
             culture: every applicant lands in your pipeline already scored, so
             your team starts with the strongest fits instead of a stack of
-            résumés. Included on every tier.
+            resumes. Included on every tier.
           </p>
 
           {/* Co-brand: the corporate half of the engine. */}
@@ -886,7 +886,7 @@ const SHOWCASE_TOP: ShowcaseFeature[] = [
         <span>matching</span>
       </span>
     ),
-    body: "A five-minute, two-sided assessment captures what no résumé can — work pace, mentorship, culture, schedule — and our proprietary dental fit score ranks every applicant against the role on it, plus real commute distance, PMS fluency, licensure, certifications, and specialty. Your strongest matches surface first, not your most recent.",
+    body: "A five-minute, two-sided assessment captures what no resume can — work pace, mentorship, culture, schedule — and our proprietary dental fit score ranks every applicant against the role on it, plus real commute distance, PMS fluency, licensure, certifications, and specialty. Your strongest matches surface first, not your most recent.",
     status: "now",
   },
   {

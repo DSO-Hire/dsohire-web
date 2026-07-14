@@ -17,7 +17,7 @@
  *   - "discoverable"      → ('recruiters_only', false)  — findable, with name
  *   - "anonymous"         → ('recruiters_only', true)   — findable, masked
  *
- * Contact + résumé visibility stay 'after_apply' regardless (we don't touch
+ * Contact + resume visibility stay 'after_apply' regardless (we don't touch
  * them here). Demographic/EEO answers are never exposed to anyone.
  */
 

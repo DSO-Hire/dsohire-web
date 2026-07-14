@@ -12,7 +12,7 @@
  *   - Inserts a row into the candidate's OWN profile table
  *     (candidate_licenses / candidate_certifications / candidate_education)
  *     — exactly what the profile editor writes; this is first-party
- *     applicant data, the same category as a résumé.
+ *     applicant data, the same category as a resume.
  *   - Optionally uploads a supporting document to the private
  *     `candidate-credentials` storage bucket and patches `document_path`
  *     (licenses + certifications only — education has no document column).
@@ -278,7 +278,7 @@ async function maybeUploadDocument(
 /**
  * #76 — re-read the candidate's profile credentials as the normalized
  * CandidateCredential[] the verification step links against. The apply wizard
- * calls this after a résumé import (saveParsedResumeAction) writes new
+ * calls this after a resume import (saveParsedResumeAction) writes new
  * licenses/certs/education to the profile, so the freshly-added rows become
  * immediately selectable as proof without a page reload. Same projection as
  * the apply page's server-side build. Returns [] on no session / no candidate.

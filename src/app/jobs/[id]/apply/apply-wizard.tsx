@@ -126,7 +126,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
     const list: { id: StepId; label: string }[] = [
       { id: "intro", label: "Get started" },
     ];
-    // Résumé first (after intro) — Cam 2026-06-05: surface it before screening
+    // Resume first (after intro) — Cam 2026-06-05: surface it before screening
     // + verifications so we can eventually parse it and pre-fill later steps (#70).
     list.push({ id: "resume", label: "Resume" });
     if (hasScreening) list.push({ id: "screening", label: "Screening" });
@@ -219,8 +219,8 @@ export function ApplyWizard(props: ApplyWizardProps) {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeError, setResumeError] = useState<string | null>(null);
 
-  // #87b.3 — returning from the free résumé builder (?built=1). The freshly
-  // built résumé is now saved to the profile, so prefer it over the stale
+  // #87b.3 — returning from the free resume builder (?built=1). The freshly
+  // built resume is now saved to the profile, so prefer it over the stale
   // "upload" choice the draft may still hold from before the détour.
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -232,13 +232,13 @@ export function ApplyWizard(props: ApplyWizardProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // #70 — opt-in "autofill from résumé". Parses the uploaded file (reusing the
+  // #70 — opt-in "autofill from resume". Parses the uploaded file (reusing the
   // profile-import LLM parser, which also saves the file on file) and fills the
   // draft name. Never silent: the candidate taps the button and reviews at
   // submit. Degrades gracefully on the 1/day parse cap.
   const [autofilling, setAutofilling] = useState(false);
   const [autofillNote, setAutofillNote] = useState<string | null>(null);
-  // #76 — the résumé parsed in-session; lets us offer to add any licenses /
+  // #76 — the resume parsed in-session; lets us offer to add any licenses /
   // certs / education it found to the candidate's profile (explicit tap only —
   // respects the locked R8 no-silent-fill rule).
   const [parsedResume, setParsedResume] = useState<ParsedResume | null>(null);
@@ -255,8 +255,8 @@ export function ApplyWizard(props: ApplyWizardProps) {
         if (!res.ok) {
           setAutofillNote(
             res.errorCode === "cap_exceeded"
-              ? "You've imported a résumé recently — your saved details are already on your profile."
-              : res.error || "We couldn't read that résumé. You can fill the fields in manually."
+              ? "You've imported a resume recently — your saved details are already on your profile."
+              : res.error || "We couldn't read that resume. You can fill the fields in manually."
           );
           return;
         }
@@ -270,21 +270,21 @@ export function ApplyWizard(props: ApplyWizardProps) {
             lastName: last_name || d.lastName,
           }));
           setAutofillNote(
-            `Filled your name from your résumé (${fullName}). Double-check everything before you submit.`
+            `Filled your name from your resume (${fullName}). Double-check everything before you submit.`
           );
         } else {
           setAutofillNote(
-            "We read your résumé and saved it. Add your name on the first step if it's blank."
+            "We read your resume and saved it. Add your name on the first step if it's blank."
           );
         }
       })
       .catch(() =>
-        setAutofillNote("Something went wrong reading that résumé.")
+        setAutofillNote("Something went wrong reading that resume.")
       )
       .finally(() => setAutofilling(false));
   };
 
-  // Licenses / certs / education the parsed résumé surfaced.
+  // Licenses / certs / education the parsed resume surfaced.
   const resumeCredCount = parsedResume
     ? parsedResume.licenses.filter((l) => l.license_type.value).length +
       parsedResume.certifications.filter((c) => c.kind.value).length +
@@ -1553,7 +1553,7 @@ function ResumeStep({
       {!hasSavedResume && (
         <div className="flex items-center justify-between gap-3 rounded-md border border-heritage/30 bg-heritage/5 px-4 py-3">
           <p className="text-xs text-slate-body leading-snug">
-            No résumé handy? Build a clean, ATS-safe one free from your
+            No resume handy? Build a clean, ATS-safe one free from your
             profile — we&apos;ll save it and attach it here.
           </p>
           <Link
@@ -1632,8 +1632,8 @@ function ResumeStep({
           >
             <BrandMark className="h-4 w-4" />
             {autofilling
-              ? "Reading your résumé…"
-              : "Autofill my details from this résumé"}
+              ? "Reading your resume…"
+              : "Autofill my details from this resume"}
           </button>
           <p className="mt-2 text-xs leading-relaxed text-slate-meta">
             Optional — we&apos;ll read your name from the file to save you
@@ -1651,7 +1651,7 @@ function ResumeStep({
         <div className="border border-heritage/40 bg-heritage/[0.05] p-4">
           <p className="text-sm font-semibold text-ink">
             We spotted <span className="tabular">{resumeCredCount}</span> credential
-            {resumeCredCount === 1 ? "" : "s"} on your résumé.
+            {resumeCredCount === 1 ? "" : "s"} on your resume.
           </p>
           <p className="mt-1 text-xs leading-relaxed text-slate-meta">
             Add your licenses, certifications, and education to your profile so

@@ -4,10 +4,10 @@
  * PracticeFit v3 — the assessment wizard (Phase A).
  *
  * Section-by-section, mostly tap-to-answer, ~5 min. Part 1 (basics) is
- * pre-filled from the candidate's existing profile (which the résumé import
+ * pre-filled from the candidate's existing profile (which the resume import
  * populates) and shown to confirm; Part 2 (deep) is always asked. A live
  * "match strength" meter climbs as they answer. Clinical-depth questions only
- * appear for clinical roles. Graceful for new grads / no résumé — every answer
+ * appear for clinical roles. Graceful for new grads / no resume — every answer
  * set includes a positive "new / growing" option, never a dead end.
  */
 
@@ -25,7 +25,7 @@ import {
 } from "@/lib/practice-fit/assessment/questions";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { saveAssessment } from "./actions";
-// #41 (Day 28) — résumé autofill on the landing: parse once, then fill BOTH
+// #41 (Day 28) — resume autofill on the landing: parse once, then fill BOTH
 // this assessment and the candidate's profile (saveParsedResumeAction writes
 // the profile + the file is saved for reuse). Reuses the profile-import parser.
 import {
@@ -61,7 +61,7 @@ export function AssessmentWizard({
   /** #94 (Day 28) — true if the candidate has finished the assessment before.
    *  Re-takers skip the landing/intro and go straight into the questions. */
   completedBefore?: boolean;
-  /** C4-1 — true if the candidate already has a résumé on file, so the landing
+  /** C4-1 — true if the candidate already has a resume on file, so the landing
    *  confirms that instead of prompting an upload. */
   hasResume?: boolean;
 }) {
@@ -77,12 +77,12 @@ export function AssessmentWizard({
   // (never a hard gate). Mirrors the DSOFit assessment landing.
   const [skipNudge, setSkipNudge] = useState(false);
 
-  // #41 (Day 28) — résumé autofill on the landing.
+  // #41 (Day 28) — resume autofill on the landing.
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [parsing, setParsing] = useState(false);
   const [autofillNote, setAutofillNote] = useState<string | null>(null);
 
-  // Map a parsed résumé's value into this candidate's profile-derived
+  // Map a parsed resume's value into this candidate's profile-derived
   // assessment years bucket (mirrors yearsBucket() in page.tsx).
   const yearsBucketFromNumber = (n: number | null): string | null => {
     if (n == null) return null;
@@ -104,9 +104,9 @@ export function AssessmentWizard({
       if (!res.ok) {
         setAutofillNote(
           res.errorCode === "cap_exceeded"
-            ? "You've imported a résumé recently — your saved details are already on your profile. Just hit Start."
+            ? "You've imported a resume recently — your saved details are already on your profile. Just hit Start."
             : res.error ||
-                "We couldn't read that résumé. You can start and fill it in as you go."
+                "We couldn't read that resume. You can start and fill it in as you go."
         );
         return;
       }
@@ -143,7 +143,7 @@ export function AssessmentWizard({
       if (typeof window !== "undefined")
         window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
-      setAutofillNote("Something went wrong reading that résumé.");
+      setAutofillNote("Something went wrong reading that resume.");
     } finally {
       setParsing(false);
     }
@@ -238,23 +238,23 @@ export function AssessmentWizard({
             </li>
           ))}
         </ul>
-        {/* #41 — résumé autofill: parse once → prefills this assessment AND the
+        {/* #41 — resume autofill: parse once → prefills this assessment AND the
             full profile (+ saves the file for reuse). Optional; Start still works. */}
         {hasResume ? (
           <div className="mt-6 rounded-lg border border-heritage/40 bg-heritage/[0.06] p-4">
             <p className="flex items-center gap-2 text-xs font-bold text-ink">
               <Check className="h-4 w-4 flex-shrink-0 text-heritage-deep" />
-              Your résumé is on file
+              Your resume is on file
             </p>
             <p className="mt-1 text-xs leading-relaxed text-slate-meta">
               We&apos;ve prefilled your basics from it — just review as you go. You
-              can update your résumé anytime from the Résumé tab.
+              can update your resume anytime from the Resume tab.
             </p>
           </div>
         ) : (
           <div className="mt-6 rounded-lg border border-heritage/40 bg-heritage/[0.06] p-4">
             <p className="text-xs font-bold text-ink">
-              Fastest start: autofill from your résumé
+              Fastest start: autofill from your resume
             </p>
             <p className="mt-1 text-xs leading-relaxed text-slate-meta">
               Upload it once — we&apos;ll prefill this assessment <em>and</em> your
@@ -276,7 +276,7 @@ export function AssessmentWizard({
                 disabled={!resumeFile || parsing}
                 className="inline-flex items-center justify-center gap-2 border border-heritage-deep px-4 py-2 text-xs font-bold uppercase tracking-[1.5px] text-heritage-deep transition-colors hover:bg-heritage/10 disabled:opacity-40"
               >
-                {parsing ? "Reading…" : "Autofill from résumé"}
+                {parsing ? "Reading…" : "Autofill from resume"}
               </button>
             </div>
             {autofillNote && (

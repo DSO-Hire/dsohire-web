@@ -1,8 +1,8 @@
 /**
- * #87 — pure résumé types + formatting helpers.
+ * #87 — pure resume types + formatting helpers.
  *
  * Extracted from resume-data.ts so it carries NO server-only imports
- * (no createSupabaseServerClient / next/headers). That lets the résumé
+ * (no createSupabaseServerClient / next/headers). That lets the resume
  * template render on the client too — which is what powers the builder's
  * live preview (resume-builder.tsx) as well as the server render.
  *
@@ -137,7 +137,7 @@ export function toBullets(text: string | null | undefined): string[] {
     .filter(Boolean);
 }
 
-/** The reorderable main résumé sections, in default order. */
+/** The reorderable main resume sections, in default order. */
 export const RESUME_MAIN_SECTIONS = [
   "summary",
   "experience",
@@ -159,7 +159,7 @@ export function orderedMainSections(order: string[]): ResumeSectionKey[] {
   return [...valid, ...RESUME_MAIN_SECTIONS.filter((k) => !seen.has(k))];
 }
 
-/** Does this résumé have any real body content beyond the header? */
+/** Does this resume have any real body content beyond the header? */
 export function resumeHasContent(d: ResumeData): boolean {
   return (
     d.work.length > 0 ||

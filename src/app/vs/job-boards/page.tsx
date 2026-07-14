@@ -42,7 +42,7 @@ const ROWS: VsRow[] = [
   },
   {
     dimension: "Finding the right applicant",
-    them: "Most-recent-first, keyword search if you're lucky. You read every résumé to find the fit.",
+    them: "Most-recent-first, keyword search if you're lucky. You read every resume to find the fit.",
     us: "Every applicant arrives scored by PracticeFit — schedule overlap, PMS fluency, clinical mix, commute. Strongest fits surface first.",
   },
   {
@@ -52,8 +52,8 @@ const ROWS: VsRow[] = [
   },
   {
     dimension: "The candidate's experience",
-    them: "Re-upload the résumé, re-type the work history, apply into a void.",
-    us: "One profile, free résumé builder, fit scores on every opening, real status tracking — candidates see where they stand.",
+    them: "Re-upload the resume, re-type the work history, apply into a void.",
+    us: "One profile, free resume builder, fit scores on every opening, real status tracking — candidates see where they stand.",
   },
 ];
 

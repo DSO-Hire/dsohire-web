@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * #87b — résumé page toolbar. Hidden in print (.no-print).
+ * #87b — resume page toolbar. Hidden in print (.no-print).
  *  • Download PDF  → server-generated /candidate/resume/pdf (real text, ATS-safe)
  *  • Save to my profile → saveResumePdf(): uploads the PDF + sets resume_url,
- *    so the built résumé is the file attached to applications.
+ *    so the built resume is the file attached to applications.
  */
 
 import { useState, useTransition } from "react";

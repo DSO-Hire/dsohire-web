@@ -10,7 +10,7 @@ export const entries: ChangelogEntry[] = [
     date: "2026-06-29",
     kind: "new",
     title: "You're in control of who can find you",
-    body: "Candidates are now private by default. Right after you sign up, you choose how discoverable you want to be — stay private, be discoverable to verified employers with your name, or be discoverable but anonymous (employers see your experience, skills, and fit, never your name or photo, until you apply or choose to reveal). You can change it anytime in Settings, and your contact info and résumé always stay hidden until you apply.",
+    body: "Candidates are now private by default. Right after you sign up, you choose how discoverable you want to be — stay private, be discoverable to verified employers with your name, or be discoverable but anonymous (employers see your experience, skills, and fit, never your name or photo, until you apply or choose to reveal). You can change it anytime in Settings, and your contact info and resume always stay hidden until you apply.",
   },
   {
     date: "2026-06-19",
@@ -52,7 +52,7 @@ export const entries: ChangelogEntry[] = [
     date: "2026-06-15",
     kind: "new",
     title: "The assistant can take you straight there",
-    body: "Ask the assistant where something lives and it now hands you a one-click button — \"Open the pipeline board ↗\", \"Open this application's messages ↗\", \"Open the résumé builder ↗\" — instead of a written click-path. It only ever links to pages inside DSO Hire that your account can open.",
+    body: "Ask the assistant where something lives and it now hands you a one-click button — \"Open the pipeline board ↗\", \"Open this application's messages ↗\", \"Open the resume builder ↗\" — instead of a written click-path. It only ever links to pages inside DSO Hire that your account can open.",
   },
   {
     date: "2026-06-15",
@@ -70,7 +70,7 @@ export const entries: ChangelogEntry[] = [
     date: "2026-06-12",
     kind: "new",
     title: "⌘K search comes to the candidate side",
-    body: "Press ⌘K (or Ctrl+K) anywhere in your candidate workspace to search open jobs, your own applications, and shortcuts — résumé builder, assessments, privacy settings, and more — without touching the mouse. Same fast palette employers have had; now both sides of DSO Hire share it.",
+    body: "Press ⌘K (or Ctrl+K) anywhere in your candidate workspace to search open jobs, your own applications, and shortcuts — resume builder, assessments, privacy settings, and more — without touching the mouse. Same fast palette employers have had; now both sides of DSO Hire share it.",
   },
   {
     date: "2026-06-12",
@@ -286,7 +286,7 @@ export const entries: ChangelogEntry[] = [
     date: "2026-06-11",
     kind: "improved",
     title: "Help center caught up with everything new",
-    body: "Seven new help articles — per-teammate permissions, confidential searches, Pipeline HQ, seat packs, the résumé builder, DSOFit, and the new apply flow — plus refreshed plan and team guides. The in-app AI assistant learned all of it too.",
+    body: "Seven new help articles — per-teammate permissions, confidential searches, Pipeline HQ, seat packs, the resume builder, DSOFit, and the new apply flow — plus refreshed plan and team guides. The in-app AI assistant learned all of it too.",
   },
   {
     date: "2026-06-11",
@@ -363,7 +363,7 @@ export const entries: ChangelogEntry[] = [
   {
     date: "2026-06-10",
     kind: "new",
-    title: "Free résumé builder for candidates",
+    title: "Free resume builder for candidates",
     body: "Six ATS-safe templates, built from your profile in minutes, exported as clean PDF. Free forever — no watermark games.",
   },
   {
@@ -382,7 +382,7 @@ export const entries: ChangelogEntry[] = [
     date: "2026-06-05",
     kind: "improved",
     title: "Rebuilt application wizard",
-    body: "Applying is now one clear question at a time — with résumé autofill so candidates never type what we can read.",
+    body: "Applying is now one clear question at a time — with resume autofill so candidates never type what we can read.",
   },
   {
     date: "2026-06-04",

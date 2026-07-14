@@ -111,7 +111,7 @@ export default async function CandidatePracticeFitPage() {
           </h2>
           <p className="mt-2 text-sm text-slate-body max-w-[560px]">
             Pace, autonomy, the procedures you love, the kind of team you thrive
-            on — the things no résumé captures. Mostly taps, and you can stop
+            on — the things no resume captures. Mostly taps, and you can stop
             anytime.
           </p>
           <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[1.5px] text-heritage-deep group-hover:gap-2.5 transition-all">

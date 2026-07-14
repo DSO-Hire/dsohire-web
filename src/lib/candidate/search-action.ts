@@ -9,7 +9,7 @@
  *   - Open jobs (title) — public postings, DSO names ALWAYS masked
  *     through getDisplayedDsoNamesBatch (never raw dsos.name).
  *   - The candidate's own applications (job title) — RLS-scoped.
- *   - Static action shortcuts (browse jobs, assessment, résumé…).
+ *   - Static action shortcuts (browse jobs, assessment, resume…).
  *
  * Server-side so RLS naturally scopes the applications results. Same
  * ILIKE substring matching as the employer side.
@@ -65,7 +65,7 @@ const STATIC_ACTIONS: CandidateSearchResult[] = [
   {
     group: "actions",
     id: "action-resume",
-    title: "Résumé builder",
+    title: "Resume builder",
     subtitle: "Six ATS-safe templates, free",
     href: "/candidate/resume",
   },

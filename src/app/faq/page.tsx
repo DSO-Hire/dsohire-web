@@ -140,7 +140,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: "How do I review and manage applicants?",
-        a: "Applicants land on a drag-and-drop kanban pipeline with stages you can rename and reorder. Every card shows the candidate's profile, résumé read, screening answers, knockout flags, and PracticeFit score. Teammates' moves sync in real time, bulk actions let you move or reject in one go, and you're notified when someone applies. It's a real ATS, not an inbox.",
+        a: "Applicants land on a drag-and-drop kanban pipeline with stages you can rename and reorder. Every card shows the candidate's profile, resume read, screening answers, knockout flags, and PracticeFit score. Teammates' moves sync in real time, bulk actions let you move or reject in one go, and you're notified when someone applies. It's a real ATS, not an inbox.",
       },
       {
         q: "Can I control what each team member can see and do?",
@@ -164,7 +164,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
     items: [
       {
         q: "Is DSO Hire free for job seekers?",
-        a: "Completely free, forever. Dental groups pay the subscription; candidates never pay to apply, never pay to be visible, and never see ads. There's no premium candidate tier, and we never resell your résumé.",
+        a: "Completely free, forever. Dental groups pay the subscription; candidates never pay to apply, never pay to be visible, and never see ads. There's no premium candidate tier, and we never resell your resume.",
       },
       {
         q: "What roles can I find on DSO Hire?",
@@ -172,14 +172,14 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: "How do I apply to a job?",
-        a: "Applying takes about three minutes — one clear question at a time, with your answers saving as you go. If you've imported a résumé, your profile pre-fills the details. Your information is shared only with the group you apply to, and only when you apply.",
+        a: "Applying takes about three minutes — one clear question at a time, with your answers saving as you go. If you've imported a resume, your profile pre-fills the details. Your information is shared only with the group you apply to, and only when you apply.",
       },
       {
-        q: "Do I have to upload a résumé, or can the platform read it?",
-        a: "You don't have to, but you can. Upload a résumé and DSO Hire reads it into your profile — and you review and edit every field before anything saves. The parser deliberately ignores sensitive data like Social Security numbers or dates of birth even if they appear on the document.",
+        q: "Do I have to upload a resume, or can the platform read it?",
+        a: "You don't have to, but you can. Upload a resume and DSO Hire reads it into your profile — and you review and edit every field before anything saves. The parser deliberately ignores sensitive data like Social Security numbers or dates of birth even if they appear on the document.",
       },
       {
-        q: "Is there a free résumé builder?",
+        q: "Is there a free resume builder?",
         a: "Yes, and it's free forever with no watermarks. Choose from six ATS-safe dental templates, export a real PDF, and use it anywhere — even off DSO Hire. It auto-attaches when you apply, and you can build one mid-application if you don't have one ready.",
       },
       {
@@ -192,7 +192,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: "Can I apply to more than one job?",
-        a: "Absolutely. Build your profile once and apply to as many roles as you want without re-uploading your résumé each time. Each application shares your profile only with that specific group.",
+        a: "Absolutely. Build your profile once and apply to as many roles as you want without re-uploading your resume each time. Each application shares your profile only with that specific group.",
       },
       {
         q: "Do I need to be licensed, and do you verify credentials?",
@@ -228,7 +228,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: "Does the employer see the same score I see?",
-        a: "It's one engine, so the underlying fit is consistent — but it's a decision aid on both sides, not a verdict. Employers see it as guidance alongside your full profile, résumé, and answers; it never ranks you into or out of a role on its own.",
+        a: "It's one engine, so the underlying fit is consistent — but it's a decision aid on both sides, not a verdict. Employers see it as guidance alongside your full profile, resume, and answers; it never ranks you into or out of a role on its own.",
       },
       {
         q: "Is the matching fair? Does it use protected characteristics?",
@@ -247,8 +247,8 @@ const FAQ_CATEGORIES: FaqCategory[] = [
     title: "Your privacy and your data",
     items: [
       {
-        q: "Who can see my profile and résumé?",
-        a: "You control it. Separate settings govern your profile, résumé, and contact info — you can keep each private, share it only after you apply, limit it to DSO Hire employer members, or make it public. By default your profile is private, and unauthenticated visitors and search engines never see your name or contact details.",
+        q: "Who can see my profile and resume?",
+        a: "You control it. Separate settings govern your profile, resume, and contact info — you can keep each private, share it only after you apply, limit it to DSO Hire employer members, or make it public. By default your profile is private, and unauthenticated visitors and search engines never see your name or contact details.",
       },
       {
         q: "Can I keep my search confidential from my current employer?",
@@ -264,11 +264,11 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: "Do you sell or share my data with recruiters or data brokers?",
-        a: "Never. We don't sell candidate data to anyone — not data brokers, not staffing agencies — and there's no résumé-reselling business behind the free candidate side. Your data is also never used to train AI models.",
+        a: "Never. We don't sell candidate data to anyone — not data brokers, not staffing agencies — and there's no resume-reselling business behind the free candidate side. Your data is also never used to train AI models.",
       },
       {
         q: "What data do you collect — and what do you deliberately not collect?",
-        a: "We collect what's needed to match you to jobs: your experience, skills, licensure, preferences, and the résumé you choose to share. We deliberately do not collect Social Security numbers, driver's licenses, dates of birth, DEA/NPI numbers, protected-class characteristics, or financial details — and our forms reject them even in free-text fields.",
+        a: "We collect what's needed to match you to jobs: your experience, skills, licensure, preferences, and the resume you choose to share. We deliberately do not collect Social Security numbers, driver's licenses, dates of birth, DEA/NPI numbers, protected-class characteristics, or financial details — and our forms reject them even in free-text fields.",
       },
       {
         q: "How is my data secured, and where is it hosted?",

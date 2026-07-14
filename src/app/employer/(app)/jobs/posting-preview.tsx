@@ -3,7 +3,7 @@
 /**
  * <PostingPreview> — Lane 6 (Job Studio, Model 05): the live right-pane
  * mirror of the public job page, updating per keystroke from wizard
- * state. The pattern the résumé builder proved in-house: type on the
+ * state. The pattern the resume builder proved in-house: type on the
  * left, watch the real artifact form on the right.
  *
  * Pure presentation — props in, markup out. No fetches, no state, no

@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * #87b.2 (+ all-inclusive upgrade) — guided résumé builder with live preview.
+ * #87b.2 (+ all-inclusive upgrade) — guided resume builder with live preview.
  *
- * Builds a COMPLETE résumé from zero: Contact, Summary, Experience (with dates
+ * Builds a COMPLETE resume from zero: Contact, Summary, Experience (with dates
  * + add/remove jobs), Education (add/remove), Licenses & Certifications
  * (dental-critical, add/remove), and Skills — all with a live preview and a
  * template picker. Writes straight to the canonical profile via the existing
@@ -146,7 +146,7 @@ export function ResumeBuilder({
   const [error, setError] = useState<string | null>(null);
 
   // Mobile sweep 2026-06-18 — scroll to top on step change so phone users
-  // don't land mid-form when moving between résumé-builder sections.
+  // don't land mid-form when moving between resume-builder sections.
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -373,7 +373,7 @@ export function ResumeBuilder({
       if (!so.ok) return setError(so.error ?? "Couldn't save section order.");
       await setResumeTemplate(template);
       const res = await saveResumePdf();
-      if (!res.ok) return setError(res.error ?? "Couldn't save your résumé PDF.");
+      if (!res.ok) return setError(res.error ?? "Couldn't save your resume PDF.");
       router.push(returnTo ?? "/candidate/resume");
     });
   }
@@ -388,7 +388,7 @@ export function ResumeBuilder({
           meterIcon={<FileText className="h-4 w-4" />}
           eyebrow={
             <span className="text-[10px] font-bold uppercase tracking-[2.5px] text-heritage-deep">
-              Résumé builder
+              Resume builder
             </span>
           }
           maxWidthClass="max-w-none"
@@ -399,7 +399,7 @@ export function ResumeBuilder({
           onNext={handleNext}
           busy={pending}
           error={error}
-          nextLabel={index === STEPS.length - 1 ? "Save & view résumé" : "Continue"}
+          nextLabel={index === STEPS.length - 1 ? "Save & view resume" : "Continue"}
           canJumpTo={(i) => i <= index}
           onJump={(i) => {
             setError(null);
@@ -777,7 +777,7 @@ export function ResumeBuilder({
             <div className="space-y-4">
               <Title>Your skills.</Title>
               <p className="text-[14px] text-slate-body">
-                Comma-separated. These render as a clean list on your résumé.
+                Comma-separated. These render as a clean list on your resume.
               </p>
               <textarea
                 className={inputCls + " min-h-[120px] leading-relaxed"}
@@ -793,7 +793,7 @@ export function ResumeBuilder({
               <div className="space-y-2">
                 <Title>Order &amp; extras.</Title>
                 <p className="text-[14px] text-slate-body">
-                  Reorder your résumé sections, or add a custom one (e.g.
+                  Reorder your resume sections, or add a custom one (e.g.
                   Volunteer Work, Awards, Publications).
                 </p>
               </div>
@@ -899,7 +899,7 @@ export function ResumeBuilder({
             <div className="space-y-4">
               <Title>You&apos;re ready.</Title>
               <p className="text-[14px] text-slate-body">
-                Save your résumé as a PDF to your profile — it&apos;ll be the file
+                Save your resume as a PDF to your profile — it&apos;ll be the file
                 attached when you apply, and you can download it any time. Your
                 live preview is on the right.
               </p>

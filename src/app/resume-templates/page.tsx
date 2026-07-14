@@ -1,7 +1,7 @@
 /**
  * /resume-templates — #87c.2 public SEO landing.
  *
- * The cold-start funnel (ties #85): ranks for "free dental résumé template"
+ * The cold-start funnel (ties #85): ranks for "free dental resume template"
  * intent, shows the six real templates rendered from sample data, and converts
  * to a candidate sign-up → build flow. Server component, indexable (the global
  * pre-launch lockdown handles noindex until go-live). No auth, no AI — the
@@ -18,14 +18,14 @@ import { RESUME_TEMPLATE_LIST } from "@/lib/resume/resume-templates";
 import { candidateCtaHref } from "@/lib/marketing/candidate-cta";
 
 export const metadata: Metadata = {
-  title: "Free Dental Résumé Templates (ATS-Friendly) | DSO Hire",
+  title: "Free Dental Resume Templates (ATS-Friendly) | DSO Hire",
   description:
-    "Build a free, ATS-safe dental résumé in minutes. Six clean templates designed for hygienists, assistants, front desk, dentists, and DSO leaders — download as a PDF, no sign-up tricks.",
+    "Build a free, ATS-safe dental resume in minutes. Six clean templates designed for hygienists, assistants, front desk, dentists, and DSO leaders — download as a PDF, no sign-up tricks.",
   alternates: { canonical: "https://dsohire.com/resume-templates" },
   openGraph: {
-    title: "Free Dental Résumé Templates (ATS-Friendly)",
+    title: "Free Dental Resume Templates (ATS-Friendly)",
     description:
-      "Six clean, ATS-safe résumé templates built for dental professionals. Free to build and download.",
+      "Six clean, ATS-safe resume templates built for dental professionals. Free to build and download.",
     url: "https://dsohire.com/resume-templates",
     type: "website",
   },
@@ -109,7 +109,7 @@ const SAMPLE: ResumeData = {
 };
 
 export default async function ResumeTemplatesLanding() {
-  // Auth-aware: a signed-in candidate building a résumé goes straight to the
+  // Auth-aware: a signed-in candidate building a resume goes straight to the
   // builder, not back through sign-up (Cam, Day 37).
   const resumeHref = await candidateCtaHref("resume");
   return (
@@ -121,7 +121,7 @@ export default async function ResumeTemplatesLanding() {
             Free for dental professionals
           </div>
           <h1 className="mx-auto max-w-[820px] text-4xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
-            Free dental résumé templates.
+            Free dental resume templates.
           </h1>
           <p className="mx-auto mt-5 max-w-[640px] text-[16px] leading-relaxed text-slate-body">
             Six clean, ATS-safe templates built for hygienists, assistants,
@@ -145,7 +145,7 @@ export default async function ResumeTemplatesLanding() {
           </div>
           <ul className="mx-auto mt-8 flex max-w-[760px] flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-slate-body">
             {[
-              "ATS-friendly (passes the résumé scanners)",
+              "ATS-friendly (passes the resume scanners)",
               "Built from your profile — no retyping",
               "Download as PDF, use anywhere",
             ].map((b) => (
@@ -164,7 +164,7 @@ export default async function ResumeTemplatesLanding() {
           Pick a style. Switch any time.
         </h2>
         <p className="mx-auto mt-3 max-w-[600px] text-center text-sm text-slate-body">
-          Every template is single-column and parser-safe, so a beautiful résumé
+          Every template is single-column and parser-safe, so a beautiful resume
           never costs you the interview. Your content stays the same — only the
           look changes.
         </p>
@@ -208,7 +208,7 @@ export default async function ResumeTemplatesLanding() {
       <section className="border-t border-[var(--rule)] bg-cream/40">
         <div className="mx-auto max-w-[920px] px-6 py-16">
           <h2 className="text-2xl font-bold tracking-[-0.4px] text-ink text-center">
-            Made for dental — and for the robots that read your résumé first.
+            Made for dental — and for the robots that read your resume first.
           </h2>
           <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3">
             {[
@@ -240,10 +240,10 @@ export default async function ResumeTemplatesLanding() {
       <section className="bg-hero">
         <div className="mx-auto max-w-[820px] px-6 py-16 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.6px] text-hero-foreground">
-            Your dental résumé, done in minutes.
+            Your dental resume, done in minutes.
           </h2>
           <p className="mx-auto mt-3 max-w-[560px] text-sm leading-relaxed text-hero-foreground/80">
-            Create a free DSO Hire profile, build your résumé, and apply to
+            Create a free DSO Hire profile, build your resume, and apply to
             multi-location dental groups — all in one place.
           </p>
           <div className="mt-8">
@@ -264,9 +264,9 @@ export default async function ResumeTemplatesLanding() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "CollectionPage",
-            name: "Free Dental Résumé Templates",
+            name: "Free Dental Resume Templates",
             description:
-              "Six free, ATS-friendly résumé templates for dental professionals.",
+              "Six free, ATS-friendly resume templates for dental professionals.",
             url: "https://dsohire.com/resume-templates",
             isPartOf: { "@type": "WebSite", name: "DSO Hire", url: "https://dsohire.com" },
           }),

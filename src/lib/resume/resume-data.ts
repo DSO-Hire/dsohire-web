@@ -1,7 +1,7 @@
 /**
- * #87a — Résumé data layer (server fetch).
+ * #87a — Resume data layer (server fetch).
  *
- * The résumé is a RENDER of the canonical profile, never a 4th data silo
+ * The resume is a RENDER of the canonical profile, never a 4th data silo
  * (TASKS.md #87). This module pulls the candidate's profile + the four
  * structured child tables into one normalized `ResumeData`. Pure types +
  * formatting live in resume-format.ts (client-safe); this file adds the
@@ -45,7 +45,7 @@ import {
 
 const arr = (v: unknown): string[] => ((v as string[] | null) ?? []) as string[];
 
-/** The candidate's saved résumé template id (normalized; default when unset). */
+/** The candidate's saved resume template id (normalized; default when unset). */
 export async function getResumeTemplateId(): Promise<ResumeTemplateId> {
   const supabase = await createSupabaseServerClient();
   const {
@@ -64,7 +64,7 @@ export async function getResumeTemplateId(): Promise<ResumeTemplateId> {
 }
 
 /**
- * Fetch the signed-in candidate's résumé data. Returns null when there's no
+ * Fetch the signed-in candidate's resume data. Returns null when there's no
  * authenticated candidate row. Child tables are RLS-scoped to the candidate
  * (same as the profile page), so no explicit candidate_id filter is needed.
  */

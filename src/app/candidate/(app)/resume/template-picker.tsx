@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * #87c — template picker for the résumé view. Selecting a template persists it
+ * #87c — template picker for the resume view. Selecting a template persists it
  * (setResumeTemplate) and refreshes so the server-rendered preview + the PDF
- * pick it up. Pure presentation swap — never touches résumé content.
+ * pick it up. Pure presentation swap — never touches resume content.
  */
 
 import { useState, useTransition } from "react";

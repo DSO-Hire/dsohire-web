@@ -22,7 +22,7 @@ import { ShieldCheck, Sparkles, Save, X, Plus, Trash2 } from "lucide-react";
 import type { ParsedResume } from "@/lib/resume/parse";
 import { ConfidencePill } from "./import-wizard";
 // #93 (Day 28) — canonical pickers for roles/specialties/languages so the
-// résumé-review step can't seed free-text typos that exclude the candidate
+// resume-review step can't seed free-text typos that exclude the candidate
 // from employers' structured search.
 import { ChipArrayInput } from "@/app/candidate/(app)/profile/edit-sheet";
 import {

@@ -71,7 +71,7 @@ export async function saveAssessment(answers: Answers): Promise<Result> {
     if (val !== null && val !== undefined) update[col] = val;
   };
 
-  // Part 1 — résumé-prefilled basics (existing columns).
+  // Part 1 — resume-prefilled basics (existing columns).
   set("desired_roles", strArr(answers.desired_roles));
   if (typeof answers.years_experience === "string") {
     const yrs = YEARS_BUCKET[answers.years_experience];

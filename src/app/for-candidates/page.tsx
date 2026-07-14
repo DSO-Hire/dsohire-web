@@ -176,7 +176,7 @@ function Hero({ ctaHref }: { ctaHref: string }) {
             Take the free PracticeFit assessment and browse real openings at
             multi-location dental groups — every job scored against how you
             actually like to work. You apply direct: no agency middleman, no
-            résumé reselling, and browsing stays private — your current
+            resume reselling, and browsing stays private — your current
             office never sees you looking.
           </p>
 
@@ -797,8 +797,8 @@ function HonestTake() {
 const CANDIDATE_PERKS = [
   {
     Icon: PenLine,
-    title: "Free résumé builder — six ATS-safe templates",
-    body: "Build a clean, professional dental résumé from your profile in minutes — six recruiter-tested templates, real PDF export, and it auto-attaches when you apply. Use it anywhere, even off-platform. Completely free.",
+    title: "Free resume builder — six ATS-safe templates",
+    body: "Build a clean, professional dental resume from your profile in minutes — six recruiter-tested templates, real PDF export, and it auto-attaches when you apply. Use it anywhere, even off-platform. Completely free.",
   },
   {
     Icon: EyeOff,

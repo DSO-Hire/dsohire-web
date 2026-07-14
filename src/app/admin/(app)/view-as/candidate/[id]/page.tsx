@@ -79,7 +79,7 @@ export default async function ViewAsCandidate({
           <Row k="Location" v={m.location ?? "—"} />
           <Row k="Searchable" v={m.isSearchable ? "Yes" : "No"} />
           <Row k="Anonymous mode" v={m.anonymousMode ? "On" : "Off"} />
-          <Row k="Résumé on file" v={m.resumeOnFile ? "Yes" : "No"} />
+          <Row k="Resume on file" v={m.resumeOnFile ? "Yes" : "No"} />
           <Row k="Primary track" v={m.primaryFit ?? "—"} />
           <Row k="PracticeFit" v={m.practiceFitDone ? "Complete" : "Not done"} />
           <Row k="DSOFit" v={m.dsoFitDone ? "Complete" : "Not done"} />
@@ -117,7 +117,7 @@ export default async function ViewAsCandidate({
 
       <p className="mt-8 text-2xs text-slate-meta leading-relaxed">
         Read-only mirror via service-role — the candidate&apos;s own view. EEO is
-        never shown. Covers profile, readiness (résumé + fit completion), and
+        never shown. Covers profile, readiness (resume + fit completion), and
         applications; full fit-score detail is a further follow-on.
       </p>
     </>

@@ -1,14 +1,14 @@
 /**
  * /candidate/assessment — the PracticeFit v3 assessment (Phase A).
  *
- * The ~5-min, mostly tap-to-answer flow that captures the moat data no résumé
+ * The ~5-min, mostly tap-to-answer flow that captures the moat data no resume
  * contains (work pace, autonomy, mentorship, clinical confidence, culture feel,
  * what-matters-most). Part 1 basics are PRE-FILLED from the candidate's profile
- * (which the résumé importer populates) and shown to confirm; Part 2 is always
+ * (which the resume importer populates) and shown to confirm; Part 2 is always
  * asked. Saving maps answers onto the candidate's signal columns + stores the
  * raw payload for re-scoring and application autofill.
  *
- * Graceful for everyone: new grads, career-changers, and no-résumé candidates
+ * Graceful for everyone: new grads, career-changers, and no-resume candidates
  * all have a first-class path — every experience question has a positive
  * "new / growing" answer that's excluded from the denominator, never penalized.
  */
@@ -40,7 +40,7 @@ export default async function CandidateAssessmentPage() {
   const { data: candidateRow } = await supabase
     .from("candidates")
     .select(
-      // Part 1 (résumé-prefilled basics) + Part 2 (v3 signal columns, so a
+      // Part 1 (resume-prefilled basics) + Part 2 (v3 signal columns, so a
       // re-take shows prior answers).
       "id, desired_roles, years_experience_dental, desired_specialty, pms_systems, temp_or_perm, min_salary, salary_unit, availability, work_pace, autonomy_pref, patient_facing_energy, mentorship_pref, procedures_confident, procedures_growth, practice_feel, ce_growth_importance, work_life_priority, career_trajectory, commute_max_minutes, comp_priority, comp_priorities, relocation_pref, assessment_note, pms_proficiency, team_size_pref, patient_population_pref, benefit_priorities, deal_breakers, assessment_completed_at, resume_url"
     )
@@ -90,7 +90,7 @@ export default async function CandidateAssessmentPage() {
   // and go straight back into the questions; first-timers see the landing.
   const completedBefore = Boolean(c.assessment_completed_at);
   // C4-1 (mobile sweep) — the assessment never read resume_url, so it always
-  // showed "upload your résumé" even for candidates who already had one on file
+  // showed "upload your resume" even for candidates who already had one on file
   // (e.g. uploaded during apply). Now the landing reflects what we have.
   const hasResume = Boolean(c.resume_url);
 

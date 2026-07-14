@@ -1538,7 +1538,7 @@ export function JobWizard({
     </div>
 
       {/* Lane 6 — the right pane IS the posting, updating per keystroke
-          (résumé-builder pattern). xl-only; the wizard stays the sole
+          (resume-builder pattern). xl-only; the wizard stays the sole
           column below that. Sticky rides the page scroll — keep this
           chain free of overflow wrappers (hard rule). */}
       <aside className="hidden xl:block sticky top-6 space-y-4">
@@ -3608,7 +3608,7 @@ function CandidateJobPreview({
       <p className="mt-6 border-t border-[var(--rule)] pt-4 text-xs text-slate-meta">
         {questionCount > 0
           ? `${questionCount} screening question${questionCount === 1 ? "" : "s"} on apply.`
-          : "Candidates apply with just résumé + cover letter."}
+          : "Candidates apply with just resume + cover letter."}
       </p>
     </div>
   );

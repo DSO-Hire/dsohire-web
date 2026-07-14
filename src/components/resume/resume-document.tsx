@@ -1,5 +1,5 @@
 /**
- * #87 — on-screen résumé render. Template-driven, section-ordered, with
+ * #87 — on-screen resume render. Template-driven, section-ordered, with
  * bullet lists and user custom sections.
  *
  * Styling comes entirely from the selected template's tokens
