@@ -35,7 +35,7 @@ export const TIER_PAGE_CONTENT: Record<PricingTier, TierPageContent> = {
     bestIf: [
       "You run 2–5 locations under one ownership",
       "You post a few roles at a time (up to 5 active listings)",
-      "1–3 people touch hiring (3 admin seats included)",
+      "1–3 people touch hiring (5 admin seats included)",
       "You want AI matching + a branded presence without enterprise overhead",
     ],
     considerHigherIf:
@@ -44,30 +44,30 @@ export const TIER_PAGE_CONTENT: Record<PricingTier, TierPageContent> = {
   growth: {
     headline: "The full hiring platform for groups in active expansion.",
     whoItsFor:
-      "Growth is the complete platform for dental groups and DSOs that are hiring continuously. It's our most popular tier because it adds the tools that matter once hiring becomes an ongoing operation: a cross-job application inbox, license-requirement and attestation tracking, funnel reporting, and the AI rejection-reason suggester — with room for up to 20 active listings and 10 admin seats, plus priority support. Everything in Solo is included.",
+      "Growth is the complete platform for dental groups and DSOs that are hiring continuously. It's our most popular tier because it adds the tools that matter once hiring becomes an ongoing operation: a cross-job application inbox, license-requirement and attestation tracking, funnel reporting, and the AI rejection-reason suggester — with room for up to 20 active listings and 15 admin seats, plus priority support. Everything in Solo is included.",
     bestIf: [
       "You're hiring continuously across multiple locations",
       "Up to 20 open roles at a time (20 active listings)",
-      "A real hiring team — up to 10 admin seats",
+      "A real hiring team — up to 15 admin seats",
       "You want pipeline reporting, license tracking, and priority support",
     ],
     considerLowerIf:
       "Just a couple of locations and a handful of roles? Solo covers the essentials for less.",
     considerHigherIf:
-      "Need unlimited listings, unlimited seats, or per-location analytics? Scale unlocks them.",
+      "Need up to 100 listings, 50 seats, or per-location analytics? Scale unlocks them.",
   },
   scale: {
     headline: "Unlimited hiring with per-location visibility.",
     whoItsFor:
-      "Scale is built for multi-location groups operating at, well, scale. It removes the caps — unlimited active listings and unlimited admin seats — and adds the visibility regional leaders need: per-location dashboards and cross-location benchmarking so you can compare practice performance side by side instead of in aggregate. It's the tier for groups where hiring is a standing operation across many sites. Everything in Growth is included.",
+      "Scale is built for multi-location groups operating at, well, scale. It raises the caps — up to 100 active listings and 50 admin seats — and adds the visibility regional leaders need: per-location dashboards and cross-location benchmarking so you can compare practice performance side by side instead of in aggregate. It's the tier for groups where hiring is a standing operation across many sites. Everything in Growth is included.",
     bestIf: [
       "Many locations, often spread across regions",
-      "Unlimited open roles and unlimited admin seats",
+      "Up to 100 open roles and 50 admin seats",
       "You need per-location dashboards + cross-location benchmarking",
       "Regional / area managers who each own hiring for a cluster",
     ],
     considerLowerIf:
-      "If 20 listings and 10 seats still fit, Growth gives you the full platform for less.",
+      "If 20 listings and 15 seats still fit, Growth gives you the full platform for less.",
     considerHigherIf:
       "Need account management, SSO/SAML, SOC 2, or BAA-readiness? Enterprise adds the governance + security layer.",
   },

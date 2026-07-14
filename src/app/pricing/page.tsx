@@ -320,7 +320,7 @@ function SoloStandoutCard({
             Start with Solo
           </Link>
           <p className="mt-4 text-[11.5px] text-slate-meta leading-relaxed">
-            Up to 5 active listings · 3 admin seats · unlimited hiring
+            Up to 5 active listings · 5 admin seats · unlimited hiring
             managers and applications.
           </p>
         </div>
@@ -377,7 +377,7 @@ function TierCard({
   const monthlyDescriptor: Record<PricingTier, string> = {
     solo: "For privately-owned 2–5 location groups",
     growth: "Most chosen for growing groups",
-    scale: "Unlimited listings + per-location analytics",
+    scale: "Up to 100 listings + per-location analytics",
     enterprise: "Account management included",
   };
   // Always carry the explicit period so the user's choice survives into

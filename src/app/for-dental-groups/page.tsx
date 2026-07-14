@@ -558,7 +558,7 @@ function AnswerCard() {
         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-7 gap-y-3.5 list-none lg:pt-2 self-center">
           {[
             "One subscription covers every location",
-            "Unlimited active listings on Growth and Enterprise",
+            "Unlimited hiring — no per-listing or placement fees",
             "Multi-location job posting in a single flow",
             "Team accounts for your recruiters and regional managers",
           ].map((item, i) => (
@@ -897,7 +897,7 @@ const SHOWCASE_TOP: ShowcaseFeature[] = [
         <span>for corporate hiring</span>
       </span>
     ),
-    body: "The back-office half of the engine. Finance, ops, marketing, HR, IT — 16 corporate functions scored on seniority, multi-site scale, dental-domain depth, and leadership scope. Pair it with a confidential search to quietly run a CFO or COO replacement only your inner circle can see.",
+    body: "The back-office half of the engine. Finance, ops, marketing, HR, IT — 17 corporate functions scored on seniority, multi-site scale, dental-domain depth, and leadership scope. Pair it with a confidential search to quietly run a CFO or COO replacement only your inner circle can see.",
     status: "now",
   },
   {
@@ -1173,7 +1173,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
       >
         {tier.id === "solo" && "For privately-owned 2–5 location groups"}
         {tier.id === "growth" && "Most chosen for growing groups"}
-        {tier.id === "scale" && "Unlimited listings + per-location analytics"}
+        {tier.id === "scale" && "Up to 100 listings + per-location analytics"}
         {tier.id === "enterprise" && "Account management included"}
       </div>
 
@@ -1265,7 +1265,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Can I add my team — recruiters, regional managers, office managers?",
-    a: "Yes. Solo includes 3 admin seats and Growth includes 10; Scale and Enterprise are unlimited. Hiring managers can be scoped to specific locations so they only see and act on what's relevant to them; admins see the whole group. Adding teammates doesn't change your billing — seat counts are bundled into the tier.",
+    a: "Yes. Solo includes 5 admin seats and Growth includes 15; Scale includes 50 and Enterprise is unlimited. Hiring managers can be scoped to specific locations so they only see and act on what's relevant to them; admins see the whole group. Adding teammates doesn't change your billing — seat counts are bundled into the tier.",
   },
   {
     q: "Do you take a placement fee?",

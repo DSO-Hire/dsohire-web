@@ -252,7 +252,7 @@ const CORPORATE_DIMS = [
   "Dental-domain depth",
   "Leadership scope (direct + indirect reports)",
   "Work mode (onsite, hybrid, remote)",
-  "Function fit across 16 corporate functions",
+  "Function fit across 17 corporate functions",
 ];
 
 function WhatItScores() {

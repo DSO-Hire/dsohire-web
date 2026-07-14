@@ -262,6 +262,7 @@ export function SiteFooter() {
             <FooterLink href="/security">Security &amp; Trust</FooterLink>
             <FooterLink href="/contact">Contact</FooterLink>
             <FooterLink href="/help">Help Center</FooterLink>
+            <FooterLink href="/faq">FAQ</FooterLink>
             <FooterLink href="/legal">All Policies</FooterLink>
           </FooterCol>
 

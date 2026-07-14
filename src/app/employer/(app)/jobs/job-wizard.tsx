@@ -1872,7 +1872,7 @@ function BasicsStep({
 
       {/* 5G.c — corporate function selector. Only surfaces when
           scope=corporate. Lets the recruiter slot the role into one of
-          12 functions powering the Corporate tab filter + landing pages. */}
+          17 functions powering the Corporate tab filter + landing pages. */}
       {scope === "corporate" && (
         <div>
           <label

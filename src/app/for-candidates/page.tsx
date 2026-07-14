@@ -686,7 +686,7 @@ function RoleBreakdown() {
           </p>
           <ul className="list-none grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2 mt-1 mb-4">
             {[
-              "12 functions — finance, HR, marketing, IT, operations, BD, and more",
+              "17 functions — finance, HR, marketing, IT, operations, BD, and more",
               "Mission-driven work supporting dozens of practices at once",
               "Clear advancement inside a scaling organization",
               "Competitive comp + full benefits, no clinical license required",

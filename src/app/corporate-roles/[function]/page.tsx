@@ -1,7 +1,7 @@
 /**
  * /corporate-roles/[function] — landing page per 5G.c (2026-05-13).
  *
- * SEO play. Each of the 12 corporate functions gets its own URL with
+ * SEO play. Each of the 17 corporate functions gets its own URL with
  * a hero, sub-role list, and a live feed of open corporate jobs at any
  * DSO matching that function. Static path generation means
  * the routes pre-render at build time and serve fast.

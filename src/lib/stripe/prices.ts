@@ -120,7 +120,7 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
     id: "scale",
     name: "Scale",
     tagline: "Multi-location groups, built for scale",
-    description: "Multi-location groups with unlimited listings and per-location analytics",
+    description: "Multi-location groups with up to 100 active listings and per-location analytics",
     monthlyPrice: 1499,
     monthlyPriceCents: 149900,
     annualPrice: 16188,
