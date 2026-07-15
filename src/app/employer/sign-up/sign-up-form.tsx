@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
-import { ArrowRight, ArrowLeft } from "lucide-react";
+import { useActionState, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, ArrowLeft, Lightbulb } from "lucide-react";
 import { LocationAutocompleteField } from "@/components/ui/location-autocomplete-input";
 import { PasswordInput } from "@/components/ui/password-input";
 import {
@@ -10,7 +11,11 @@ import {
   resendSignUpCode,
   type SignUpState,
 } from "./actions";
-import type { PricingTier, BillingPeriod } from "@/lib/stripe/prices";
+import {
+  PRICING_TIERS,
+  type PricingTier,
+  type BillingPeriod,
+} from "@/lib/stripe/prices";
 
 const initialForm: SignUpState = { ok: false, step: "form" };
 const initialVerify: SignUpState = { ok: false, step: "verify" };
@@ -27,6 +32,21 @@ export function SignUpForm({
    *  account creation and creates the DSO under the existing session. */
   authedEmail?: string | null;
 }) {
+  const router = useRouter();
+
+  // Tier nudge (2026-07-15): the form defaults to Solo when no ?tier= param
+  // is present, so a large group could buy the wrong tier without noticing.
+  // As soon as they type a practice count we SUGGEST the fitting tier — a
+  // one-click switch, never an auto-change (tier stays consumer-chosen).
+  const [practiceCount, setPracticeCount] = useState<number | null>(null);
+  const [nudgeDismissed, setNudgeDismissed] = useState(false);
+  const suggestedTier =
+    practiceCount != null && practiceCount >= 1
+      ? suggestTierForPracticeCount(practiceCount)
+      : null;
+  const showTierNudge =
+    suggestedTier !== null && suggestedTier !== initialTier && !nudgeDismissed;
+
   const [formState, submitForm, submittingForm] = useActionState(
     signUpEmployer,
     initialForm
@@ -218,7 +238,54 @@ export function SignUpForm({
         placeholder="12"
         required
         helper="Approximate is fine — used to suggest the right tier and validate later."
+        onChange={(e) => {
+          const n = parseInt(e.currentTarget.value, 10);
+          setPracticeCount(Number.isNaN(n) ? null : n);
+          setNudgeDismissed(false);
+        }}
       />
+
+      {showTierNudge && suggestedTier && (
+        <div
+          role="status"
+          className="border-l-4 border-heritage bg-cream p-4"
+        >
+          <p className="text-sm text-ink leading-relaxed mb-3 flex items-start gap-2">
+            <Lightbulb className="h-4 w-4 text-heritage flex-shrink-0 mt-0.5" aria-hidden />
+            <span>
+              For a group of {practiceCount} location
+              {practiceCount === 1 ? "" : "s"},{" "}
+              <span className="font-semibold">
+                {PRICING_TIERS[suggestedTier].name}
+              </span>{" "}
+              is usually the right fit —{" "}
+              {PRICING_TIERS[suggestedTier].features[0].toLowerCase()}. You&apos;re
+              currently signing up for {PRICING_TIERS[initialTier].name}.
+            </span>
+          </p>
+          <div className="flex items-center gap-4 flex-wrap pl-6">
+            <button
+              type="button"
+              onClick={() =>
+                router.replace(
+                  `/employer/sign-up?tier=${suggestedTier}&period=${initialPeriod}`,
+                  { scroll: false }
+                )
+              }
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase hover:bg-primary/90 transition-colors"
+            >
+              Switch to {PRICING_TIERS[suggestedTier].name}
+            </button>
+            <button
+              type="button"
+              onClick={() => setNudgeDismissed(true)}
+              className="text-xs font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
+            >
+              Keep {PRICING_TIERS[initialTier].name}
+            </button>
+          </div>
+        </div>
+      )}
 
       {formState.error && (
         <div role="alert" className="bg-danger-bg border-l-4 border-danger p-4">
@@ -263,6 +330,19 @@ export function SignUpForm({
   );
 }
 
+/**
+ * Suggest the fitting tier from a practice-location count. Boundaries come
+ * from the tier definitions themselves: Solo is pitched at 2–5 locations,
+ * Enterprise's tagline is "35+ practices", Growth/Scale split the middle
+ * along their openings/seats capacity. A nudge only — never auto-applied.
+ */
+function suggestTierForPracticeCount(count: number): PricingTier {
+  if (count <= 5) return "solo";
+  if (count <= 20) return "growth";
+  if (count < 35) return "scale";
+  return "enterprise";
+}
+
 function Field({
   label,
   name,
@@ -274,6 +354,7 @@ function Field({
   min,
   max,
   maxLength,
+  onChange,
 }: {
   label: string;
   name: string;
@@ -285,6 +366,7 @@ function Field({
   min?: number;
   max?: number;
   maxLength?: number;
+  onChange?: (e: { currentTarget: { value: string } }) => void;
 }) {
   return (
     <div>
@@ -315,6 +397,7 @@ function Field({
           min={min}
           max={max}
           maxLength={maxLength}
+          onChange={onChange}
           className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
         />
       )}
