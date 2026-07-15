@@ -55,6 +55,12 @@ const ROUTES: SitemapRoute[] = [
   { path: "/vs/job-boards", priority: 0.7, changeFrequency: "monthly" },
   { path: "/vs/staffing-agencies", priority: 0.7, changeFrequency: "monthly" },
 
+  // Pillar hiring guides (launch SEO spec, Phase 3).
+  { path: "/guides", priority: 0.6, changeFrequency: "monthly" },
+  { path: "/guides/dso-multi-location-hiring", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/guides/reduce-time-to-hire-dental-practice", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/guides/dental-culture-fit-screening", priority: 0.7, changeFrequency: "monthly" },
+
   // Role / audience landing pages — keep all of them indexable so each
   // role-specific search query has a tailored landing page to rank.
   { path: "/for-dentists", priority: 0.6, changeFrequency: "monthly" },
