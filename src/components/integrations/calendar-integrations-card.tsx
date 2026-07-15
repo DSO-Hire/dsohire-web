@@ -33,7 +33,10 @@ interface ConnectionStatus {
 
 interface Props {
   google: ConnectionStatus;
-  microsoft: ConnectionStatus;
+  /** null hides the Microsoft card entirely — used while the Azure app's
+   *  publisher verification is pending (MICROSOFT_CALENDAR_ENABLED flag),
+   *  so users never hit Microsoft's "unverified app" consent warning. */
+  microsoft: ConnectionStatus | null;
   returnTo: string;
   searchParams: {
     integration?: "connected" | "denied" | "error";
@@ -55,9 +58,12 @@ export function CalendarIntegrationsCard({
         </h2>
         <p className="text-sm text-slate-body leading-relaxed">
           Connect your work calendar so interviews scheduled in DSO Hire
-          auto-create events with a video link — Google Meet for
-          Google, Microsoft Teams for Outlook — and stay in sync with
-          your day. Disconnect anytime; existing events stay put.
+          auto-create events with a video link
+          {microsoft
+            ? " — Google Meet for Google, Microsoft Teams for Outlook —"
+            : " (Google Meet)"}{" "}
+          and stay in sync with your day. Disconnect anytime; existing
+          events stay put.
         </p>
       </header>
 
@@ -71,13 +77,15 @@ export function CalendarIntegrationsCard({
           status={google}
           returnTo={returnTo}
         />
-        <ProviderCard
-          provider="microsoft"
-          name="Outlook Calendar (Microsoft 365)"
-          valueProp="Auto-create interview events on your Outlook calendar with a Microsoft Teams link."
-          status={microsoft}
-          returnTo={returnTo}
-        />
+        {microsoft && (
+          <ProviderCard
+            provider="microsoft"
+            name="Outlook Calendar (Microsoft 365)"
+            valueProp="Auto-create interview events on your Outlook calendar with a Microsoft Teams link."
+            status={microsoft}
+            returnTo={returnTo}
+          />
+        )}
       </div>
     </div>
   );

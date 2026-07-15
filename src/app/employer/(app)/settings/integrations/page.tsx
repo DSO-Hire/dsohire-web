@@ -65,9 +65,15 @@ export default async function IntegrationsSettingsPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/employer/sign-in");
 
+  // Microsoft card hidden until the Azure app's publisher verification is
+  // approved (2026-07-15) — set MICROSOFT_CALENDAR_ENABLED=true in Vercel to
+  // bring it back; no code change needed. Avoids Microsoft's "unverified
+  // app" consent warning in front of customers.
+  const microsoftEnabled = process.env.MICROSOFT_CALENDAR_ENABLED === "true";
+
   const [google, microsoft] = await Promise.all([
     getConnection(user.id, "google"),
-    getConnection(user.id, "microsoft"),
+    microsoftEnabled ? getConnection(user.id, "microsoft") : Promise.resolve(null),
   ]);
 
   const params = await searchParams;
@@ -81,11 +87,15 @@ export default async function IntegrationsSettingsPage({
           connectedEmail: google?.connected_email,
           expiresAt: google?.expires_at,
         }}
-        microsoft={{
-          connected: !!microsoft,
-          connectedEmail: microsoft?.connected_email,
-          expiresAt: microsoft?.expires_at,
-        }}
+        microsoft={
+          microsoftEnabled
+            ? {
+                connected: !!microsoft,
+                connectedEmail: microsoft?.connected_email,
+                expiresAt: microsoft?.expires_at,
+              }
+            : null
+        }
         returnTo="/employer/settings/integrations"
         searchParams={status}
       />

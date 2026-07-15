@@ -55,9 +55,13 @@ export default async function CandidateIntegrationsSettingsPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/candidate/sign-in?next=/candidate/settings/integrations");
 
+  // Microsoft card hidden until Azure publisher verification is approved —
+  // mirrors the employer page; MICROSOFT_CALENDAR_ENABLED=true re-enables.
+  const microsoftEnabled = process.env.MICROSOFT_CALENDAR_ENABLED === "true";
+
   const [google, microsoft] = await Promise.all([
     getConnection(user.id, "google"),
-    getConnection(user.id, "microsoft"),
+    microsoftEnabled ? getConnection(user.id, "microsoft") : Promise.resolve(null),
   ]);
 
   const params = await searchParams;
@@ -71,11 +75,15 @@ export default async function CandidateIntegrationsSettingsPage({
           connectedEmail: google?.connected_email,
           expiresAt: google?.expires_at,
         }}
-        microsoft={{
-          connected: !!microsoft,
-          connectedEmail: microsoft?.connected_email,
-          expiresAt: microsoft?.expires_at,
-        }}
+        microsoft={
+          microsoftEnabled
+            ? {
+                connected: !!microsoft,
+                connectedEmail: microsoft?.connected_email,
+                expiresAt: microsoft?.expires_at,
+              }
+            : null
+        }
         returnTo="/candidate/settings/integrations"
         searchParams={status}
       />
