@@ -41,3 +41,26 @@ export function isPreLaunchMode(): boolean {
 export function isDistributionLive(): boolean {
   return !isPreLaunchMode() && process.env.DISTRIBUTION_LIVE === "true";
 }
+
+/**
+ * True on the demo deployment (demo.dsohire.com — separate Vercel project,
+ * separate Supabase project, seeded demo data). The demo site sets
+ * PREVIEW_GATE_DISABLED=true so prospects can browse without a cookie, but
+ * it must NEVER be indexed or unfurl as the real product: robots.ts and the
+ * layout noindex both stay locked when this flag is set.
+ *
+ * Set DEMO_SITE=true ONLY on the demo Vercel project. Never on prod.
+ */
+export function isDemoSite(): boolean {
+  return process.env.DEMO_SITE === "true";
+}
+
+/**
+ * True when search engines and social crawlers should be allowed in:
+ * the site has launched AND this is not the demo deployment. Single source
+ * of truth for robots.ts and the site-wide metadata robots block, so the
+ * two can never disagree.
+ */
+export function isIndexingAllowed(): boolean {
+  return !isPreLaunchMode() && !isDemoSite();
+}

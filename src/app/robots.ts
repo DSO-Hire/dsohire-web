@@ -1,28 +1,55 @@
 import type { MetadataRoute } from "next";
+import { isIndexingAllowed } from "@/lib/launch/gate";
 
 /**
- * robots.txt — PRE-LAUNCH LOCKDOWN (testing period).
+ * robots.txt — env-driven launch gate.
  *
- * The entire site currently serves seeded / demo / test data. We block ALL
- * crawlers from the whole site so no test content (especially fake JobPosting
- * data) gets discovered or indexed while we build. This is paired with the
- * site-wide `noindex` in src/app/layout.tsx as defense-in-depth.
+ * Locked (blanket Disallow, no sitemap) whenever indexing is not allowed:
+ *   - pre-launch (PREVIEW_GATE_DISABLED unset/false), or
+ *   - the demo deployment (DEMO_SITE=true on demo.dsohire.com — demo data
+ *     must never be crawled or indexed, permanently).
  *
- * ⚠️ AT LAUNCH: replace this with the real robots policy — allow crawling and
- *    re-add the sitemap reference, e.g.:
+ * Open (real policy + sitemap) once PREVIEW_GATE_DISABLED=true on prod.
+ * This mirrors the site-wide `robots` metadata in src/app/layout.tsx via
+ * the shared isIndexingAllowed() helper, so the two never disagree.
  *
- *      return {
- *        rules: [{ userAgent: "*", allow: "/", disallow: ["/employer/", "/candidate/", "/admin/", "/api/"] }],
- *        sitemap: "https://dsohire.com/sitemap.xml",
- *      };
+ * Launch day: set PREVIEW_GATE_DISABLED=true in Vercel and redeploy —
+ * no code change needed here.
  */
 export default function robots(): MetadataRoute.Robots {
+  if (!isIndexingAllowed()) {
+    return {
+      rules: [
+        {
+          userAgent: "*",
+          disallow: "/",
+        },
+      ],
+    };
+  }
+
+  // Open policy per docs/ClaudeCode_Launch_SEO_GoLive_Spec_2026-07-13.md:
+  // app/auth/tokenized surfaces stay out; /feeds/ deliberately NOT disallowed
+  // (Indeed's crawler needs it); /embed/ disallowed (iframe content, already
+  // noindexed inline). No AI-crawler blocks — GPTBot/ClaudeBot/PerplexityBot
+  // readability is the point of the AI-visibility effort.
   return {
     rules: [
       {
         userAgent: "*",
-        disallow: "/",
+        allow: "/",
+        disallow: [
+          "/employer/",
+          "/candidate/",
+          "/admin/",
+          "/api/",
+          "/o/",
+          "/r/",
+          "/auth/",
+          "/embed/",
+        ],
       },
     ],
+    sitemap: "https://dsohire.com/sitemap.xml",
   };
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { isIndexingAllowed } from "@/lib/launch/gate";
 
 // Geist (the Next.js template default) was removed 2026-07-06 — it was
 // dead weight: globals.css `@theme inline` already forces the font-sans
@@ -23,22 +24,24 @@ export const metadata: Metadata = {
     "Dental hiring, done direct. The hiring platform built for mid-market Dental Support Organizations — flat-fee, unlimited multi-location postings, no placement fees, no per-listing surcharges.",
   metadataBase: new URL("https://dsohire.com"),
   // ───────────────────────────────────────────────────────────────
-  // PRE-LAUNCH INDEXING LOCKDOWN (testing period).
-  // Every page on the site currently shows seeded / demo / test data
-  // (DSOs, jobs, candidates). We do NOT want Google indexing any of it —
-  // indexing fake job postings risks a Google for Jobs structured-data
-  // policy strike against the whole domain, and surfaces fake content to
-  // anyone who searches us. This site-wide noindex cascades to every page
-  // that doesn't set its own `robots`. Paired with a hard Disallow in
-  // robots.ts.
-  // ⚠️ REMOVE THIS `robots` block (and relax robots.ts) at launch, once
-  //    real data is in and we WANT to be indexed.
+  // ENV-DRIVEN INDEXING GATE — shared with robots.ts via isIndexingAllowed()
+  // so the two can never disagree. noindex applies whenever the site hasn't
+  // launched (PREVIEW_GATE_DISABLED unset/false) OR this is the demo
+  // deployment (DEMO_SITE=true on demo.dsohire.com, which serves seeded
+  // demo data and must never be indexed — fake JobPostings risk a Google
+  // for Jobs structured-data policy strike against the whole domain).
+  // Launch day on prod: set PREVIEW_GATE_DISABLED=true and redeploy — the
+  // noindex disappears automatically. No code edit needed.
   // ───────────────────────────────────────────────────────────────
-  robots: {
-    index: false,
-    follow: false,
-    googleBot: { index: false, follow: false },
-  },
+  ...(isIndexingAllowed()
+    ? {}
+    : {
+        robots: {
+          index: false,
+          follow: false,
+          googleBot: { index: false, follow: false },
+        },
+      }),
   openGraph: {
     type: "website",
     siteName: "DSO Hire",
