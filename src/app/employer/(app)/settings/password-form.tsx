@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { KeyRound } from "lucide-react";
+import { PasswordInput } from "@/components/ui/password-input";
 import { updatePassword, type PasswordState } from "./actions";
 
 const initial: PasswordState = { ok: false };
@@ -18,9 +19,8 @@ export function PasswordForm() {
         >
           New Password <span className="text-heritage">*</span>
         </label>
-        <input
+        <PasswordInput
           id="settings-password"
-          type="password"
           name="password"
           required
           minLength={8}
@@ -37,9 +37,8 @@ export function PasswordForm() {
         >
           Confirm New Password <span className="text-heritage">*</span>
         </label>
-        <input
+        <PasswordInput
           id="settings-confirm"
-          type="password"
           name="confirm"
           required
           minLength={8}

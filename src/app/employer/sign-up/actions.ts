@@ -9,6 +9,14 @@
  * Step 2 (verifySignUpEmployer): user enters the code → verifyOtp sets the
  *   session → redirect to /employer/onboarding.
  *
+ * Signed-in path (2026-07-15): a visitor with a live session but no DSO —
+ *   their DSO was deleted, or a signed-in candidate starting the employer
+ *   side — skips account creation entirely: the DSO is created under the
+ *   existing account and they go straight to checkout (email already
+ *   verified, so no OTP step). Previously this state was a hard loop:
+ *   createUser errored "already exists" while /employer/onboarding
+ *   redirected DSO-less users right back to this form.
+ *
  * Slug generation per Q5 decision: auto-derive from name, validate against
  * reserved words, append numeric suffix on collision.
  */
@@ -99,8 +107,15 @@ export async function signUpEmployer(
     return { ok: true, step: "verify", email, message: "Sign-up confirmed." };
   }
 
+  // Signed-in users take the existing-account path below — email + password
+  // fields aren't rendered for them, so only validate those when anonymous.
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user: sessionUser },
+  } = await supabase.auth.getUser();
+
   // Validation
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (!sessionUser && (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
     return { ok: false, step: "form", error: "Please enter a valid email address." };
   }
   if (!firstName || !lastName) {
@@ -128,7 +143,7 @@ export async function signUpEmployer(
       error: "Please enter your number of practice locations.",
     };
   }
-  if (password && password.length < 8) {
+  if (!sessionUser && password && password.length < 8) {
     return {
       ok: false,
       step: "form",
@@ -150,6 +165,86 @@ export async function signUpEmployer(
 
   const admin = createSupabaseServiceRoleClient();
   const slug = await resolveAvailableSlug(admin, baseSlug);
+
+  // ── Signed-in path: create the DSO under the existing account ──
+  if (sessionUser) {
+    // One DSO per account — if they already belong to one, this form isn't
+    // the place to add another.
+    const { data: existingMembership } = await admin
+      .from("dso_users")
+      .select("id")
+      .eq("auth_user_id", sessionUser.id)
+      .maybeSingle();
+    if (existingMembership) {
+      return {
+        ok: false,
+        step: "form",
+        error:
+          "Your account already belongs to a DSO — head to your dashboard instead.",
+      };
+    }
+
+    const acqAuthed = await getAcquisition();
+    const { data: authedDso, error: authedDsoError } = await admin
+      .from("dsos")
+      .insert({
+        name: dsoName,
+        slug,
+        headquarters_city: headquartersCity || null,
+        headquarters_state: headquartersState,
+        practice_count: practiceCount,
+        status: "pending",
+        acquisition_channel: acqAuthed.channel,
+        acquisition_source: acqAuthed.source,
+      })
+      .select("id")
+      .single();
+    if (authedDsoError || !authedDso) {
+      return {
+        ok: false,
+        step: "form",
+        error: `Failed to create your DSO record. Please try again or contact ${SUPPORT_EMAIL}.`,
+      };
+    }
+
+    const { error: authedLinkError } = await admin.from("dso_users").insert({
+      auth_user_id: sessionUser.id,
+      dso_id: authedDso.id,
+      role: "owner",
+      first_name: firstName,
+      last_name: lastName,
+    });
+    if (authedLinkError) {
+      await admin.from("dsos").delete().eq("id", authedDso.id);
+      return {
+        ok: false,
+        step: "form",
+        error: `Failed to link your account to the DSO. Please try again or contact ${SUPPORT_EMAIL}.`,
+      };
+    }
+
+    after(() =>
+      recordGoal("signup_employer", { channel: acqAuthed.channel, tier })
+    );
+
+    await admin.auth.admin.updateUserById(sessionUser.id, {
+      user_metadata: {
+        ...sessionUser.user_metadata,
+        full_name: sessionUser.user_metadata?.full_name || fullName,
+        role_during_signup: "employer",
+        requested_tier: tier,
+        requested_billing_period: billingPeriod,
+        requested_tier_price_cents:
+          billingPeriod === "annual"
+            ? PRICING_TIERS[tier].annualPriceCents
+            : PRICING_TIERS[tier].monthlyPriceCents,
+      },
+    });
+
+    // Email is already verified on an existing account — skip the OTP step
+    // and send them straight to checkout (sign-up step 3).
+    redirect(`/employer/checkout?tier=${tier}&period=${billingPeriod}`);
+  }
 
   const { data: createdUser, error: createUserError } =
     await admin.auth.admin.createUser({
@@ -244,7 +339,6 @@ export async function signUpEmployer(
   });
 
   // Send the 6-digit verification code (no emailRedirectTo = OTP-only).
-  const supabase = await createSupabaseServerClient();
   const { error: otpError } = await supabase.auth.signInWithOtp({
     email,
     options: {

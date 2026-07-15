@@ -9,6 +9,7 @@ import {
   type CandidateSignUpState,
 } from "./actions";
 import { LinkedInOAuthButton } from "@/components/auth/linkedin-oauth-button";
+import { PasswordInput } from "@/components/ui/password-input";
 import { SALUTATIONS } from "@/lib/candidate/name";
 
 const initialForm: CandidateSignUpState = { ok: false, step: "form" };
@@ -236,15 +237,26 @@ function Field({
       >
         {label} {required && <span className="text-heritage">*</span>}
       </label>
-      <input
-        id={`csignup-${name}`}
-        type={type}
-        name={name}
-        required={required}
-        autoComplete={autoComplete}
-        placeholder={placeholder}
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
-      />
+      {type === "password" ? (
+        <PasswordInput
+          id={`csignup-${name}`}
+          name={name}
+          required={required}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+        />
+      ) : (
+        <input
+          id={`csignup-${name}`}
+          type={type}
+          name={name}
+          required={required}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+        />
+      )}
       {helper && (
         <p className="mt-1.5 text-xs text-slate-meta leading-relaxed">
           {helper}

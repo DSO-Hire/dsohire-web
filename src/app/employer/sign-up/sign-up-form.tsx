@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { LocationAutocompleteField } from "@/components/ui/location-autocomplete-input";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   signUpEmployer,
   verifySignUpEmployer,
@@ -18,9 +19,13 @@ const initialResend: SignUpState = { ok: false, step: "verify" };
 export function SignUpForm({
   initialTier,
   initialPeriod,
+  authedEmail,
 }: {
   initialTier: PricingTier;
   initialPeriod: BillingPeriod;
+  /** Set when the visitor is signed in without a DSO — the form then skips
+   *  account creation and creates the DSO under the existing session. */
+  authedEmail?: string | null;
 }) {
   const [formState, submitForm, submittingForm] = useActionState(
     signUpEmployer,
@@ -147,22 +152,40 @@ export function SignUpForm({
           required
         />
       </div>
-      <Field
-        label="Work email"
-        name="email"
-        type="email"
-        autoComplete="email"
-        placeholder="you@yourdso.com"
-        required
-      />
-      <Field
-        label="Password (optional)"
-        name="password"
-        type="password"
-        autoComplete="new-password"
-        placeholder="At least 8 characters"
-        helper="Set a password if you'd like to sign in without an emailed code each time. You can set or change this anytime in Settings."
-      />
+      {authedEmail ? (
+        <div className="border-l-4 border-heritage bg-cream p-4">
+          <p className="text-sm text-ink leading-relaxed">
+            You&apos;re signed in as{" "}
+            <span className="font-semibold">{authedEmail}</span> — this DSO
+            will be created under that account.{" "}
+            <a
+              href="/employer/sign-out"
+              className="text-heritage underline underline-offset-2 hover:text-heritage-deep"
+            >
+              Use a different email
+            </a>
+          </p>
+        </div>
+      ) : (
+        <>
+          <Field
+            label="Work email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@yourdso.com"
+            required
+          />
+          <Field
+            label="Password (optional)"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            placeholder="At least 8 characters"
+            helper="Set a password if you'd like to sign in without an emailed code each time. You can set or change this anytime in Settings."
+          />
+        </>
+      )}
 
       <div className="pt-2 border-t border-[var(--rule)]" />
 
@@ -208,7 +231,13 @@ export function SignUpForm({
         disabled={submittingForm}
         className="inline-flex items-center justify-center gap-2.5 w-full px-9 py-4 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        {submittingForm ? "Creating Account…" : "Create Account & Send Code"}
+        {submittingForm
+          ? authedEmail
+            ? "Creating DSO…"
+            : "Creating Account…"
+          : authedEmail
+            ? "Create DSO & Continue"
+            : "Create Account & Send Code"}
         {!submittingForm && <ArrowRight className="h-4 w-4" />}
       </button>
 
@@ -265,18 +294,30 @@ function Field({
       >
         {label} {required && <span className="text-heritage">*</span>}
       </label>
-      <input
-        id={`signup-${name}`}
-        type={type}
-        name={name}
-        required={required}
-        autoComplete={autoComplete}
-        placeholder={placeholder}
-        min={min}
-        max={max}
-        maxLength={maxLength}
-        className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
-      />
+      {type === "password" ? (
+        <PasswordInput
+          id={`signup-${name}`}
+          name={name}
+          required={required}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          maxLength={maxLength}
+          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+        />
+      ) : (
+        <input
+          id={`signup-${name}`}
+          type={type}
+          name={name}
+          required={required}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          min={min}
+          max={max}
+          maxLength={maxLength}
+          className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+        />
+      )}
       {helper && (
         <p className="mt-1.5 text-xs text-slate-meta leading-relaxed">
           {helper}

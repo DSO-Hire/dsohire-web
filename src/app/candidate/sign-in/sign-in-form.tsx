@@ -2,6 +2,7 @@
 
 import { useState, useActionState } from "react";
 import { Mail, ArrowLeft, KeyRound } from "lucide-react";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   signInCandidate,
   verifySignInCandidate,
@@ -208,9 +209,8 @@ export function CandidateSignInForm({ next }: { next?: string }) {
         >
           Password <span className="text-heritage">*</span>
         </label>
-        <input
+        <PasswordInput
           id="candidate-password"
-          type="password"
           name="password"
           required
           autoComplete="current-password"

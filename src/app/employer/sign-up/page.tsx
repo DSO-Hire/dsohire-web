@@ -12,6 +12,8 @@
  */
 
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { SignUpForm } from "./sign-up-form";
 import { BillingPeriodToggle } from "@/app/pricing/billing-period-toggle";
@@ -35,6 +37,26 @@ interface PageProps {
 
 export default async function SignUpPage({ searchParams }: PageProps) {
   const { tier: tierParam, period: periodParam } = await searchParams;
+
+  // Signed-in visitors (2026-07-15): with a DSO → they don't belong on the
+  // sign-up form, send them home. Without one (deleted DSO, or a candidate
+  // starting the employer side) → render the form in existing-account mode so
+  // the DSO is created under their session instead of erroring "account
+  // already exists" and looping via /employer/onboarding.
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  let authedEmail: string | null = null;
+  if (user) {
+    const { data: membership } = await supabase
+      .from("dso_users")
+      .select("dso_id")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+    if (membership) redirect("/employer/dashboard");
+    authedEmail = user.email ?? null;
+  }
   const requestedTier = isPricingTier(tierParam) ? tierParam : "solo";
   const period: BillingPeriod = isBillingPeriod(periodParam)
     ? periodParam
@@ -63,7 +85,11 @@ export default async function SignUpPage({ searchParams }: PageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-px bg-[var(--rule)] border border-[var(--rule)]">
           {/* Form */}
           <div className="bg-card p-8 sm:p-10">
-            <SignUpForm initialTier={requestedTier} initialPeriod={period} />
+            <SignUpForm
+              initialTier={requestedTier}
+              initialPeriod={period}
+              authedEmail={authedEmail}
+            />
           </div>
 
           {/* Tier sidebar */}
