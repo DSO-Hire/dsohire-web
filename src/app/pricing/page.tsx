@@ -1026,9 +1026,26 @@ const FAQ_ITEMS = [
   },
 ];
 
+// FAQPage JSON-LD built from the same FAQ_ITEMS array that renders on-page,
+// so the structured data can never drift from visible content (Google policy:
+// only mark up what renders). Same pattern as /faq and the salary pages.
+const FAQ_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQ_ITEMS.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+
 function FAQ() {
   return (
     <section className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 pt-24 pb-24">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSONLD) }}
+      />
       <div className="max-w-[860px] mx-auto">
         <Eyebrow className="text-heritage-deep mb-3.5">FAQ</Eyebrow>
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-12">

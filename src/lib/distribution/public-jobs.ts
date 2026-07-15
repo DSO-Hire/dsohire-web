@@ -66,6 +66,21 @@ export function jobPostingEmploymentType(raw: string): string {
   return EMPLOYMENT_TYPE_SCHEMA[raw] ?? "OTHER";
 }
 
+/**
+ * schema.org QuantitativeValue.unitText tokens Google accepts for baseSalary
+ * (HOUR / DAY / WEEK / MONTH / YEAR). Our compensation_period enum values
+ * ("hourly" | "daily" | "annual") are not valid tokens as-is.
+ */
+const SALARY_UNIT_TEXT: Record<string, string> = {
+  hourly: "HOUR",
+  daily: "DAY",
+  annual: "YEAR",
+};
+
+export function jobPostingSalaryUnitText(period: string): string {
+  return SALARY_UNIT_TEXT[period] ?? "YEAR";
+}
+
 export function indeedJobType(raw: string): string | null {
   return EMPLOYMENT_TYPE_INDEED[raw] ?? null;
 }
@@ -323,7 +338,7 @@ export function buildJobPostingJsonLd(job: PublicJob): Record<string, unknown> {
             "@type": "QuantitativeValue",
             minValue: job.comp.min,
             maxValue: job.comp.max ?? job.comp.min,
-            unitText: job.comp.period.toUpperCase(),
+            unitText: jobPostingSalaryUnitText(job.comp.period),
           },
         }
       : undefined,

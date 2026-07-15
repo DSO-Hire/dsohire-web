@@ -128,12 +128,24 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
     })),
   };
 
+  // BreadcrumbList mirrors the visible breadcrumb nav (role hub → state).
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Dental Salary Data", item: "https://dsohire.com/salary" },
+      { "@type": "ListItem", position: 2, name: `${role.searchTitle} salary`, item: `https://dsohire.com/salary/${role.slug}` },
+      { "@type": "ListItem", position: 3, name: state.name, item: `https://dsohire.com/salary/${p.role}/${p.state}` },
+    ],
+  };
+
   const otherRoles = SALARY_ROLES.filter((x) => x.slug !== role.slug);
   const otherStates = FEATURED_STATES.filter((n) => n !== state.name).slice(0, 8);
 
   return (
     <SiteShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
       {/* HERO */}
       <section className="pt-[140px] pb-12 px-6 sm:px-14">

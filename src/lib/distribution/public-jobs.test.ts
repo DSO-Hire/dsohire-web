@@ -200,6 +200,20 @@ test("comp is emitted when visible", () => {
   assert.deepEqual(job.comp, { min: 180000, max: 220000, period: "annual" });
 });
 
+test("baseSalary unitText uses Google-valid tokens, not raw enum values", () => {
+  const cases: Array<[string, string]> = [
+    ["annual", "YEAR"],
+    ["hourly", "HOUR"],
+    ["daily", "DAY"],
+  ];
+  for (const [period, expected] of cases) {
+    const ld = buildJobPostingJsonLd(
+      mapRowToPublicJob(row({ compensation_period: period as DistributionRpcRow["compensation_period"] })),
+    ) as { baseSalary: { value: { unitText: string } } };
+    assert.equal(ld.baseSalary.value.unitText, expected, period);
+  }
+});
+
 /* ── JSON-LD ── */
 
 test("JSON-LD has validThrough, identifier, directApply", () => {

@@ -42,6 +42,7 @@ import {
 import { Eyebrow } from "@/components/brand/eyebrow";
 import { Button } from "@/components/ui/button";
 import { SiteShell } from "@/components/marketing/site-shell";
+import { OrgJsonLd } from "@/components/seo/org-jsonld";
 import { BackOfficeShowcase } from "@/components/marketing/back-office/showcase";
 import { CountUp } from "@/components/marketing/motion";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
@@ -65,6 +66,7 @@ export default async function Home() {
   const live = await getHomeLiveSnapshot();
   return (
     <SiteShell>
+      <OrgJsonLd />
       <Hero live={live} />
       <LiveMarketBand live={live} />
       <BackOfficeShowcase />
