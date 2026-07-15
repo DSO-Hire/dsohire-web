@@ -32,8 +32,8 @@
  * Test-mode Price IDs were created in the "DSO Hire sandbox" on 2026-05-20 and
  * are populated below — Checkout resolves both monthly + annual. Stripe prices
  * are immutable, so a future amount change needs a brand-new Price object (not
- * an edit). Live IDs get added at soft-launch (set STRIPE_LIVE_MODE = "1" in
- * Vercel Production once the live-mode prices are populated).
+ * an edit). Live-mode Price IDs created + populated 2026-07-15 (go-live);
+ * they activate when STRIPE_LIVE_MODE = "1" is set in Vercel Production.
  */
 
 export type PricingTier = "solo" | "growth" | "scale" | "enterprise";
@@ -93,6 +93,8 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
     maxSeats: 5,
     stripePriceIdTest: "price_1TZCQh0uFxwSh1FnO9cRurPI",
     stripePriceIdTestAnnual: "price_1TZCRL0uFxwSh1FnqaMDm06C",
+    stripePriceIdLive: "price_1TtWL716EBfaEQpfMMQQlWps",
+    stripePriceIdLiveAnnual: "price_1TtWLn16EBfaEQpfKt8FcN2t",
   },
   growth: {
     id: "growth",
@@ -115,6 +117,8 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
     maxSeats: 15,
     stripePriceIdTest: "price_1TZCRe0uFxwSh1FnqKatGAUP",
     stripePriceIdTestAnnual: "price_1TZCS20uFxwSh1Fnt8Gsc0Y2",
+    stripePriceIdLive: "price_1TtWMH16EBfaEQpfiAqAIETp",
+    stripePriceIdLiveAnnual: "price_1TtWMY16EBfaEQpf8TC2Bry2",
   },
   scale: {
     id: "scale",
@@ -137,6 +141,8 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
     maxSeats: 50,
     stripePriceIdTest: "price_1TZCSO0uFxwSh1FnGSO3OoJR",
     stripePriceIdTestAnnual: "price_1TZCSj0uFxwSh1FnkuUbRajm",
+    stripePriceIdLive: "price_1TtWMv16EBfaEQpfnoHjfgwS",
+    stripePriceIdLiveAnnual: "price_1TtWNC16EBfaEQpfdCI5G9pm",
     badge: "Most popular",
   },
   enterprise: {
@@ -161,6 +167,8 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
     maxSeats: null,
     stripePriceIdTest: "price_1TZCT70uFxwSh1FnIQNZziqE",
     stripePriceIdTestAnnual: "price_1TZCTQ0uFxwSh1Fn3FCyRSvk",
+    stripePriceIdLive: "price_1TtWNg16EBfaEQpfWmBKdQu4",
+    stripePriceIdLiveAnnual: "price_1TtWNw16EBfaEQpfH5VKzsGt",
   },
 };
 
