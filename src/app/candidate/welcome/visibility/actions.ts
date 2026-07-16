@@ -27,8 +27,6 @@ import {
   type VisibilityChoice,
 } from "@/lib/candidate/visibility-choice";
 
-export type { VisibilityChoice };
-
 interface Result {
   ok: boolean;
   dest?: string;
