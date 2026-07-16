@@ -23,7 +23,7 @@ const ORG_WEBSITE_JSONLD = {
         width: 800,
         height: 284,
       },
-      // TODO(cam): add LinkedIn company page URL to sameAs once created
+      sameAs: ["https://www.linkedin.com/company/dsohire"],
     },
     {
       "@type": "WebSite",
