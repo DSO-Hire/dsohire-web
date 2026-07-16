@@ -164,6 +164,30 @@ export function PipelineChapter({
             <div ref={dropRef}>
               {moved && <DemoKbCard card={SARAH} highlight />}
             </div>
+            {/* Automation toast — maps to the LIVE stage_changed →
+                email_candidate rule. In-flow directly under the landing slot,
+                attached to the card that triggered it: a floating overlay
+                landed ON the board at frame heights where no corner is free
+                (Cam's desktop review, launch eve). Space is reserved while
+                hidden, so the fire animation causes zero layout shift. */}
+            <div
+              role="status"
+              className={`mt-2 w-full bg-hero text-hero-foreground border-l-[3px] border-l-heritage-bright px-3.5 py-3 shadow-[0_16px_40px_rgba(0,0,0,0.35)] transition-all duration-500 ${
+                phase === "toast"
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-[14px] pointer-events-none"
+              }`}
+              style={{ transitionTimingFunction: "var(--ease-settle)" }}
+            >
+              <div className="flex items-center gap-1.5 text-2xs font-extrabold tracking-[1.4px] uppercase text-heritage-bright mb-1">
+                <span aria-hidden className={phase === "toast" ? "bo-spark inline-block" : ""}>
+                  ⚡
+                </span>
+                {AUTOMATION_TOAST.kicker}
+              </div>
+              <div className="text-xs font-bold leading-snug">{AUTOMATION_TOAST.title}</div>
+              <div className="text-2xs text-hero-foreground/70 mt-1">{AUTOMATION_TOAST.sub}</div>
+            </div>
           </InterviewColumn>
 
           {/* Offer */}
@@ -174,28 +198,6 @@ export function PipelineChapter({
           </Column>
         </div>
       </DndContext>
-
-      {/* Automation toast — maps to the LIVE stage_changed → email_candidate
-          rule. In-flow below the board on phones (an overlay covers cards at
-          2-col width — Cam's mobile review); floats bottom-right at sm+. */}
-      <div
-        role="status"
-        className={`mt-3 w-full sm:mt-0 sm:w-[290px] sm:max-w-[85%] sm:absolute sm:right-3 sm:bottom-2 bg-hero text-hero-foreground border-l-[3px] border-l-heritage-bright px-4 py-3 shadow-[0_16px_40px_rgba(0,0,0,0.35)] transition-all duration-500 z-10 ${
-          phase === "toast"
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 translate-y-[18px] pointer-events-none max-sm:hidden"
-        }`}
-        style={{ transitionTimingFunction: "var(--ease-settle)" }}
-      >
-        <div className="flex items-center gap-1.5 text-2xs font-extrabold tracking-[1.4px] uppercase text-heritage-bright mb-1">
-          <span aria-hidden className={phase === "toast" ? "bo-spark inline-block" : ""}>
-            ⚡
-          </span>
-          {AUTOMATION_TOAST.kicker}
-        </div>
-        <div className="text-xs font-bold leading-snug">{AUTOMATION_TOAST.title}</div>
-        <div className="text-2xs text-hero-foreground/70 mt-1">{AUTOMATION_TOAST.sub}</div>
-      </div>
     </div>
   );
 }
