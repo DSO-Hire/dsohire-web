@@ -17,8 +17,11 @@ const GUIDES_DIR = path.join(process.cwd(), "src", "content", "guides");
 
 const SITE_URL = "https://dsohire.com";
 
-/** The site went publicly live 2026-07-15; the guides shipped with launch. */
-export const GUIDES_DATE_PUBLISHED = "2026-07-15";
+/**
+ * The site went publicly live 2026-07-15 (evening CT); the guides shipped
+ * with launch. Full timestamp + timezone per Google's Article guidance.
+ */
+export const GUIDES_DATE_PUBLISHED = "2026-07-15T19:00:00-05:00";
 
 export interface GuideFaqItem {
   q: string;
@@ -121,6 +124,8 @@ export function buildGuideArticleJsonLd(guide: Guide): Record<string, unknown> {
     description: guide.metaDescription,
     url,
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    // Site-wide OG card (1200×630) — guides don't ship their own hero art.
+    image: [`${SITE_URL}/opengraph-image`],
     datePublished: GUIDES_DATE_PUBLISHED,
     author: {
       "@type": "Organization",
