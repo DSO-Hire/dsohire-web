@@ -51,7 +51,7 @@ export default async function AdminConversationsPage({ searchParams }: PageProps
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/employer/sign-in?next=/admin/support/conversations");
+  if (!user) redirect("/admin/sign-in?next=/admin/support/conversations");
   if (!user.email || !ADMIN_EMAILS.has(user.email.toLowerCase())) {
     notFound();
   }

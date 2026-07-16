@@ -56,7 +56,7 @@ export default async function CustomerSuccessDashboard() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/employer/sign-in?next=/admin/cs");
+  if (!user) redirect("/admin/sign-in?next=/admin/cs");
   if (!user.email || !ADMIN_EMAILS.has(user.email.toLowerCase())) {
     notFound();
   }

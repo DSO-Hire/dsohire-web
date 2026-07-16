@@ -31,7 +31,7 @@ export async function requireSuperadmin(nextPath = "/admin"): Promise<User> {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect(`/employer/sign-in?next=${encodeURIComponent(nextPath)}`);
+  if (!user) redirect(`/admin/sign-in?next=${encodeURIComponent(nextPath)}`);
   if (!isSuperadminEmail(user.email)) redirect("/");
 
   return user;

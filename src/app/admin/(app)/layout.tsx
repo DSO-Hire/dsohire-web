@@ -39,7 +39,7 @@ export default async function AdminAppLayout({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/employer/sign-in?next=/admin");
+    redirect("/admin/sign-in?next=/admin");
   }
 
   // Tier-1 gate — must be in admin_users to see anything in /admin/*.
