@@ -7,8 +7,13 @@
  */
 
 import type { Metadata } from "next";
-import Link from "next/link";
 import { requireSuperadmin } from "@/lib/admin/gate";
+import {
+  createSupabaseServerClient,
+  createSupabaseServiceRoleClient,
+} from "@/lib/supabase/server";
+import { getMfaState } from "@/lib/auth/mfa";
+import { MfaSection } from "@/app/employer/(app)/settings/account/mfa-section";
 import { SetPasswordForm } from "./set-password-form";
 
 export const metadata: Metadata = {
@@ -18,6 +23,17 @@ export const metadata: Metadata = {
 
 export default async function AdminAccountPage() {
   const user = await requireSuperadmin("/admin/account");
+
+  // Same wizard the employer settings page uses; admin accounts have no
+  // DSO membership, so the org-wide toggle (isOwner) stays off.
+  const supabase = await createSupabaseServerClient();
+  const mfaState = await getMfaState(supabase);
+  const admin = createSupabaseServiceRoleClient();
+  const { count } = await admin
+    .from("mfa_recovery_codes")
+    .select("id", { count: "exact", head: true })
+    .eq("auth_user_id", user.id)
+    .is("used_at", null);
 
   return (
     <div className="p-8 space-y-10">
@@ -41,18 +57,15 @@ export default async function AdminAccountPage() {
         <SetPasswordForm />
       </section>
 
-      <section className="space-y-3 pt-6 border-t border-[var(--rule)]">
-        <h2 className="text-base font-bold text-ink">Two-factor authentication</h2>
-        <p className="text-sm text-slate-body max-w-md leading-relaxed">
-          Strongly recommended for admin accounts. Enroll an authenticator app
-          and every sign-in will require a second code from your phone.
-        </p>
-        <Link
-          href="/auth/mfa/setup?next=/admin/account"
-          className="inline-flex text-xs font-semibold text-heritage hover:text-heritage-deep underline underline-offset-2"
-        >
-          Set up two-factor authentication →
-        </Link>
+      <section className="pt-6 border-t border-[var(--rule)] max-w-2xl">
+        <MfaSection
+          initialEnrolled={mfaState.isEnrolled}
+          remainingRecoveryCodes={count ?? 0}
+          isOwner={false}
+          isEnterprise={false}
+          initialRequireMfa={false}
+          initialFactorId={mfaState.verifiedFactorId}
+        />
       </section>
     </div>
   );
