@@ -36,11 +36,21 @@ export default async function DsoFitAssessmentPage() {
   // before database.types.ts is regenerated for the dsofit_candidate_signals
   // migration; we read the new columns off the Record cast below. (Types regen
   // is a tracked follow-up.)
-  const { data: candidateRow } = await supabase
+  const { data: candidateRow, error: candidateError } = await supabase
     .from("candidates")
     .select("*")
     .eq("auth_user_id", user.id)
     .maybeSingle();
+  // A query failure and "no candidate row" are different situations — a
+  // silent bounce to the dashboard on both made the launch-day blank-screen
+  // report untraceable. Log the failure before redirecting so prod logs show
+  // why a candidate got bounced.
+  if (candidateError) {
+    console.error(
+      "[dsofit-assessment] candidates query failed, redirecting to dashboard:",
+      candidateError.message
+    );
+  }
   if (!candidateRow) redirect("/candidate/dashboard");
 
   const c = candidateRow as Record<string, unknown>;
