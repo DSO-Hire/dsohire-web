@@ -35,10 +35,6 @@ import {
 import { dispatchInboxSystemMessage } from "@/lib/inbox/dispatch-system";
 import type { SelfReportedStatus } from "./row-actions-data";
 
-// Re-export the type so existing import paths don't break for files
-// pulling SelfReportedStatus from row-actions.ts directly.
-export type { SelfReportedStatus } from "./row-actions-data";
-
 type Result =
   | { ok: true }
   | { ok: false; error: string };
