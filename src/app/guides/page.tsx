@@ -42,7 +42,7 @@ export default function GuidesIndexPage() {
             <em className="not-italic text-heritage-light">hire.</em>
           </h1>
           <p className="text-lg sm:text-xl text-slate-body leading-relaxed max-w-[620px] mb-14">
-            Practical, no-fluff guides to the hardest parts of dental hiring —
+            Practical, no-fluff guides to the hardest parts of dental hiring,
             written for the people doing the hiring, not for the algorithm.
           </p>
 
