@@ -10,7 +10,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Gauge, Search, Building2, BarChart3, MessageSquare, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Gauge, Search, Building2, BarChart3, MessageSquare, ShieldCheck, Users } from "lucide-react";
 import { ANALYTICS_PRODUCT_NAME } from "@/lib/analytics/product";
 
 interface NavItem {
@@ -28,6 +28,7 @@ const NAV: NavItem[] = [
   { label: "Command", href: "/admin", match: "/admin", exact: true, Icon: LayoutDashboard },
   { label: "Liquidity", href: "/admin/liquidity", match: "/admin/liquidity", Icon: Gauge },
   { label: "Search", href: "/admin/search", match: "/admin/search", Icon: Search },
+  { label: "Accounts", href: "/admin/accounts", match: "/admin/accounts", Icon: Users },
   { label: "DSOs", href: "/admin/dsos", match: "/admin/dsos", Icon: Building2 },
   {
     label: ANALYTICS_PRODUCT_NAME,
