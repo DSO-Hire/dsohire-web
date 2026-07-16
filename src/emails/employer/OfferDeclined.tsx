@@ -33,7 +33,7 @@ export function OfferDeclined({
   reason,
   detailUrl,
 }: OfferDeclinedProps) {
-  const greeting = recipientFirstName ? `Hi ${recipientFirstName} —` : "Hi —";
+  const greeting = recipientFirstName ? `Hi ${recipientFirstName},` : "Hi,";
   return (
     <Layout
       previewText={`${candidateName} declined the offer for ${jobTitle}`}

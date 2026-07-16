@@ -48,7 +48,7 @@ export function ProspectInterest({
 
       <Text style={smallParagraph}>
         You stay anonymous until you choose to reply or apply. You can reply,
-        mute, or block this employer right from the conversation — they never see
+        mute, or block this employer right from the conversation; they never see
         your email address.
       </Text>
     </Layout>

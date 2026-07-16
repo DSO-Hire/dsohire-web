@@ -19,7 +19,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Dental Groups & DSOs on DSO Hire",
   description:
-    "Browse the dental groups hiring through DSO Hire — multi-location practices and DSOs operating across the U.S.",
+    "Browse the dental groups hiring through DSO Hire: multi-location practices and DSOs operating across the U.S.",
 };
 
 const COMPANIES_SORT_OPTIONS = [
@@ -918,7 +918,7 @@ function EmptyState() {
         No dental groups listed yet.
       </h2>
       <p className="text-sm text-slate-body leading-relaxed max-w-[440px] mx-auto">
-        DSO Hire is in early launch — dental groups are onboarding through
+        DSO Hire is in early launch, and dental groups are onboarding through
         summer 2026. Check back soon, or{" "}
         <Link
           href="/jobs"

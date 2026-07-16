@@ -32,7 +32,7 @@ export function ApplicationReceived({
   return (
     <Layout previewText={`Your application for ${jobTitle} at ${dsoName} was received`}>
       <Text style={eyebrow}>Application received</Text>
-      <Heading style={heading}>Hi {candidateName} —</Heading>
+      <Heading style={heading}>Hi {candidateName},</Heading>
       <Text style={paragraph}>
         Your application for <strong style={strong}>{jobTitle}</strong> at{" "}
         <strong style={strong}>{dsoName}</strong>{" "}was successfully submitted.

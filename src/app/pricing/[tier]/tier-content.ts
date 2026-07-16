@@ -31,7 +31,7 @@ export const TIER_PAGE_CONTENT: Record<PricingTier, TierPageContent> = {
   solo: {
     headline: "The essentials for privately-owned groups of 2–5 locations.",
     whoItsFor:
-      "Solo is for privately-owned dental groups running a handful of locations — typically two to five practices — that have outgrown posting jobs one office at a time but don't yet need a full enterprise hiring stack. You get the core platform: multi-location posting in a single flow, Practice Fit + AI candidate matching, the dental-context AI job-description generator, and a branded company page with map view — without paying for seats and reporting depth you won't use yet.",
+      "Solo is for privately-owned dental groups running a handful of locations (typically two to five practices) that have outgrown posting jobs one office at a time but don't yet need a full enterprise hiring stack. You get the core platform: multi-location posting in a single flow, Practice Fit + AI candidate matching, the dental-context AI job-description generator, and a branded company page with map view, without paying for seats and reporting depth you won't use yet.",
     bestIf: [
       "You run 2–5 locations under one ownership",
       "You post a few roles at a time (up to 5 active listings)",
@@ -44,11 +44,11 @@ export const TIER_PAGE_CONTENT: Record<PricingTier, TierPageContent> = {
   growth: {
     headline: "The full hiring platform for groups in active expansion.",
     whoItsFor:
-      "Growth is the complete platform for dental groups and DSOs that are hiring continuously. It's our most popular tier because it adds the tools that matter once hiring becomes an ongoing operation: a cross-job application inbox, license-requirement and attestation tracking, funnel reporting, and the AI rejection-reason suggester — with room for up to 20 active listings and 15 admin seats, plus priority support. Everything in Solo is included.",
+      "Growth is the complete platform for dental groups and DSOs that are hiring continuously. It's our most popular tier because it adds the tools that matter once hiring becomes an ongoing operation: a cross-job application inbox, license-requirement and attestation tracking, funnel reporting, and the AI rejection-reason suggester, with room for up to 20 active listings and 15 admin seats, plus priority support. Everything in Solo is included.",
     bestIf: [
       "You're hiring continuously across multiple locations",
       "Up to 20 open roles at a time (20 active listings)",
-      "A real hiring team — up to 15 admin seats",
+      "A real hiring team: up to 15 admin seats",
       "You want pipeline reporting, license tracking, and priority support",
     ],
     considerLowerIf:
@@ -59,7 +59,7 @@ export const TIER_PAGE_CONTENT: Record<PricingTier, TierPageContent> = {
   scale: {
     headline: "Unlimited hiring with per-location visibility.",
     whoItsFor:
-      "Scale is built for multi-location groups operating at, well, scale. It raises the caps — up to 100 active listings and 50 admin seats — and adds the visibility regional leaders need: per-location dashboards and cross-location benchmarking so you can compare practice performance side by side instead of in aggregate. It's the tier for groups where hiring is a standing operation across many sites. Everything in Growth is included.",
+      "Scale is built for multi-location groups operating at, well, scale. It raises the caps (up to 100 active listings and 50 admin seats) and adds the visibility regional leaders need: per-location dashboards and cross-location benchmarking so you can compare practice performance side by side instead of in aggregate. It's the tier for groups where hiring is a standing operation across many sites. Everything in Growth is included.",
     bestIf: [
       "Many locations, often spread across regions",
       "Up to 100 open roles and 50 admin seats",
@@ -74,7 +74,7 @@ export const TIER_PAGE_CONTENT: Record<PricingTier, TierPageContent> = {
   enterprise: {
     headline: "Governance, security, and account management for the largest groups.",
     whoItsFor:
-      "Enterprise is for the largest, most complex groups — typically 35+ practices — where hiring runs alongside real governance, security, and account-management requirements. On top of everything in Scale, it layers an audit log with indefinite retention, a dedicated customer success manager with an SLA, SSO / SAML and SOC 2, and BAA-readiness for HIPAA workflows. Some of these capabilities are on the H2 2026 roadmap; your CSM maps the rollout to your timeline.",
+      "Enterprise is for the largest, most complex groups (typically 35+ practices) where hiring runs alongside real governance, security, and account-management requirements. On top of everything in Scale, it layers an audit log with indefinite retention, a dedicated customer success manager with an SLA, SSO / SAML and SOC 2, and BAA-readiness for HIPAA workflows. Some of these capabilities are on the H2 2026 roadmap; your CSM maps the rollout to your timeline.",
     bestIf: [
       "35+ practices and/or multi-region operations",
       "Procurement, security review, or compliance requirements in the buying process",

@@ -48,7 +48,7 @@ export function CommentMention({
       previewText={`${authorName} mentioned you on ${candidateName}`}
     >
       <Text style={eyebrow}>You were mentioned</Text>
-      <Heading style={heading}>Hi {recipientName} —</Heading>
+      <Heading style={heading}>Hi {recipientName},</Heading>
       <Text style={paragraph}>
         <strong style={strong}>{authorName}</strong>{" "}mentioned you in a
         comment on{" "}
@@ -66,7 +66,7 @@ export function CommentMention({
 
       <Text style={smallParagraph}>
         Reply directly in the comment thread to keep the conversation in
-        one place. Internal comments are visible to your team only — never
+        one place. Internal comments are visible to your team only, never
         to candidates.
       </Text>
     </Layout>

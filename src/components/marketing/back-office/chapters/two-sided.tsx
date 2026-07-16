@@ -75,7 +75,7 @@ export function TwoSidedChapter({
         <div className="flex items-baseline gap-2 flex-wrap min-w-0">
           <PracticeFitWordmark tm className="text-base" />
           <span className="text-sm font-extrabold tracking-[-0.2px] min-w-0">
-            — one score, two sides of data
+            · one score, two sides of data
           </span>
         </div>
         <span

@@ -24,7 +24,7 @@ import { INFO_EMAIL, INFO_MAILTO } from "@/lib/contact";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Security & Trust — DSO Hire",
+  title: "Security & Trust · DSO Hire",
   description:
     "How DSO Hire protects candidate and practice data: row-level security on every table, encryption in transit and at rest, an EEO data firewall, candidate anonymity architecture, audit logging, per-teammate permissions, and an honest compliance roadmap.",
 };
@@ -33,27 +33,27 @@ const PILLARS = [
   {
     icon: Database,
     title: "Row-level security on every table",
-    body: "Access control is enforced in the database itself, not just the application. Every query a user runs is filtered by Postgres row-level security policies — a recruiter physically cannot read another organization's data, even if application code had a bug. Server-side permission checks sit on top as a second layer.",
+    body: "Access control is enforced in the database itself, not just the application. Every query a user runs is filtered by Postgres row-level security policies, so a recruiter physically cannot read another organization's data, even if application code had a bug. Server-side permission checks sit on top as a second layer.",
   },
   {
     icon: Lock,
     title: "Encrypted in transit and at rest",
-    body: "All traffic is TLS-encrypted. Data is encrypted at rest on our database infrastructure (Supabase / AWS). Payments are processed entirely by Stripe — card numbers never touch our servers.",
+    body: "All traffic is TLS-encrypted. Data is encrypted at rest on our database infrastructure (Supabase / AWS). Payments are processed entirely by Stripe; card numbers never touch our servers.",
   },
   {
     icon: EyeOff,
     title: "Candidate anonymity, architecturally",
-    body: "Anonymous mode masks a candidate's name and photo from every employer they haven't applied to — enforced by shared masking helpers on every discovery surface, not page-by-page goodwill. Private-practice affiliations are masked in every candidate-facing email and page by the same rule.",
+    body: "Anonymous mode masks a candidate's name and photo from every employer they haven't applied to, enforced by shared masking helpers on every discovery surface, not page-by-page goodwill. Private-practice affiliations are masked in every candidate-facing email and page by the same rule.",
   },
   {
     icon: ShieldCheck,
     title: "The EEO firewall",
-    body: "Voluntary EEO self-identification data is stored in a separate table with NO employer read path — not a hidden one, a nonexistent one. Hiring decision-makers cannot see individual demographic data on this platform, by construction. This mirrors EEOC/OFCCP guidance.",
+    body: "Voluntary EEO self-identification data is stored in a separate table with NO employer read path: not a hidden one, a nonexistent one. Hiring decision-makers cannot see individual demographic data on this platform, by construction. This mirrors EEOC/OFCCP guidance.",
   },
   {
     icon: UserCheck,
     title: "Per-teammate permissions + audit log",
-    body: "Owners and admins tune exactly what each teammate can see and do — down to hiding compensation fields — and can restrict sensitive searches to named people. Role changes, permission grants, offers, and exports are recorded in an audit log.",
+    body: "Owners and admins tune exactly what each teammate can see and do (down to hiding compensation fields) and can restrict sensitive searches to named people. Role changes, permission grants, offers, and exports are recorded in an audit log.",
   },
   {
     icon: KeyRound,
@@ -65,7 +65,7 @@ const PILLARS = [
 const ROADMAP = [
   {
     item: "SOC 2 Type II",
-    status: "Planned — engagement begins alongside our first Enterprise deployments.",
+    status: "Planned. Engagement begins alongside our first Enterprise deployments.",
   },
   {
     item: "Third-party penetration test",
@@ -99,7 +99,7 @@ export default function SecurityPage() {
         >
           A hiring platform holds compensation data, employment histories, and
           people quietly looking for their next role. Here&apos;s exactly how
-          DSO Hire is built to protect all three — and an honest account of
+          DSO Hire is built to protect all three, and an honest account of
           what&apos;s still on the roadmap.
         </p>
       </section>
@@ -143,7 +143,7 @@ export default function SecurityPage() {
               backups. Email is delivered through Resend with per-category
               one-click unsubscribe. Our AI features run on Anthropic&apos;s
               Claude models with spend circuit-breakers; AI features read
-              your data to answer questions — your data is not used to train
+              your data to answer questions; your data is not used to train
               models.
             </p>
           </div>
@@ -153,7 +153,7 @@ export default function SecurityPage() {
             </h2>
             <p className="text-sm text-slate-body leading-[1.7]">
               Owners can export their organization&apos;s complete data or
-              delete the organization outright from Settings — no support
+              delete the organization outright from Settings, no support
               ticket required. We don&apos;t sell candidate data, we
               don&apos;t broker resumes, and candidates can delete their
               accounts and data themselves.
@@ -172,7 +172,7 @@ export default function SecurityPage() {
           style={{ "--mk-delay": "70ms" } as React.CSSProperties}
           className="text-2xl sm:text-4xl font-extrabold tracking-[-1.2px] text-ink mb-8 max-w-[680px]"
         >
-          What we don&apos;t have yet — and when we will.
+          What we don&apos;t have yet, and when we will.
         </h2>
         <ul className="list-none border-t border-[var(--rule)] max-w-[820px]">
           {ROADMAP.map((r) => (

@@ -59,7 +59,7 @@ export function JobAlertMatch({
         {count} new job{count === 1 ? "" : "s"} match &ldquo;{searchName}&rdquo;
       </Heading>
       <Text style={paragraph}>
-        Hi {recipientFirstName} — new roles were just posted that match a
+        Hi {recipientFirstName}, new roles were just posted that match a
         search you saved on DSO Hire.
       </Text>
 

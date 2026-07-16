@@ -71,7 +71,7 @@ export default async function ComingSoonPage({ searchParams }: PageProps) {
 
         {wrongCode && (
           <p className="mt-3 text-xs text-danger">
-            That code didn&apos;t work — double-check it, or email us for access.
+            That code didn&apos;t work. Double-check it, or email us for access.
           </p>
         )}
 

@@ -143,8 +143,8 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
         emails. {category.description}
       </Body>
       <Body>
-        Transactional emails — application receipts, direct messages, and account
-        or billing notices — will still be sent, since they&apos;re required to
+        Transactional emails (application receipts, direct messages, and account
+        or billing notices) will still be sent, since they&apos;re required to
         use your account.
       </Body>
 

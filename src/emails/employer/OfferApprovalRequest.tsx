@@ -35,7 +35,7 @@ export function OfferApprovalRequest({
   return (
     <Layout previewText={`${requesterName} needs your sign-off on an offer`}>
       <Text style={eyebrow}>Offer approval needed</Text>
-      <Heading style={heading}>Hi {recipientName} —</Heading>
+      <Heading style={heading}>Hi {recipientName},</Heading>
       <Text style={paragraph}>
         <strong>{requesterName}</strong> prepared an offer to{" "}
         <strong>{candidateName}</strong> for <strong>{jobTitle}</strong> and it
@@ -57,7 +57,7 @@ export function OfferApprovalRequest({
       </Section>
 
       <Text style={smallParagraph}>
-        Nothing has been sent to the candidate yet — the offer waits here until
+        Nothing has been sent to the candidate yet; the offer waits here until
         you approve it. You can change who needs approval and when in{" "}
         <a href={`${brand.siteUrl}/employer/settings/offer-approvals`} style={inlineLink}>
           offer-approval settings

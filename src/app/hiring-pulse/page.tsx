@@ -29,9 +29,9 @@ import { PulseExplorer } from "./pulse-explorer";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Dental Hiring Pulse — live dental job market data",
+  title: "Dental Hiring Pulse · live dental job market data",
   description:
-    "What dental roles actually pay and where demand is hottest — live data from real openings on DSO Hire. Posted-pay percentiles by role, demand by state, updated continuously.",
+    "What dental roles actually pay and where demand is hottest: live data from real openings on DSO Hire. Posted-pay percentiles by role, demand by state, updated continuously.",
 };
 
 // Live data — recompute periodically, not per-request.
@@ -97,7 +97,7 @@ function Hero({ pulse }: { pulse: PulseSnapshot }) {
           style={{ "--mk-delay": "140ms" } as React.CSSProperties}
           className="text-lg text-slate-body leading-relaxed max-w-[620px] mx-auto"
         >
-          What dental roles actually pay and where demand is hottest —
+          What dental roles actually pay and where demand is hottest,
           computed from real, live openings. Not last year&rsquo;s survey.
         </p>
 
@@ -155,7 +155,7 @@ function PayExplorerSection({ pulse }: { pulse: PulseSnapshot }) {
           style={{ "--mk-delay": "120ms" } as React.CSSProperties}
           className="text-sm text-slate-body leading-[1.7] max-w-[600px] mb-9"
         >
-          Computed from pay ranges on live postings. Pick a role — only roles
+          Computed from pay ranges on live postings. Pick a role; only roles
           with enough data to be trustworthy appear at all.
         </p>
         <div data-reveal style={{ "--mk-delay": "180ms" } as React.CSSProperties}>
@@ -189,7 +189,7 @@ function DemandSection({ pulse }: { pulse: PulseSnapshot }) {
           style={{ "--mk-delay": "120ms" } as React.CSSProperties}
           className="text-sm text-slate-body leading-[1.7] max-w-[600px] mb-9"
         >
-          States light up as groups join — watching this grid fill in is the
+          States light up as groups join. Watching this grid fill in is the
           growth story, live.
         </p>
         <div
@@ -243,7 +243,7 @@ function WarmingUp() {
         </h2>
         <p className="text-sm text-slate-body leading-[1.75]">
           This page publishes live market statistics only when there&rsquo;s
-          enough inventory to be trustworthy — no projections, no padding.
+          enough inventory to be trustworthy: no projections, no padding.
           Check back as the marketplace grows, or browse what&rsquo;s live
           right now.
         </p>
@@ -288,7 +288,7 @@ function ClosingCta() {
           style={{ "--mk-delay": "60ms" } as React.CSSProperties}
           className="text-sm text-hero-foreground/60 leading-[1.7] max-w-[520px] mx-auto mb-9"
         >
-          Every number on this page is a real opening at a real dental group —
+          Every number on this page is a real opening at a real dental group,
           posted direct, no agencies. Join either side of it.
         </p>
         <div

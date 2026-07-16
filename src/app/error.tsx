@@ -59,8 +59,8 @@ export default function RootError({
           We dropped the handpiece.
         </h1>
         <p className="mx-auto mb-10 max-w-[560px] text-lg leading-relaxed text-slate-body">
-          An unexpected error interrupted this page — your data is safe.
-          Trying again usually clears it
+          An unexpected error interrupted this page. Your data is safe, and
+          trying again usually clears it
           {error.digest ? (
             <>
               ; if it doesn&apos;t, mention error{" "}

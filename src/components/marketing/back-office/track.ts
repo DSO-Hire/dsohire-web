@@ -95,7 +95,7 @@ export const COMP_FIELDS: ReadonlyArray<{ label: string; value: string }> = [
 ];
 
 export const COMP_GUARDRAIL =
-  "32% is above your Associate · Boise band (28–30%) — flagged for owner sign-off.";
+  "32% is above your Associate · Boise band (28–30%); flagged for owner sign-off.";
 
 export const COMP_ESTIMATE = { min: 185, max: 232 }; // $k
 
@@ -119,7 +119,7 @@ export const FIT_PAIRS: ReadonlyArray<{
   practice: string;
 }> = [
   { dim: "Work pace", candidate: "Steady & thorough", practice: "Steady" },
-  { dim: "Mentorship", candidate: "Wants a mentor", practice: "Offered — clinical director" },
+  { dim: "Mentorship", candidate: "Wants a mentor", practice: "Offered · clinical director" },
   { dim: "PMS fluency", candidate: "Dentrix · Eaglesoft", practice: "Dentrix" },
   { dim: "Matters most", candidate: "Compensation", practice: "$750/day + 32%" },
 ];
@@ -137,10 +137,10 @@ export const FIT_DIM_CHIPS: ReadonlyArray<{ label: string; weight: number }> = [
 export const FIT_DIM_MORE = "+ 16 more";
 
 export const FIT_HONESTY_NOTE =
-  "A dimension only counts when both sides answered — nothing is guessed.";
+  "A dimension only counts when both sides answered; nothing is guessed.";
 
 export const DSOFIT_NOTE =
-  "Corporate & multi-practice leadership roles run the same engine — weighted per function: seniority, org scale, leadership scope.";
+  "Corporate & multi-practice leadership roles run the same engine, weighted per function: seniority, org scale, leadership scope.";
 
 /* ── CH4 · Draft with AI ── */
 
@@ -148,9 +148,9 @@ export const DSOFIT_NOTE =
 export const DRAFT_BUTTON_LABEL = "Draft with AI";
 
 export const JD_LINES: ReadonlyArray<{ html: string }> = [
-  { html: "<h4>Associate Dentist — Boise, ID</h4>" },
+  { html: "<h4>Associate Dentist · Boise, ID</h4>" },
   {
-    html: "Join a growing, clinician-led practice as an Associate Dentist. We offer a <b>$750/day guarantee for your first 90 days</b>, then <b>32% of adjusted production</b> — with lab fees split 50/50.",
+    html: "Join a growing, clinician-led practice as an Associate Dentist. We offer a <b>$750/day guarantee for your first 90 days</b>, then <b>32% of adjusted production</b>, with lab fees split 50/50.",
   },
   {
     html: "You'll see a full schedule of general and restorative cases with modern equipment and a supportive hygiene team.",
@@ -207,7 +207,7 @@ export const CHAPTERS: ReadonlyArray<ChapterMeta> = [
     title: "Pipeline → automation",
     url: "app.dsohire.com/employer/pipeline",
     caption:
-      "Drag Dr. Chen to Interview — masking holds, counts tick, the automation fires.",
+      "Drag Dr. Chen to Interview: masking holds, counts tick, the automation fires.",
     durationMs: 8200,
   },
   {
@@ -215,7 +215,7 @@ export const CHAPTERS: ReadonlyArray<ChapterMeta> = [
     title: "A comp model that speaks dental",
     url: "app.dsohire.com/employer/jobs/new · comp",
     caption:
-      "Build a real dental package — guarantee, production %, lab fees — into a live annual range.",
+      "Build a real dental package (guarantee, production %, lab fees) into a live annual range.",
     durationMs: 6800,
   },
   {
@@ -223,7 +223,7 @@ export const CHAPTERS: ReadonlyArray<ChapterMeta> = [
     title: "One score, two sides of data",
     url: "app.dsohire.com/employer/candidates/chen",
     caption:
-      "Dr. Chen's assessment meets the practice's profile — dimensions only count when both sides answered. DSOFit runs corporate roles the same way.",
+      "Dr. Chen's assessment meets the practice's profile; dimensions only count when both sides answered. DSOFit runs corporate roles the same way.",
     durationMs: 7400,
   },
   {
@@ -239,7 +239,7 @@ export const CHAPTERS: ReadonlyArray<ChapterMeta> = [
     title: "Candidates who want to be found",
     url: "app.dsohire.com/employer/sourcing",
     caption:
-      "Double-blind outreach — the candidate stays anonymous until they choose to reveal.",
+      "Double-blind outreach: the candidate stays anonymous until they choose to reveal.",
     durationMs: 7200,
   },
 ];

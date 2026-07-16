@@ -94,10 +94,10 @@ function FounderLetter() {
           <div className="space-y-4.5 text-sm text-ink leading-[1.85]">
             <p>
               For the past decade I&rsquo;ve worked with dentists and dental
-              organizations across the country — through growth, through
+              organizations across the country, through growth, through
               transitions, through every kind of hiring crunch. I grew up
-              around this industry — around the people who practice it and the
-              people who run it — and I&rsquo;ve spent my career inside its
+              around this industry, around the people who practice it and the
+              people who run it, and I&rsquo;ve spent my career inside its
               business.
             </p>
             <p>
@@ -106,21 +106,21 @@ function FounderLetter() {
               <strong className="text-heritage-deep">
                 everything except the way it hires
               </strong>
-              . Operations, finance, clinical systems — transformed. Hiring is
+              . Operations, finance, clinical systems: transformed. Hiring is
               still 2005: post on a board, pray, or pay an agency{" "}
               <strong className="text-heritage-deep">$30,000 a head</strong>.
             </p>
             <p>
               DSO Hire is the missing piece, built properly.{" "}
               <strong className="text-heritage-deep">PracticeFit</strong>{" "}
-              matches on what actually predicts retention — pace, schedule,
-              mentorship, culture — and around it sits a real hiring operating
+              matches on what actually predicts retention (pace, schedule,
+              mentorship, culture), and around it sits a real hiring operating
               system: pipelines, automations, offers, analytics. One flat fee.
               No middlemen.
             </p>
             <p>
               The rules we run it by are listed below. They&rsquo;re not
-              marketing — they&rsquo;re the reasons this exists.
+              marketing; they&rsquo;re the reasons this exists.
             </p>
           </div>
 
@@ -140,7 +140,7 @@ function FounderLetter() {
           </div>
 
           <p className="mt-7 pt-4 border-t border-dashed border-[var(--rule-strong)] text-xs text-slate-body leading-[1.7]">
-            P.S. — If you&rsquo;re a candidate: it&rsquo;s free, forever, and
+            P.S. If you&rsquo;re a candidate: it&rsquo;s free, forever, and
             your current office can&rsquo;t see you here. That part is
             non-negotiable.
           </p>
@@ -192,12 +192,12 @@ const TIMELINE: Array<{ yr: string; title: string; body: string; now?: boolean }
   {
     yr: "The early years",
     title: "Grew up around it",
-    body: "Dentistry was the backdrop long before it was the work — the people, the practices, the rhythms of an industry most folks only see from the chair.",
+    body: "Dentistry was the backdrop long before it was the work: the people, the practices, the rhythms of an industry most folks only see from the chair.",
   },
   {
     yr: "≈2016",
     title: "Into the business of dentistry",
-    body: "The industry became the career — ten years on its business side, working with dentists and dental groups on the decisions that shape practices.",
+    body: "The industry became the career: ten years on its business side, working with dentists and dental groups on the decisions that shape practices.",
   },
   {
     yr: "The decade",
@@ -206,8 +206,8 @@ const TIMELINE: Array<{ yr: string; title: string; body: string; now?: boolean }
   },
   {
     yr: "2026",
-    title: "DSO Hire — the missing piece, built properly",
-    body: "PracticeFit scores what actually predicts whether someone stays: pace, schedule, mentorship, the way an office feels. Around it, the full hiring machine dental groups never had — flat-fee, dental-only, direct.",
+    title: "DSO Hire: the missing piece, built properly",
+    body: "PracticeFit scores what actually predicts whether someone stays: pace, schedule, mentorship, the way an office feels. Around it, the full hiring machine dental groups never had: flat-fee, dental-only, direct.",
   },
   {
     yr: "Today",
@@ -270,15 +270,15 @@ function Timeline() {
 const PROMISES = [
   {
     title: "Never charge placement fees",
-    body: "One flat monthly fee. Hire one person or thirty — the price doesn't move. We will never take a percentage of anyone's salary.",
+    body: "One flat monthly fee. Hire one person or thirty; the price doesn't move. We will never take a percentage of anyone's salary.",
   },
   {
     title: "Never out a candidate to their employer",
-    body: "Anonymous browsing is masked everywhere a candidate appears — every surface, every email, enforced in code. A job search shouldn't risk the job you have.",
+    body: "Anonymous browsing is masked everywhere a candidate appears: every surface, every email, enforced in code. A job search shouldn't risk the job you have.",
   },
   {
     title: "Never fake a match score",
-    body: "PracticeFit only scores what both sides actually said. No signal, no score — and a thin profile is never punished for being thin.",
+    body: "PracticeFit only scores what both sides actually said. No signal, no score, and a thin profile is never punished for being thin.",
   },
   {
     title: "Never let an algorithm reject a person",
@@ -286,11 +286,11 @@ const PROMISES = [
   },
   {
     title: "Never sell your data",
-    body: "Candidates and groups are the customers, not the product. Profiles, salaries, pipelines — none of it is for sale to anyone.",
+    body: "Candidates and groups are the customers, not the product. Profiles, salaries, pipelines: none of it is for sale to anyone.",
   },
   {
     title: "Never stop being dental-only",
-    body: "No warehouse jobs, no restaurant shifts. Dentistry is the whole product — that focus is why the matching works.",
+    body: "No warehouse jobs, no restaurant shifts. Dentistry is the whole product; that focus is why the matching works.",
   },
 ];
 
@@ -312,7 +312,7 @@ function Promises() {
         style={{ "--mk-delay": "120ms" } as React.CSSProperties}
         className="text-sm text-slate-body leading-[1.7] max-w-[620px] mb-11"
       >
-        These aren&rsquo;t values-page platitudes — they&rsquo;re engineering
+        These aren&rsquo;t values-page platitudes; they&rsquo;re engineering
         constraints. Several are enforced in the database itself.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">

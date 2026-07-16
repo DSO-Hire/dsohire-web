@@ -15,7 +15,7 @@ You must be at least 18 years old and legally eligible to work in the country wh
 
 You are responsible for the accuracy of the information in your account, including resume content, work history, education, and contact information. You agree to keep your information current and to safeguard your password.
 
-## 4. Resume and profile content — your rights and the license you grant us
+## 4. Resume and profile content: your rights and the license you grant us
 
 You retain ownership of your resume, profile content, and any documents you upload (collectively, "Candidate Content"). By uploading Candidate Content, you grant DSO Hire LLC a worldwide, non-exclusive, royalty-free license to host, store, reproduce, display, and transmit Candidate Content as needed to operate the Services and to deliver Candidate Content to employers when you apply to their job postings.
 

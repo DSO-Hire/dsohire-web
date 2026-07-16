@@ -33,10 +33,10 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { tier } = await params;
-  if (!isPricingTier(tier)) return { title: "Plans — DSO Hire" };
+  if (!isPricingTier(tier)) return { title: "Plans · DSO Hire" };
   const t = PRICING_TIERS[tier];
   return {
-    title: `${t.name} plan — DSO Hire`,
+    title: `${t.name} plan · DSO Hire`,
     description: `${t.description}. ${TIER_PAGE_CONTENT[tier].headline}`,
   };
 }

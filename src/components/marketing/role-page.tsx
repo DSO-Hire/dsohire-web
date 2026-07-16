@@ -243,7 +243,7 @@ function Compensation({ config }: { config: RoleConfig }) {
           {config.compensation.notes}
         </p>
         <p className="mt-5 text-xs text-slate-meta italic leading-[1.6]">
-          We don&apos;t publish dollar ranges — comp varies too much by region,
+          We don&apos;t publish dollar ranges; comp varies too much by region,
           DSO, and individual experience to anchor on. Every job listing on
           DSO Hire surfaces the specific comp the DSO chooses to share.
         </p>
@@ -270,7 +270,7 @@ function SalaryByState({ config }: { config: RoleConfig }) {
           {salary.searchTitle} salary, by state
         </h2>
         <p className="text-slate-body leading-[1.7] max-w-[680px] mb-7">
-          See median pay, the typical range, and top-paying metros — based on the latest BLS data.
+          See median pay, the typical range, and top-paying metros, based on the latest BLS data.
         </p>
         <div className="flex flex-wrap gap-x-6 gap-y-2 mb-7">
           {featured.map((n) => (

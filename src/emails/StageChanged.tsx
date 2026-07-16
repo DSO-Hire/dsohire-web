@@ -35,7 +35,7 @@ export function StageChanged({
   return (
     <Layout previewText={previewText}>
       <Text style={eyebrow}>Application update</Text>
-      <Heading style={heading}>Hi {recipientName} —</Heading>
+      <Heading style={heading}>Hi {recipientName},</Heading>
       <Text style={paragraph}>
         Quick update on your application for{" "}
         <strong style={strong}>{jobTitle}</strong> at{" "}

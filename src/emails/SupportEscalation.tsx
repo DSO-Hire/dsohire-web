@@ -54,7 +54,7 @@ export function SupportEscalation({
     <Layout previewText={`${authorName} escalated a Claude chat (${dsoName})`}>
       <Text style={eyebrow}>Escalated from Claude chat</Text>
       <Heading style={heading}>
-        {authorName} — {dsoName}
+        {authorName} · {dsoName}
       </Heading>
 
       <Section style={metaSection}>
@@ -84,7 +84,7 @@ export function SupportEscalation({
       </Heading>
       {transcript.length === 0 ? (
         <Text style={emptyText}>
-          (No messages — user escalated before sending anything.)
+          (No messages; user escalated before sending anything.)
         </Text>
       ) : (
         transcript.map((m, i) => (
@@ -106,7 +106,7 @@ export function SupportEscalation({
           <Section style={eventsSection}>
             {recentEvents.map((e, i) => (
               <Text key={i} style={eventRow}>
-                <code style={codeText}>{e.event_kind}</code> — {e.summary}{" "}
+                <code style={codeText}>{e.event_kind}</code>: {e.summary}{" "}
                 <span style={metaLabel}>
                   ({new Date(e.created_at).toLocaleString()})
                 </span>

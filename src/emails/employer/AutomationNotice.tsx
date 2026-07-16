@@ -29,7 +29,7 @@ export function AutomationNotice({
   return (
     <Layout previewText={headline}>
       <Text style={eyebrow}>Automation alert</Text>
-      <Heading style={heading}>Hi {recipientName} —</Heading>
+      <Heading style={heading}>Hi {recipientName},</Heading>
       <Text style={paragraph}>{body}</Text>
 
       <Section style={cardSection}>

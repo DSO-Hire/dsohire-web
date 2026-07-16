@@ -147,7 +147,7 @@ export function PracticeFitTeaser({
           {/* Their real captured signals */}
           <div className="mt-7 border-t border-[var(--rule)] pt-5">
             <Eyebrow className="mb-3">
-              Captured — 3 of 25+ signals
+              Captured · 3 of 25+ signals
             </Eyebrow>
             <ul className="list-none space-y-1.5 mb-5">
               {QUESTIONS.map((q, i) => (
@@ -159,7 +159,7 @@ export function PracticeFitTeaser({
               ))}
             </ul>
             <p className="text-xs text-slate-body leading-relaxed mb-6">
-              Your real PracticeFit uses 25+ dimensions — schedule overlap
+              Your real PracticeFit uses 25+ dimensions: schedule overlap
               with actual openings, commute from your area, PMS fluency,
               clinical mix, and more. Five minutes, free, private.
             </p>

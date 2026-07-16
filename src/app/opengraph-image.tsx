@@ -13,7 +13,7 @@
 import { ImageResponse } from "next/og";
 
 // Next.js metadata file convention — these exports drive the route.
-export const alt = "DSO Hire — Dental hiring, done direct.";
+export const alt = "DSO Hire · Dental hiring, done direct.";
 // Canonical OG size. We tried 2x (2400x1260) on 2026-05-15 hoping it
 // would make downscaled previews crisper, but it actually amplified
 // the soft-text artifact from Google Fonts' subsetted-TTF endpoint —

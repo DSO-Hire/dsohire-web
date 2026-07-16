@@ -60,7 +60,7 @@ export function PracticeFitDigest({
     : "Roles worth a look this week";
 
   const intro = isNew
-    ? "Here are this week's best new matches for your profile — ranked by how closely they fit what you're looking for."
+    ? "Here are this week's best new matches for your profile, ranked by how closely they fit what you're looking for."
     : "Nothing brand-new cleared the bar this week, so here are a few roles still worth a look based on your profile.";
 
   const previewText = isNew
@@ -72,7 +72,7 @@ export function PracticeFitDigest({
       <Text style={eyebrow}>PracticeFit · Weekly matches</Text>
       <Heading style={headingStyle}>{heading}</Heading>
       <Text style={paragraph}>
-        Hi {recipientFirstName} — {intro}
+        Hi {recipientFirstName}. {intro}
       </Text>
 
       <Section style={listSection}>

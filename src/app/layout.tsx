@@ -17,11 +17,11 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: {
-    default: "DSO Hire — Dental hiring, done direct.",
+    default: "DSO Hire · Dental hiring, done direct.",
     template: "%s · DSO Hire",
   },
   description:
-    "Dental hiring, done direct. The hiring platform built for mid-market Dental Support Organizations — flat-fee, unlimited multi-location postings, no placement fees, no per-listing surcharges.",
+    "Dental hiring, done direct. The hiring platform built for mid-market Dental Support Organizations: flat-fee, unlimited multi-location postings, no placement fees, no per-listing surcharges.",
   metadataBase: new URL("https://dsohire.com"),
   // ───────────────────────────────────────────────────────────────
   // ENV-DRIVEN INDEXING GATE — shared with robots.ts via isIndexingAllowed()

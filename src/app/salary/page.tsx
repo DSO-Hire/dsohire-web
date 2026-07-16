@@ -10,7 +10,7 @@ import { SALARY_ROLES, fmtAnnual, fmtHourly } from "@/lib/comp/salary";
 
 export const metadata: Metadata = {
   title: "Dental Salary Data by Role & State (2026)",
-  description: "Dental salary data for hygienists, assistants, dentists, office managers, and more — national medians plus a state-by-state breakdown, based on the latest BLS data.",
+  description: "Dental salary data for hygienists, assistants, dentists, office managers, and more: national medians plus a state-by-state breakdown, based on the latest BLS data.",
   alternates: { canonical: "/salary" },
 };
 
@@ -42,7 +42,7 @@ export default async function SalaryHome() {
             Dental Salary Data
           </h1>
           <p className="text-lg sm:text-xl text-slate-body leading-[1.6] max-w-[760px]">
-            What dental professionals earn — by role, state, and metro. Median pay and typical ranges, straight from the latest Bureau of Labor Statistics data.
+            What dental professionals earn, by role, state, and metro. Median pay and typical ranges, straight from the latest Bureau of Labor Statistics data.
           </p>
         </div>
       </section>

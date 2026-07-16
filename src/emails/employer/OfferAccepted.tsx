@@ -36,7 +36,7 @@ export function OfferAccepted({
   signedName,
   detailUrl,
 }: OfferAcceptedProps) {
-  const greeting = recipientFirstName ? `Hi ${recipientFirstName} —` : "Hi —";
+  const greeting = recipientFirstName ? `Hi ${recipientFirstName},` : "Hi,";
   return (
     <Layout
       previewText={`${candidateName} accepted the offer for ${jobTitle}`}

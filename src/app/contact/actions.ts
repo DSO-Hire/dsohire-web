@@ -40,7 +40,7 @@ export async function submitContact(
 
   // Honeypot: if filled, silently succeed (don't tip off the bot).
   if (honeypot) {
-    return { ok: true, message: "Thanks — we'll be in touch shortly." };
+    return { ok: true, message: "Thanks! We'll be in touch shortly." };
   }
 
   if (!name || !email || !message) {
@@ -80,7 +80,7 @@ export async function submitContact(
     return {
       ok: true,
       message:
-        "Thanks — we'll reply within one business day.",
+        "Thanks! We'll reply within one business day.",
     };
   } catch (err) {
     console.error("[contact] resend.emails.send failed", err);

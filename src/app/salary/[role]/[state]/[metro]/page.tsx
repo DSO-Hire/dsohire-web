@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const city = metroShort(metro.name);
   return {
     title: `${r.role.searchTitle} Salary in ${city} (2026)`,
-    description: `${r.role.searchTitle} pay in ${city}: median, the typical range, and how it compares to ${r.state.name} and the U.S. — based on the latest BLS data.`,
+    description: `${r.role.searchTitle} pay in ${city}: median, the typical range, and how it compares to ${r.state.name} and the U.S., based on the latest BLS data.`,
     alternates: { canonical: `/salary/${p.role}/${p.state}/${p.metro}` },
   };
 }
@@ -89,10 +89,10 @@ export default async function MetroSalaryPage({ params }: { params: Promise<Para
     },
     vsState
       ? { q: `Is ${city} higher or lower than the rest of ${state.name}?`, a: `${city} runs about ${vsState.pct}% ${vsState.dir} the ${state.name} state median for ${role.searchTitle.toLowerCase()}s.` }
-      : { q: `Does pay vary across the ${city} area?`, a: `Yes — employer type and experience drive most of the spread, from ${low} at the lower end to ${high} at the upper end.` },
+      : { q: `Does pay vary across the ${city} area?`, a: `Yes. Employer type and experience drive most of the spread, from ${low} at the lower end to ${high} at the upper end.` },
     vsNational
       ? { q: `How does ${city} compare nationally?`, a: `Compared to the national median, ${role.searchTitle.toLowerCase()} pay in ${city} is about ${vsNational.pct}% ${vsNational.dir} average.` }
-      : { q: `Is demand strong in ${city}?`, a: `Dental hiring is competitive nationwide, and metro markets like ${city} are no exception — open roles can take well over two months to fill.` },
+      : { q: `Is demand strong in ${city}?`, a: `Dental hiring is competitive nationwide, and metro markets like ${city} are no exception: open roles can take well over two months to fill.` },
   ];
   const jsonLd = {
     "@context": "https://schema.org",

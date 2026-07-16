@@ -31,7 +31,7 @@ export function OutreachMessage({
   body = "",
   siteUrl = "https://dsohire.com",
 }: OutreachMessageProps) {
-  const greeting = candidateFirstName ? `Hi ${candidateFirstName} —` : "Hi —";
+  const greeting = candidateFirstName ? `Hi ${candidateFirstName},` : "Hi,";
 
   // Split body into paragraphs on blank lines so the email keeps
   // reasonable spacing instead of one massive run-on block.

@@ -122,7 +122,7 @@ export function PipelineChapter({
   return (
     <div ref={stageRef} className="relative">
       <SceneHead
-        title="Pipeline — every practice, every role"
+        title="Pipeline: every practice, every role"
         pill="Realtime"
         pulsing={phase !== "rest"}
       />

@@ -43,17 +43,17 @@ export function CredentialExpiryDigest({
 
   return (
     <Layout
-      previewText={`${total} credential${total === 1 ? "" : "s"} need attention — sign in to review`}
+      previewText={`${total} credential${total === 1 ? "" : "s"} need attention. Sign in to review`}
     >
       <Text style={eyebrow}>Credential alert</Text>
       <Heading style={heading}>
         {total} credential{total === 1 ? "" : "s"} need attention
       </Heading>
       <Text style={paragraph}>
-        Hi {recipientFirstName} — some licenses or certifications for people
+        Hi {recipientFirstName}, some licenses or certifications for people
         you&apos;re hiring or have hired at{" "}
         <strong style={strong}>{dsoName}</strong> are expired or expiring soon.
-        For privacy, the specifics stay behind sign-in — open your dashboard to
+        For privacy, the specifics stay behind sign-in; open your dashboard to
         see who and take action.
       </Text>
 

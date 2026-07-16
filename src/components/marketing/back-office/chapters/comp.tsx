@@ -46,7 +46,7 @@ export function CompChapter({
 
   return (
     <div>
-      <SceneHead title="Comp — an ATS that speaks dental" pill="Dental-native" />
+      <SceneHead title="Comp: an ATS that speaks dental" pill="Dental-native" />
       <div className="grid grid-cols-1 sm:grid-cols-[1fr_290px] gap-5 items-start">
         <div>
           {COMP_FIELDS.map((f, i) => (
@@ -86,9 +86,9 @@ export function CompChapter({
             <span ref={maxRef}>${COMP_ESTIMATE.max}k</span>
           </div>
           <div className="text-2xs text-hero-foreground/70 mt-2 leading-relaxed">
-            Modeled from guarantee, production %, and adjusted-production basis
-            — the way dentists actually get paid. No generic ATS can compute
-            this.
+            Modeled from guarantee, production %, and adjusted-production
+            basis, which is the way dentists actually get paid. No generic ATS
+            can compute this.
           </div>
         </div>
       </div>

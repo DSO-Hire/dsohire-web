@@ -20,7 +20,7 @@ import { candidateCtaHref } from "@/lib/marketing/candidate-cta";
 export const metadata: Metadata = {
   title: "Free Dental Resume Templates (ATS-Friendly) | DSO Hire",
   description:
-    "Build a free, ATS-safe dental resume in minutes. Six clean templates designed for hygienists, assistants, front desk, dentists, and DSO leaders — download as a PDF, no sign-up tricks.",
+    "Build a free, ATS-safe dental resume in minutes. Six clean templates designed for hygienists, assistants, front desk, dentists, and DSO leaders. Download as a PDF, no sign-up tricks.",
   alternates: { canonical: "https://dsohire.com/resume-templates" },
   openGraph: {
     title: "Free Dental Resume Templates (ATS-Friendly)",
@@ -126,7 +126,7 @@ export default async function ResumeTemplatesLanding() {
           <p className="mx-auto mt-5 max-w-[640px] text-[16px] leading-relaxed text-slate-body">
             Six clean, ATS-safe templates built for hygienists, assistants,
             front desk, dentists, and DSO leaders. Fill it once, switch styles
-            with one click, and download a polished PDF — no design skills, no
+            with one click, and download a polished PDF. No design skills, no
             catch.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -146,7 +146,7 @@ export default async function ResumeTemplatesLanding() {
           <ul className="mx-auto mt-8 flex max-w-[760px] flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-slate-body">
             {[
               "ATS-friendly (passes the resume scanners)",
-              "Built from your profile — no retyping",
+              "Built from your profile, no retyping",
               "Download as PDF, use anywhere",
             ].map((b) => (
               <li key={b} className="inline-flex items-center gap-1.5">
@@ -165,7 +165,7 @@ export default async function ResumeTemplatesLanding() {
         </h2>
         <p className="mx-auto mt-3 max-w-[600px] text-center text-sm text-slate-body">
           Every template is single-column and parser-safe, so a beautiful resume
-          never costs you the interview. Your content stays the same — only the
+          never costs you the interview. Your content stays the same; only the
           look changes.
         </p>
 
@@ -208,13 +208,13 @@ export default async function ResumeTemplatesLanding() {
       <section className="border-t border-[var(--rule)] bg-cream/40">
         <div className="mx-auto max-w-[920px] px-6 py-16">
           <h2 className="text-2xl font-bold tracking-[-0.4px] text-ink text-center">
-            Made for dental — and for the robots that read your resume first.
+            Made for dental, and for the robots that read your resume first.
           </h2>
           <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3">
             {[
               {
                 t: "Speaks dental",
-                d: "Sections for licenses, certifications, PMS systems, and specialties — the things a dental employer actually scans for.",
+                d: "Sections for licenses, certifications, PMS systems, and specialties: the things a dental employer actually scans for.",
               },
               {
                 t: "ATS-safe by design",
@@ -244,7 +244,7 @@ export default async function ResumeTemplatesLanding() {
           </h2>
           <p className="mx-auto mt-3 max-w-[560px] text-sm leading-relaxed text-hero-foreground/80">
             Create a free DSO Hire profile, build your resume, and apply to
-            multi-location dental groups — all in one place.
+            multi-location dental groups, all in one place.
           </p>
           <div className="mt-8">
             <Link

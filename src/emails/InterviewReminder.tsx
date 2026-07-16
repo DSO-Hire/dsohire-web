@@ -66,7 +66,7 @@ export function InterviewReminder({
   detailUrl,
   recipientTimezone = "America/Chicago",
 }: InterviewReminderProps) {
-  const greeting = recipientName ? `Hi ${recipientName} —` : "Hi —";
+  const greeting = recipientName ? `Hi ${recipientName},` : "Hi,";
   const { line1, line2 } = formatStart(startAtIso, recipientTimezone);
   const eyebrowText =
     windowLabel === "tomorrow"

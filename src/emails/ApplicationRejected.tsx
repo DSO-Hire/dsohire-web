@@ -33,7 +33,7 @@ export function ApplicationRejected({
   return (
     <Layout previewText={previewText}>
       <Text style={eyebrow}>Application update</Text>
-      <Heading style={heading}>Hi {recipientName} —</Heading>
+      <Heading style={heading}>Hi {recipientName},</Heading>
       <Text style={paragraph}>
         Thank you for applying for <strong style={strong}>{jobTitle}</strong>{" "}
         at <strong style={strong}>{dsoName}</strong>, and for the time you
@@ -42,7 +42,7 @@ export function ApplicationRejected({
       <Text style={paragraph}>
         After careful review, the hiring team has decided to move forward
         with other candidates for this role. This decision isn&apos;t a
-        reflection of your qualifications — hiring often comes down to a
+        reflection of your qualifications; hiring often comes down to a
         very specific mix of needs for a single opening.
       </Text>
       <Text style={paragraph}>

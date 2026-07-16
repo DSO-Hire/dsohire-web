@@ -24,9 +24,9 @@ import { candidateCtaHref } from "@/lib/marketing/candidate-cta";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "PracticeFit™ & DSOFit™ — The Dental Fit Score",
+  title: "PracticeFit™ & DSOFit™ · The Dental Fit Score",
   description:
-    "PracticeFit is the proprietary two-sided fit model built only for dentistry: a five-minute assessment scores every candidate against every opening on schedule, pace, culture, PMS fluency, commute, and more. DSOFit does the same for corporate DSO roles. A score, never a gate — it informs decisions, it never makes them.",
+    "PracticeFit is the proprietary two-sided fit model built only for dentistry: a five-minute assessment scores every candidate against every opening on schedule, pace, culture, PMS fluency, commute, and more. DSOFit does the same for corporate DSO roles. A score, never a gate: it informs decisions, it never makes them.",
   keywords: [
     "PracticeFit",
     "DSOFit",
@@ -96,7 +96,7 @@ function Hero({ ctaHref }: { ctaHref: string }) {
             style={{ "--mk-delay": "140ms" } as React.CSSProperties}
             className="text-lg text-slate-body leading-[1.7] max-w-[560px] mb-9"
           >
-            A five-minute, two-sided assessment — then every candidate and
+            A five-minute, two-sided assessment. Then every candidate and
             every opening get scored against each other on the things that
             actually decide whether a hire works out in a dental practice:
             schedule, pace, culture, mentorship, PMS fluency, commute,
@@ -196,7 +196,7 @@ function TwoSides() {
               If you&apos;re a dental professional
             </Eyebrow>
             <p className="text-sm text-slate-body leading-[1.7] mb-4">
-              Take the assessment once — your pace, your schedule, how you
+              Take the assessment once: your pace, your schedule, how you
               like to be mentored, what matters most to you. Every opening on
               the board gets a score against it, with a plain-English
               &ldquo;why this match&rdquo; so you know what a practice is
@@ -217,7 +217,7 @@ function TwoSides() {
             </Eyebrow>
             <p className="text-sm text-slate-body leading-[1.7] mb-4">
               Every applicant lands in your pipeline already scored against
-              the role — schedule overlap, PMS fluency, clinical mix, commute,
+              the role: schedule overlap, PMS fluency, clinical mix, commute,
               licensure. Smart Picks surface the strongest fits per job, and
               your dashboard rolls up today&apos;s top fits across every
               opening you have open.
@@ -334,11 +334,11 @@ function DsoFitBand() {
           style={{ "--mk-delay": "140ms" } as React.CSSProperties}
           className="text-base text-slate-body leading-[1.7] max-w-[680px] mb-8"
         >
-          Finance, operations, marketing, HR, IT, legal — a growing group
+          Finance, operations, marketing, HR, IT, legal: a growing group
           hires a back office, and no general ATS understands what a
           dental-fluent CFO looks like. DSOFit scores corporate candidates on
           seniority, multi-site scale, dental-domain depth, and leadership
-          scope — and it understands the clinician-to-executive bridge, so a
+          scope. It also understands the clinician-to-executive bridge, so a
           DDS stepping into a Chief Clinical Officer search is scored on
           intent, not pigeonholed by degree. Pair it with a confidential
           search to keep an executive replacement visible only to the people
@@ -363,15 +363,15 @@ function DsoFitBand() {
 const PRINCIPLES = [
   {
     title: "A score, never a gate",
-    body: "Fit informs decisions — it never makes them. No candidate is auto-screened, auto-rejected, or hidden because of a score, on either side.",
+    body: "Fit informs decisions; it never makes them. No candidate is auto-screened, auto-rejected, or hidden because of a score, on either side.",
   },
   {
     title: "Thin profiles aren't punished",
-    body: "We score honestly on the signals that exist and say so when coverage is thin — a new profile reads \"not enough signal yet,\" never \"bad fit.\"",
+    body: "We score honestly on the signals that exist and say so when coverage is thin: a new profile reads \"not enough signal yet,\" never \"bad fit.\"",
   },
   {
     title: "No unearned extrapolation",
-    body: "We never assume a fit a candidate hasn't signaled. The score is built from what you told us and what the job actually requires — nothing inferred from age, school year, or anything close to a protected category.",
+    body: "We never assume a fit a candidate hasn't signaled. The score is built from what you told us and what the job actually requires, with nothing inferred from age, school year, or anything close to a protected category.",
   },
   {
     title: "You can always see why",
@@ -443,7 +443,7 @@ function FinalCta({ ctaHref }: { ctaHref: string }) {
           style={{ "--mk-delay": "70ms" } as React.CSSProperties}
           className="text-base text-slate-body leading-[1.7] max-w-[540px] mx-auto mb-10"
         >
-          Five minutes for candidates. Zero setup for dental groups — it&apos;s
+          Five minutes for candidates. Zero setup for dental groups: it&apos;s
           on, on every tier, from the first applicant.
         </p>
         <div

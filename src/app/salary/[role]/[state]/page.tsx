@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const r = resolve(p);
   if (!r) return { title: "Dental Salary Data" };
   const title = `${r.role.searchTitle} Salary in ${r.state.name} (2026)`;
-  const description = `What does a ${r.role.searchTitle.toLowerCase()} earn in ${r.state.name}? Median pay, the typical range (25th–75th percentile), and the top-paying metro areas — based on the latest BLS data.`;
+  const description = `What does a ${r.role.searchTitle.toLowerCase()} earn in ${r.state.name}? Median pay, the typical range (25th–75th percentile), and the top-paying metro areas, based on the latest BLS data.`;
   return {
     title,
     description,
@@ -105,7 +105,7 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
         }
       : {
           q: `Does ${role.searchTitle.toLowerCase()} pay vary within ${state.name}?`,
-          a: `Yes — pay varies by metro area, employer type, and experience. Larger metros and group/DSO settings often pay toward the upper end of the range.`,
+          a: `Yes. Pay varies by metro area, employer type, and experience. Larger metros and group/DSO settings often pay toward the upper end of the range.`,
         },
     topMetro
       ? {
@@ -114,7 +114,7 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
         }
       : {
           q: `Is demand for ${role.searchTitle.toLowerCase()}s strong?`,
-          a: `Demand across dentistry is high — staffing is consistently ranked among dentists' top operational challenges, and open roles can take well over two months to fill.`,
+          a: `Demand across dentistry is high: staffing is consistently ranked among dentists' top operational challenges, and open roles can take well over two months to fill.`,
         },
   ];
 
@@ -167,7 +167,7 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
             in {isState ? state.name : "the U.S."}, with most between {low} and {high}.
             {!isState && (
               <span className="block mt-2 text-sm text-slate-meta">
-                State-level data isn&apos;t available for this role yet — showing national figures.
+                State-level data isn&apos;t available for this role yet, so we&apos;re showing national figures.
               </span>
             )}
           </p>
@@ -238,7 +238,7 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
               talent across multiple locations and can offer benefits and advancement a single practice can&apos;t.
             </p>
             <p className="text-slate-body leading-[1.7]">
-              Across dentistry, hiring is hard and getting harder — staffing is consistently ranked among dentists&apos;
+              Across dentistry, hiring is hard and getting harder: staffing is consistently ranked among dentists&apos;
               top challenges, and open roles routinely take well over two months to fill. For candidates, that means
               leverage; for employers, it means speed and fit matter more than ever.
             </p>
@@ -247,7 +247,7 @@ export default async function SalaryPage({ params }: { params: Promise<Params> }
             <p className="text-2xs font-bold tracking-[3px] uppercase text-heritage-deep mb-3">For dental pros</p>
             <h3 className="text-xl font-extrabold text-ink mb-3">Know your worth, then go get it</h3>
             <p className="text-slate-body leading-[1.7] mb-6 text-sm">
-              Build a free, ATS-ready resume and get matched to practices that fit how you want to work — in {state.name} and beyond.
+              Build a free, ATS-ready resume and get matched to practices that fit how you want to work, in {state.name} and beyond.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link href="/resume-templates" className="inline-flex items-center px-7 py-3.5 bg-primary text-primary-foreground text-xs font-bold tracking-[2px] uppercase hover:bg-primary/90 transition-colors">

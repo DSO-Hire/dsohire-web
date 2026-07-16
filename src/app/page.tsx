@@ -56,10 +56,10 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "DSO Hire — Dental hiring, done direct.",
+    absolute: "DSO Hire · Dental hiring, done direct.",
   },
   description:
-    "DSO Hire is the dental-only job platform connecting multi-location dental groups (DSOs) with dental professionals — directly. No per-listing fees, no placement fees, no agency middlemen. Whether you're hiring across your practices or looking for your next dental role, start here.",
+    "DSO Hire is the dental-only job platform connecting multi-location dental groups (DSOs) with dental professionals, directly. No per-listing fees, no placement fees, no agency middlemen. Whether you're hiring across your practices or looking for your next dental role, start here.",
 };
 
 export default async function Home() {
@@ -147,7 +147,7 @@ function Hero({ live }: { live: HomeLiveSnapshot }) {
             className="mk-hero -mt-5 mb-9 text-sm font-semibold text-heritage-deep tabular-nums"
           >
             {live.activeJobs.toLocaleString("en-US")} open roles across{" "}
-            {live.states} states — updated daily
+            {live.states} states · updated daily
           </p>
         )}
 
@@ -175,7 +175,7 @@ function Hero({ live }: { live: HomeLiveSnapshot }) {
             icon={Stethoscope}
             eyebrow="Job Candidates"
             title="Find your next dental role"
-            body="Real openings at multi-location dental groups — clinical and corporate, hygiene through specialist — scored to how you actually like to work."
+            body="Real openings at multi-location dental groups (clinical and corporate, hygiene through specialist), scored to how you actually like to work."
             proof="Free forever · Direct apply · Private from your current office"
             demo={<MiniDial />}
             ctaLabel="Browse dental jobs"
@@ -247,7 +247,7 @@ function MiniDial() {
           <PracticeFitWordmark surface="light" tm className="text-sm" />
         </span>
         <span className="block">
-          Every opening, scored against how you work — schedule, pace,
+          Every opening, scored against how you work: schedule, pace,
           culture, commute.
         </span>
       </div>
@@ -518,7 +518,7 @@ function MachineBand() {
   const items: Array<{ title: React.ReactNode; body: string; hg?: boolean }> = [
     {
       title: "Pipelines & stages",
-      body: "Kanban pipelines per role, custom stages, bulk actions, stale alerts — across every practice from one screen.",
+      body: "Kanban pipelines per role, custom stages, bulk actions, stale alerts. All across every practice from one screen.",
     },
     {
       // Both fit products as their REAL wordmarks at matched size — PracticeFit
@@ -549,7 +549,7 @@ function MachineBand() {
     },
     {
       title: "Analytics & outcome proof",
-      body: "Funnel, source, time-to-fill, and fit-to-outcome curves — your hiring as a managed operation.",
+      body: "Funnel, source, time-to-fill, and fit-to-outcome curves: your hiring as a managed operation.",
     },
   ];
   return (
@@ -574,7 +574,7 @@ function MachineBand() {
           className="text-base text-slate-body leading-[1.7] max-w-[640px]"
         >
           Legacy dental job boards hand you applicants and walk away. DSO Hire
-          is the operating system for the entire hire — and it&apos;s all
+          is the operating system for the entire hire, and it&apos;s all
           included in the flat fee.
         </p>
 
@@ -645,15 +645,15 @@ function CandidateStrip() {
           {[
             {
               title: "Your PracticeFit™ score on every job",
-              body: "Five minutes of questions about how you actually like to work — then every opening shows you a fit score and the plain-English why.",
+              body: "Five minutes of questions about how you actually like to work. Then every opening shows you a fit score and the plain-English why.",
             },
             {
               title: "A free resume builder that's actually good",
-              body: "Six ATS-safe dental templates, built from your profile, exported as a real PDF. Yours to use anywhere — even off-platform.",
+              body: "Six ATS-safe dental templates, built from your profile, exported as a real PDF. Yours to use anywhere, even off-platform.",
             },
             {
               title: "Private from your current office",
-              body: "Browsing is invisible, and anonymous mode masks your name and photo from any employer you haven't applied to. Looking around while employed is normal — we built for it.",
+              body: "Browsing is invisible, and anonymous mode masks your name and photo from any employer you haven't applied to. Looking around while employed is normal, so we built for it.",
             },
           ].map((f, i) => (
             <div
@@ -687,7 +687,7 @@ function CandidateStrip() {
             className="text-base text-slate-body leading-[1.7] max-w-[520px] mb-8"
           >
             Free forever, no premium tier, no resume reselling. Apply direct
-            to the group that posted the job — your application never passes
+            to the group that posted the job. Your application never passes
             through a recruiter taking 20% on the way.
           </p>
           <div
@@ -725,7 +725,7 @@ function FounderLine() {
         <p className="text-lg sm:text-xl text-ink font-semibold leading-[1.6] tracking-[-0.2px] mb-5">
           &ldquo;Dentistry professionalized everything except hiring. After
           ten years on the business side of this industry, we built the
-          missing piece — no agencies, no $30,000 introductions.&rdquo;
+          missing piece: no agencies, no $30,000 introductions.&rdquo;
         </p>
         {/* The real signature (Brand Assets/founder-signature/, processed
             Day 32 — trimmed 640w; ivory variant exists for dark surfaces).
@@ -785,8 +785,8 @@ function ClosingDoorways() {
           style={{ "--mk-delay": "70ms" } as React.CSSProperties}
           className="text-base text-hero-foreground/60 leading-[1.7] max-w-[560px] mx-auto mb-10"
         >
-          Two audiences, one dental-only platform. Head to the side that fits —
-          you can always switch.
+          Two audiences, one dental-only platform. Head to the side that
+          fits. You can always switch.
         </p>
         <div
           data-reveal

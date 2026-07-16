@@ -64,10 +64,10 @@ export function OfferLetter({
 }: OfferLetterProps) {
   return (
     <Layout
-      previewText={`${dsoName} has an offer for you${jobTitle ? ` — ${jobTitle}` : ""}`}
+      previewText={`${dsoName} has an offer for you${jobTitle ? `: ${jobTitle}` : ""}`}
     >
       <Text style={eyebrow}>Offer letter</Text>
-      <Heading style={heading}>Hi {candidateFirstName} —</Heading>
+      <Heading style={heading}>Hi {candidateFirstName},</Heading>
 
       <Text style={paragraph}>
         We&apos;re excited to extend the offer below from{" "}
@@ -89,7 +89,7 @@ export function OfferLetter({
           <Text style={ctaLabel}>Your response</Text>
           <Text style={ctaCopy}>
             When you&apos;re ready, click below to accept or decline. You can
-            type a short reason if you decline — it&apos;s optional and goes
+            type a short reason if you decline; it&apos;s optional and goes
             only to {dsoName}.
           </Text>
           <Section style={buttonWrap}>

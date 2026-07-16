@@ -58,8 +58,8 @@ export function InterviewProposed({
   recipientTimezone = "America/Chicago",
 }: InterviewProposedProps) {
   const greeting = candidateFirstName
-    ? `Hi ${candidateFirstName} —`
-    : "Hi —";
+    ? `Hi ${candidateFirstName},`
+    : "Hi,";
   return (
     <Layout
       previewText={`${dsoName} proposed interview times for ${jobTitle}`}

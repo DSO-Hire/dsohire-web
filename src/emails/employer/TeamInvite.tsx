@@ -75,7 +75,7 @@ export function TeamInvite({
       <Text style={urlPreview}>{acceptUrl}</Text>
 
       <Text style={smallParagraph}>
-        Didn&apos;t expect this? You can safely ignore this email — no
+        Didn&apos;t expect this? You can safely ignore this email; no
         account is created until you click the link.
       </Text>
     </Layout>

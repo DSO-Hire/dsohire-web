@@ -26,7 +26,7 @@ export default function PricingLayout({
 function PricingNav() {
   return (
     <nav className="fixed top-0 inset-x-0 z-50 h-[80px] px-6 sm:px-14 flex items-center justify-between backdrop-blur-md bg-ivory/85 border-b border-[var(--rule)]">
-      <Link href="/" className="flex items-center" aria-label="DSO Hire — home">
+      <Link href="/" className="flex items-center" aria-label="DSO Hire home">
         <BrandLockup height={42} />
       </Link>
       <div className="flex items-center gap-6">

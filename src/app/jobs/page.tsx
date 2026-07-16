@@ -178,7 +178,7 @@ const SURFACE_OPTIONS: Array<{
     chipBgClass: "bg-heritage-deep/10 text-heritage-deep",
     emptyHeading: "No practice roles match these filters.",
     emptyBody:
-      "Try widening your state, role, or posted-within filters — or browse Corporate Roles for DSO-wide leadership openings.",
+      "Try widening your state, role, or posted-within filters, or browse Corporate Roles for DSO-wide leadership openings.",
   },
   {
     value: "corporate",
@@ -191,7 +191,7 @@ const SURFACE_OPTIONS: Array<{
     chipBgClass: "bg-corporate/10 text-corporate",
     emptyHeading: "No corporate roles open right now.",
     emptyBody:
-      "DSO-wide leadership openings (CEO, CFO, regional director, etc.) post here. Check back — or browse Practice Roles for chairside + office hires.",
+      "DSO-wide leadership openings (CEO, CFO, regional director, etc.) post here. Check back, or browse Practice Roles for chairside + office hires.",
   },
 ];
 
@@ -717,7 +717,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           </em>
         </h1>
         <p className="text-base sm:text-lg text-slate-body leading-relaxed max-w-[640px]">
-          Real openings from real dental groups — never staffing agencies,
+          Real openings from real dental groups: never staffing agencies,
           recruiter reposts, or middlemen. Every employer agrees to our
           Acceptable Use Policy.{" "}
           <Link
@@ -1023,7 +1023,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
               results — otherwise the user thinks the filter is active. */}
           {radiusActive && nearGeo === null && (
             <span className="text-2xs text-slate-meta italic ml-1">
-              Couldn&apos;t find that location — showing all results.
+              Couldn&apos;t find that location; showing all results.
             </span>
           )}
         </form>
@@ -1101,7 +1101,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
         {minCompAmount !== null && hiddenNoCompCount > 0 && (
           <p className="mb-5 -mt-1 text-2xs italic text-slate-meta">
             <span className="tabular">{hiddenNoCompCount}</span>{" "}
-            {hiddenNoCompCount === 1 ? "role" : "roles"} hidden — no published
+            {hiddenNoCompCount === 1 ? "role" : "roles"} hidden: no published
             pay range.{" "}
             <Link
               href={buildHref(
@@ -1119,8 +1119,8 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-l-4 border-heritage bg-cream/70 p-4">
             <p className="max-w-[640px] text-xs leading-relaxed text-slate-body">
               {viewerIsCandidate
-                ? "PracticeFit ranks every open role to your profile — your role, location, pay, schedule, and dental experience. See your full ranked board on your dashboard."
-                : "PracticeFit ranks roles to your profile — your role, location, pay, schedule, and dental experience. Create a free candidate account to unlock it."}
+                ? "PracticeFit ranks every open role to your profile: your role, location, pay, schedule, and dental experience. See your full ranked board on your dashboard."
+                : "PracticeFit ranks roles to your profile: your role, location, pay, schedule, and dental experience. Create a free candidate account to unlock it."}
             </p>
             <Link
               href={viewerIsCandidate ? "/candidate/jobs" : "/candidate/sign-up"}

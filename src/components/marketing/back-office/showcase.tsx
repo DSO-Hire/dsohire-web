@@ -98,7 +98,7 @@ export function BackOfficeShowcase() {
           style={{ "--mk-delay": "140ms" } as React.CSSProperties}
           className="text-sm text-hero-foreground/60 leading-[1.7] max-w-[620px] mb-7"
         >
-          Behind every posting is a full hiring operating system — the same
+          Behind every posting is a full hiring operating system: the same
           machinery enterprise recruiting teams pay five figures for, built
           dental-only. Watch it run.
         </p>
@@ -237,7 +237,7 @@ export function BackOfficeShowcase() {
           </div>
           <span className="text-xs text-hero-foreground/70 leading-snug flex-1 min-w-[220px]">
             <b className="text-hero-foreground">{CHAPTERS[current].title}</b>
-            {" — "}
+            {" · "}
             {CHAPTERS[current].caption}
           </span>
         </div>

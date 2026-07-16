@@ -52,9 +52,9 @@ import { FitDial } from "@/components/marketing/fit-dial";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Dental Group Hiring Platform — Flat-Fee Job Board for Multi-Location Practices",
+  title: "Dental Group Hiring Platform: Flat-Fee Job Board for Multi-Location Practices",
   description:
-    "DSO Hire is the flat-fee dental hiring platform built for multi-location dental groups — DSOs and independent multi-practice owners alike. Post across every location for one flat monthly fee — no per-listing fees, no 15–25% placement fees, no recruiter middlemen. Team accounts and an applicant pipeline built for the way dental groups actually hire.",
+    "DSO Hire is the flat-fee dental hiring platform built for multi-location dental groups, DSOs and independent multi-practice owners alike. Post across every location for one flat monthly fee: no per-listing fees, no 15–25% placement fees, no recruiter middlemen. Team accounts and an applicant pipeline built for the way dental groups actually hire.",
   keywords: [
     "dental group hiring",
     "DSO hiring",
@@ -166,9 +166,9 @@ function Hero() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-12 lg:gap-16 items-start">
           <div data-reveal style={{ "--mk-delay": "130ms" } as React.CSSProperties}>
             <p className="text-lg sm:text-xl text-slate-body leading-relaxed mb-10">
-              Built for multi-location dental groups — from DSOs to independent
+              Built for multi-location dental groups, from DSOs to independent
               owners running a handful of practices. Subscribe once and post
-              across every location you operate — flat monthly fee, no
+              across every location you operate: flat monthly fee, no
               per-listing charges, no 15–25% placement fees, no recruiter
               middlemen.
             </p>
@@ -495,8 +495,8 @@ function ProblemSection() {
             tagline="Built for solo practices. Priced per listing."
             points={[
               "Per-listing pricing means a 30-location group posting an associate role at three offices pays three times",
-              "Typically no native multi-location posting — recruiters re-enter the same job over and over",
-              "Rarely built for teams — office managers and regional directors each need their own login",
+              "Typically no native multi-location posting, so recruiters re-enter the same job over and over",
+              "Rarely built for teams, so office managers and regional directors each need their own login",
               "Designed around individual practice owners, not multi-site operators",
             ]}
           />
@@ -506,7 +506,7 @@ function ProblemSection() {
             points={[
               "15–25% of first-year salary per placement. A $200K associate dentist costs you $30–50K in placement fees alone",
               "Routine roles (hygienists, dental assistants, office managers) move slowly through agency pipelines",
-              "Limited visibility into the candidate pipeline — you see who they choose to share",
+              "Limited visibility into the candidate pipeline: you see who they choose to share",
               "No leverage as your hiring volume grows. Hiring 10 people doesn't get you a discount",
             ]}
           />
@@ -558,7 +558,7 @@ function AnswerCard() {
         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-7 gap-y-3.5 list-none lg:pt-2 self-center">
           {[
             "One subscription covers every location",
-            "Unlimited hiring — no per-listing or placement fees",
+            "Unlimited hiring, no per-listing or placement fees",
             "Multi-location job posting in a single flow",
             "Team accounts for your recruiters and regional managers",
           ].map((item, i) => (
@@ -775,7 +775,7 @@ function PracticeFitBand() {
             style={{ "--mk-delay": "140ms" } as React.CSSProperties}
             className="text-base text-slate-body leading-[1.7] max-w-[560px] mb-7"
           >
-            Not keyword matching — a two-sided fit model built only for
+            Not keyword matching: a two-sided fit model built only for
             dentistry. Schedule overlap, PMS fluency, clinical mix, pace and
             culture: every applicant lands in your pipeline already scored, so
             your team starts with the strongest fits instead of a stack of
@@ -790,8 +790,8 @@ function PracticeFitBand() {
           >
             <DsoFitWordmark surface="light" tm className="text-[17px]" />
             <span className="text-[13.5px] text-slate-body leading-snug">
-              Hiring for HQ too? The same engine scores corporate candidates —
-              finance, ops, marketing, HR —{" "}
+              Hiring for HQ too? The same engine scores corporate candidates
+              (finance, ops, marketing, HR):{" "}
               <Link
                 href="/for-corporate"
                 className="font-semibold text-heritage-deep hover:text-ink transition-colors underline underline-offset-2"
@@ -826,7 +826,7 @@ function PracticeFitBand() {
             <div className="flex items-start justify-between gap-4 px-6 py-4 bg-cream border-b border-[var(--rule)]">
               <div className="min-w-0">
                 <Eyebrow className="text-[9px] text-heritage-deep mb-1">
-                  New Applicant · Hygienist — Maple &amp; 3rd
+                  New Applicant · Hygienist · Maple &amp; 3rd
                 </Eyebrow>
                 <div className="text-[16px] font-bold tracking-[-0.3px] text-ink leading-tight">
                   Sarah Chen, RDH
@@ -886,7 +886,7 @@ const SHOWCASE_TOP: ShowcaseFeature[] = [
         <span>matching</span>
       </span>
     ),
-    body: "A five-minute, two-sided assessment captures what no resume can — work pace, mentorship, culture, schedule — and our proprietary dental fit score ranks every applicant against the role on it, plus real commute distance, PMS fluency, licensure, certifications, and specialty. Your strongest matches surface first, not your most recent.",
+    body: "A five-minute, two-sided assessment captures what no resume can (work pace, mentorship, culture, schedule), and our proprietary dental fit score ranks every applicant against the role on it, plus real commute distance, PMS fluency, licensure, certifications, and specialty. Your strongest matches surface first, not your most recent.",
     status: "now",
   },
   {
@@ -897,13 +897,13 @@ const SHOWCASE_TOP: ShowcaseFeature[] = [
         <span>for corporate hiring</span>
       </span>
     ),
-    body: "The back-office half of the engine. Finance, ops, marketing, HR, IT — 17 corporate functions scored on seniority, multi-site scale, dental-domain depth, and leadership scope. Pair it with a confidential search to quietly run a CFO or COO replacement only your inner circle can see.",
+    body: "The back-office half of the engine. Finance, ops, marketing, HR, IT: 17 corporate functions scored on seniority, multi-site scale, dental-domain depth, and leadership scope. Pair it with a confidential search to quietly run a CFO or COO replacement only your inner circle can see.",
     status: "now",
   },
   {
     icon: Columns3,
     title: "Pipeline kanban with real-time team sync",
-    body: "Drag candidates through New → Screening → Interview → Offer → Hired. When one teammate moves a card, everyone sees it within half a second. Bulk actions, multi-card drag, @mention comments — no refresh, no email chains.",
+    body: "Drag candidates through New → Screening → Interview → Offer → Hired. When one teammate moves a card, everyone sees it within half a second. Bulk actions, multi-card drag, @mention comments. No refresh, no email chains.",
     status: "now",
   },
 ];
@@ -912,7 +912,7 @@ const SHOWCASE_BOTTOM: ShowcaseFeature[] = [
   {
     icon: Workflow,
     title: "Automations + drip sequences",
-    body: "If-this-then-that rules on your pipeline — auto-message on stage change, nudge idle candidates, notify teammates — plus multi-step drip sequences that keep silver-medal candidates warm without anyone remembering to follow up.",
+    body: "If-this-then-that rules on your pipeline (auto-message on stage change, nudge idle candidates, notify teammates), plus multi-step drip sequences that keep silver-medal candidates warm without anyone remembering to follow up.",
     status: "now",
   },
   {
@@ -924,7 +924,7 @@ const SHOWCASE_BOTTOM: ShowcaseFeature[] = [
   {
     icon: ShieldCheck,
     title: "Per-teammate permissions + confidential searches",
-    body: "Dentrix-style control: tune exactly what each recruiter or hiring manager can see and do — down to hiding pay fields — and restrict sensitive searches to the people on them. Every change audit-logged.",
+    body: "Dentrix-style control: tune exactly what each recruiter or hiring manager can see and do, down to hiding pay fields, and restrict sensitive searches to the people on them. Every change audit-logged.",
     status: "now",
   },
   {
@@ -936,7 +936,7 @@ const SHOWCASE_BOTTOM: ShowcaseFeature[] = [
   {
     icon: ClipboardList,
     title: "Screening library + role scorecards",
-    body: "130+ curated screening questions across clinical and corporate roles — knockout rules included. Then score finalists with multi-reviewer, role-specific scorecards that roll up automatically.",
+    body: "130+ curated screening questions across clinical and corporate roles, knockout rules included. Then score finalists with multi-reviewer, role-specific scorecards that roll up automatically.",
     status: "now",
   },
   {
@@ -956,8 +956,8 @@ function FeatureShowcase() {
           Built for how dental hiring actually works.
         </SectionHeadline>
         <SectionSub>
-          A full dental hiring platform — applicant pipeline, candidate
-          sourcing, matching, and dental-specific tooling — with the same
+          A full dental hiring platform (applicant pipeline, candidate
+          sourcing, matching, and dental-specific tooling) with the same
           feature depth at every paid tier.
         </SectionSub>
 
@@ -1055,12 +1055,12 @@ function HowItWorks() {
           <HowStep
             n="02"
             title="Post once, hire across every location"
-            body="Write a role once and assign it to as many of your practices as you need. Your team — recruiters, regional managers, office managers — all post and review under a single account."
+            body="Write a role once and assign it to as many of your practices as you need. Your whole team (recruiters, regional managers, office managers) posts and reviews under a single account."
           />
           <HowStep
             n="03"
             title="Review, interview, hire"
-            body="Applications land in a shared dashboard with status tracking. Move candidates through your pipeline, leave internal notes, and hire — without paying a placement fee on the way out."
+            body="Applications land in a shared dashboard with status tracking. Move candidates through your pipeline, leave internal notes, and hire without paying a placement fee on the way out."
           />
         </div>
       </div>
@@ -1225,7 +1225,7 @@ function FinalCta() {
         </h2>
         <p className="text-base text-slate-body leading-[1.7] mb-9">
           Built for dental groups by people who know the business of
-          dentistry — the same team that writes the product answers the
+          dentistry. The same team that writes the product answers the
           email. Ask the questions you actually want answered.
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
@@ -1253,23 +1253,23 @@ function FinalCta() {
 const FAQ_ITEMS = [
   {
     q: "What does the subscription actually cover?",
-    a: "Multi-location job postings, the full applicant pipeline with kanban + scorecards + team comments, candidate dashboards, branded company page, application + candidate data exports for your HR records, and Stripe-secured billing. Pricing scales with your practice count; features are the same depth at every paid tier. Active-listing caps are tier-based — Solo up to 5, Growth up to 20, Scale and Enterprise unlimited.",
+    a: "Multi-location job postings, the full applicant pipeline with kanban + scorecards + team comments, candidate dashboards, branded company page, application + candidate data exports for your HR records, and Stripe-secured billing. Pricing scales with your practice count; features are the same depth at every paid tier. Active-listing caps are tier-based: Solo up to 5, Growth up to 20, Scale and Enterprise unlimited.",
   },
   {
     q: "Can I cancel or change tiers anytime?",
-    a: "Yes. Change tiers or cancel from your billing settings — Stripe handles prorated billing automatically, and you keep access through the end of your current billing period. No retention call, no penalty.",
+    a: "Yes. Change tiers or cancel from your billing settings; Stripe handles prorated billing automatically, and you keep access through the end of your current billing period. No retention call, no penalty.",
   },
   {
     q: "How does multi-location posting actually work?",
     a: "Write the job description once and select which of your practices it applies to in a single flow. We render a per-location listing for each, so candidates see the role at the location they're searching for, without you re-entering the same job. Posting to one practice or fifteen takes the same amount of time.",
   },
   {
-    q: "Can I add my team — recruiters, regional managers, office managers?",
-    a: "Yes. Solo includes 5 admin seats and Growth includes 15; Scale includes 50 and Enterprise is unlimited. Hiring managers can be scoped to specific locations so they only see and act on what's relevant to them; admins see the whole group. Adding teammates doesn't change your billing — seat counts are bundled into the tier.",
+    q: "Can I add my team (recruiters, regional managers, office managers)?",
+    a: "Yes. Solo includes 5 admin seats and Growth includes 15; Scale includes 50 and Enterprise is unlimited. Hiring managers can be scoped to specific locations so they only see and act on what's relevant to them; admins see the whole group. Adding teammates doesn't change your billing; seat counts are bundled into the tier.",
   },
   {
     q: "Do you take a placement fee?",
-    a: "Never. The monthly subscription is the entire cost — we don't take a cut of placements, and we don't charge per listing. Hire whoever applies, keep 100% of their first-year salary.",
+    a: "Never. The monthly subscription is the entire cost: we don't take a cut of placements, and we don't charge per listing. Hire whoever applies, keep 100% of their first-year salary.",
   },
   {
     q: "How fast can we get started?",
@@ -1277,7 +1277,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What about Indeed, LinkedIn, and the other major job boards?",
-    a: "Today, every DSO Hire job is searchable on the platform and indexed by Google for Jobs. Cross-posting integrations to Indeed, LinkedIn, and Facebook are on the H2 2026 roadmap — until then, many dental groups cross-post manually using the listing copy we generate.",
+    a: "Today, every DSO Hire job is searchable on the platform and indexed by Google for Jobs. Cross-posting integrations to Indeed, LinkedIn, and Facebook are on the H2 2026 roadmap. Until then, many dental groups cross-post manually using the listing copy we generate.",
   },
 ];
 

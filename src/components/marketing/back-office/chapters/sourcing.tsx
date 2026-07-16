@@ -35,7 +35,7 @@ export function SourcingChapter({
 
   return (
     <div>
-      <SceneHead title="Sourcing — candidates who want to be found" pill="Consent-based" />
+      <SceneHead title="Sourcing: candidates who want to be found" pill="Consent-based" />
       <div className="grid grid-cols-1 sm:grid-cols-[280px_1fr] gap-5 items-start">
         <div className="bg-card border border-[var(--rule)] p-4">
           <div
@@ -88,7 +88,7 @@ export function SourcingChapter({
             ))}
           </div>
           <div className="text-2xs text-slate-meta mt-3">
-            Private by default — the candidate&apos;s name is shared only when
+            Private by default: the candidate&apos;s name is shared only when
             they choose to share it.
           </div>
         </div>

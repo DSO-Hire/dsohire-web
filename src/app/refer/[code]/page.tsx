@@ -43,7 +43,7 @@ export default async function ReferPage({
               </h1>
               <p className="mt-3 text-sm text-slate-body leading-relaxed">
                 Pass along their name and the hiring team will reach out. It
-                only takes a minute — no account needed.
+                only takes a minute, no account needed.
               </p>
             </header>
             <div className="border border-[var(--rule)] bg-cream/40 p-6 sm:p-8">

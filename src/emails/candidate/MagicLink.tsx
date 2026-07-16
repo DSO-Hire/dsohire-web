@@ -47,7 +47,7 @@ export function CandidateMagicLink({
       <Text style={urlPreview}>{magicUrl}</Text>
 
       <Text style={paragraph}>
-        Didn&apos;t request this? You can safely ignore this email — your account is
+        Didn&apos;t request this? You can safely ignore this email; your account is
         only accessed when someone clicks a sign-in link.
       </Text>
     </Layout>

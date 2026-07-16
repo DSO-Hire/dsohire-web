@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   if (!role) return { title: "Dental Salary Data" };
   return {
     title: `${role.searchTitle} Salary by State (2026)`,
-    description: `${role.searchTitle} salary across the U.S. — national median plus a state-by-state breakdown, based on the latest BLS data.`,
+    description: `${role.searchTitle} salary across the U.S.: national median plus a state-by-state breakdown, based on the latest BLS data.`,
     alternates: { canonical: `/salary/${p.role}` },
   };
 }

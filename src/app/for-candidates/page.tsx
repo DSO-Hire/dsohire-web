@@ -60,9 +60,9 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title:
-    "Dental Jobs at Multi-Location DSOs — Hygienist, Dentist, Assistant & Front Desk Roles",
+    "Dental Jobs at Multi-Location DSOs: Hygienist, Dentist, Assistant & Front Desk Roles",
   description:
-    "Find dental jobs at real, multi-location dental support organizations. Browse open hygienist jobs, dental assistant jobs, associate dentist, specialist, front desk, and office manager roles at DSOs on DSO Hire. Apply direct — no agency middlemen, no placement fees, no resume reselling. Free for candidates forever, with transparent comp wherever DSOs share it. Build a dental career at a real group practice.",
+    "Find dental jobs at real, multi-location dental support organizations. Browse open hygienist jobs, dental assistant jobs, associate dentist, specialist, front desk, and office manager roles at DSOs on DSO Hire. Apply direct: no agency middlemen, no placement fees, no resume reselling. Free for candidates forever, with transparent comp wherever DSOs share it. Build a dental career at a real group practice.",
   keywords: [
     "dental jobs",
     "dental careers",
@@ -174,9 +174,9 @@ function Hero({ ctaHref }: { ctaHref: string }) {
         <div data-reveal style={{ "--mk-delay": "130ms" } as React.CSSProperties}>
           <p className="text-lg sm:text-xl text-slate-body leading-[1.65] max-w-[560px] mb-10">
             Take the free PracticeFit assessment and browse real openings at
-            multi-location dental groups — every job scored against how you
-            actually like to work. You apply direct: no agency middleman, no
-            resume reselling, and browsing stays private — your current
+            multi-location dental groups, with every job scored against how
+            you actually like to work. You apply direct: no agency middleman,
+            no resume reselling, and browsing stays private, so your current
             office never sees you looking.
           </p>
 
@@ -255,9 +255,9 @@ function PracticeFitCandidateBand({
             style={{ "--mk-delay": "140ms" } as React.CSSProperties}
             className="text-base text-slate-body leading-[1.7] max-w-[560px] mb-7"
           >
-            A five-minute assessment — your pace, your schedule, how you like
-            to be mentored — and every opening gets a PracticeFit score
-            against it. No more guessing from a job description what a
+            A five-minute assessment covers your pace, your schedule, and how
+            you like to be mentored, and every opening gets a PracticeFit
+            score against it. No more guessing from a job description what a
             practice is actually like to work in. Free, private, and your
             current office never sees you browsing.
           </p>
@@ -270,8 +270,8 @@ function PracticeFitCandidateBand({
           >
             <DsoFitWordmark surface="light" tm className="text-[17px]" />
             <span className="text-[13.5px] text-slate-body leading-snug">
-              On the corporate track? DSOFit scores DSO HQ roles — finance,
-              ops, marketing, HR — the same way.{" "}
+              On the corporate track? DSOFit scores DSO HQ roles (finance,
+              ops, marketing, HR) the same way.{" "}
               <Link
                 href="/for-corporate"
                 className="font-semibold text-heritage-deep hover:text-ink transition-colors underline underline-offset-2"
@@ -466,12 +466,12 @@ const PROMISES = [
   {
     Icon: ShieldCheck,
     title: "Every employer is a multi-location DSO",
-    body: "Every employer on DSO Hire is a Dental Support Organization that subscribes to the platform and agrees to our Acceptable Use Policy — staffing-agency middlemen, recruiter reposts, and solo-practice reposts are prohibited. We monitor the community and remove anyone in violation.",
+    body: "Every employer on DSO Hire is a Dental Support Organization that subscribes to the platform and agrees to our Acceptable Use Policy: staffing-agency middlemen, recruiter reposts, and solo-practice reposts are all prohibited. We monitor the community and remove anyone in violation.",
   },
   {
     Icon: Send,
     title: "You apply direct",
-    body: "Your resume goes straight to the DSO that posted the job — not to an agency that takes 15-25% of your first-year salary, not to a recruiter who'll pitch you to half a dozen practices you didn't ask about. Direct applications, every time.",
+    body: "Your resume goes straight to the DSO that posted the job, not to an agency that takes 15-25% of your first-year salary, not to a recruiter who'll pitch you to half a dozen practices you didn't ask about. Direct applications, every time.",
   },
   {
     Icon: Heart,
@@ -481,7 +481,7 @@ const PROMISES = [
   {
     Icon: Sparkles,
     title: "Built for dental, not for everything",
-    body: "Filters that understand the difference between an associate role and a partner-track. Comp ranges in dental terms. License-aware screening. Built specifically for dental — not generic job-board software with a dental tag bolted on.",
+    body: "Filters that understand the difference between an associate role and a partner-track. Comp ranges in dental terms. License-aware screening. Built specifically for dental, not generic job-board software with a dental tag bolted on.",
   },
 ];
 
@@ -498,7 +498,7 @@ function Promises() {
         <p className="text-sm text-slate-body leading-[1.7] max-w-[640px] mb-12">
           Most dental job boards were built for solo practices a decade ago,
           then bolted on multi-location features. DSO Hire was built the
-          other way around — for dental professionals applying to real
+          other way around: for dental professionals applying to real
           multi-location operations.
         </p>
 
@@ -534,9 +534,9 @@ const ROLES = [
     eyebrow: "DDS / DMD",
     href: "/for-dentists",
     advantages: [
-      "Real benefits package — 401(k) match, group health, malpractice, paid CE allowance",
+      "Real benefits package: 401(k) match, group health, malpractice, paid CE allowance",
       "Mentorship + peer learning across multi-doc practices",
-      "Career path clarity — associate → senior → partner track at some dental groups",
+      "Career path clarity: associate → senior → partner track at some dental groups",
       "Modern equipment (CBCT, digital scanners, CAD/CAM) at scale",
     ],
   },
@@ -571,7 +571,7 @@ const ROLES = [
     href: "/for-dental-assistants",
     advantages: [
       "Structured EFDA training with reimbursement",
-      "Multi-doc variety — assist alongside specialists, not just one GP",
+      "Multi-doc variety: assist alongside specialists, not just one GP",
       "Career ladder to expanded functions, OM, or ops roles",
       "Real benefits (vs. unpaid time off at many solo offices)",
     ],
@@ -584,7 +584,7 @@ const ROLES = [
     advantages: [
       "Real systems training (PMS, insurance verification, financing tools)",
       "Defined career path to OM is well-traveled at most dental groups",
-      "Backup coverage — vacations don't crash the schedule",
+      "Backup coverage: vacations don't crash the schedule",
       "Performance-based bonus structures common across dental groups",
     ],
   },
@@ -595,7 +595,7 @@ const ROLES = [
     href: "/for-office-managers",
     advantages: [
       "Real P&L responsibility with KPI scorecards",
-      "DSO operating playbooks — not solo-practice trial-and-error",
+      "DSO operating playbooks, not solo-practice trial-and-error",
       "Peer OM network across the DSO for problem-solving",
       "Compensation models (base + production %) more standardized",
     ],
@@ -681,12 +681,12 @@ function RoleBreakdown() {
             </div>
           </div>
           <p className="text-[13.5px] text-slate-body leading-[1.6] mb-4 max-w-[760px]">
-            The non-clinical side of a growing DSO — build a career in dental
+            The non-clinical side of a growing DSO: build a career in dental
             without the clinical license.
           </p>
           <ul className="list-none grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2 mt-1 mb-4">
             {[
-              "17 functions — finance, HR, marketing, IT, operations, BD, and more",
+              "17 functions: finance, HR, marketing, IT, operations, BD, and more",
               "Mission-driven work supporting dozens of practices at once",
               "Clear advancement inside a scaling organization",
               "Competitive comp + full benefits, no clinical license required",
@@ -746,7 +746,7 @@ function HonestTake() {
           <p>
             You&apos;ve probably heard it. Dental school faculty, op-eds in
             industry pubs, and senior practice owners often frame DSO
-            employment as &quot;corporate dentistry&quot; — shorthand for
+            employment as &quot;corporate dentistry,&quot; shorthand for
             losing clinical autonomy, working under quotas, or selling out the
             profession. It&apos;s a narrative with real history behind it,
             especially from how some DSO models operated a decade ago.
@@ -760,7 +760,7 @@ function HonestTake() {
             isn&apos;t the DSO model in 2014.
           </p>
           <p>
-            That said — private practice has real, durable strengths.
+            That said, private practice has real, durable strengths.
             Ownership equity. Total clinical autonomy. Direct relationship
             with the same patients for decades. Physical-space control. If
             those are non-negotiable for you, private practice is still
@@ -773,7 +773,7 @@ function HonestTake() {
             how they want to work. We&apos;re not here to dunk on private
             practice. We&apos;re here for the dentist, hygienist, or office
             manager who looked at their next ten years and decided the DSO
-            route makes more sense — and who&apos;s tired of finding out about
+            route makes more sense, and who&apos;s tired of finding out about
             openings through a friend&apos;s friend or a third-party recruiter
             charging a 20% take.
           </p>
@@ -782,7 +782,7 @@ function HonestTake() {
         {/* Pull-quote-style attribution block */}
         <div className="mt-12 pt-10 border-t border-heritage/30">
           <p className="text-sm text-slate-body leading-[1.65] italic">
-            We&apos;re building DSO Hire to make the choice clearer — not to
+            We&apos;re building DSO Hire to make the choice clearer, not to
             push you one direction. The job board you actually use should
             respect that the decision is yours.
           </p>
@@ -797,18 +797,18 @@ function HonestTake() {
 const CANDIDATE_PERKS = [
   {
     Icon: PenLine,
-    title: "Free resume builder — six ATS-safe templates",
-    body: "Build a clean, professional dental resume from your profile in minutes — six recruiter-tested templates, real PDF export, and it auto-attaches when you apply. Use it anywhere, even off-platform. Completely free.",
+    title: "Free resume builder: six ATS-safe templates",
+    body: "Build a clean, professional dental resume from your profile in minutes: six recruiter-tested templates, real PDF export, and it auto-attaches when you apply. Use it anywhere, even off-platform. Completely free.",
   },
   {
     Icon: EyeOff,
     title: "Look around without your office knowing",
-    body: "Browsing is private, and anonymous mode masks your name and photo from employers you haven't applied to. Quietly exploring while employed is normal — the platform is built to protect it.",
+    body: "Browsing is private, and anonymous mode masks your name and photo from employers you haven't applied to. Quietly exploring while employed is normal; the platform is built to protect it.",
   },
   {
     Icon: GraduationCap,
     title: "CE tracking, free forever",
-    body: "Track every continuing education credit you earn across employers. Get a 60-day reminder before your license expires. Free for every candidate — not gated to a 'pro' tier, not tied to which DSO you work for.",
+    body: "Track every continuing education credit you earn across employers. Get a 60-day reminder before your license expires. Free for every candidate: not gated to a 'pro' tier, not tied to which DSO you work for.",
   },
   {
     Icon: FileText,
@@ -823,7 +823,7 @@ const CANDIDATE_PERKS = [
   {
     Icon: DollarSign,
     title: "Transparent comp where dental groups share it",
-    body: "When a DSO shares the salary range for a role, we show it on every listing. When they don't, we tell you that too — no fake 'competitive pay' filler. Some practices share, some don't. Either way, no surprises.",
+    body: "When a DSO shares the salary range for a role, we show it on every listing. When they don't, we tell you that too. No fake 'competitive pay' filler. Some practices share, some don't. Either way, no surprises.",
   },
 ];
 
@@ -839,7 +839,7 @@ function CandidateBenefits() {
         </h2>
         <p className="text-sm text-slate-body leading-[1.7] max-w-[640px] mb-12">
           A two-sided marketplace only works when both sides win. Here&apos;s
-          the candidate side — the parts of DSO Hire designed to make your
+          the candidate side: the parts of DSO Hire designed to make your
           job hunt and your career easier, not just to fill the employer&apos;s
           inbox.
         </p>
@@ -900,8 +900,8 @@ function FinalCta({ ctaHref }: { ctaHref: string }) {
         </h2>
         <p className="text-sm sm:text-[16px] text-slate-body leading-[1.7] mb-9 max-w-[560px] mx-auto">
           Free profile takes a couple minutes. Browse without an account if
-          you&apos;d rather. No upsells, no premium tier, no agency calls —
-          just dental jobs at real dental groups.
+          you&apos;d rather. No upsells, no premium tier, no agency calls.
+          Just dental jobs at real dental groups.
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
           <Button asChild variant="primary" size="xl">
@@ -928,31 +928,31 @@ function FinalCta({ ctaHref }: { ctaHref: string }) {
 const FAQ_ITEMS = [
   {
     q: "Is DSO Hire really free for candidates?",
-    a: "Yes — completely free, forever. Dental groups pay a flat monthly subscription to post and hire; candidates never pay to apply, never pay to be visible, and never see ads inside the platform. There's no premium candidate tier.",
+    a: "Yes, completely free, forever. Dental groups pay a flat monthly subscription to post and hire; candidates never pay to apply, never pay to be visible, and never see ads inside the platform. There's no premium candidate tier.",
   },
   {
     q: "Who can see my profile?",
-    a: "Only DSO Hire employer members can search candidate profiles, and only if your visibility setting allows it. Your default is private. You can mark yourself hidden, recruiters-only, or open-to-work at any time from your settings — and you control which fields are shown.",
+    a: "Only DSO Hire employer members can search candidate profiles, and only if your visibility setting allows it. Your default is private. You can mark yourself hidden, recruiters-only, or open-to-work at any time from your settings, and you control which fields are shown.",
   },
   {
     q: "What if I'm currently employed and don't want my employer to find out I'm looking?",
-    a: "Set your visibility to \"hidden\" or \"recruiters only\" — dental groups can't surface your profile in search, and your name and contact info aren't exposed. When you apply to a specific role, only that dental group sees your application; no one else does.",
+    a: "Set your visibility to \"hidden\" or \"recruiters only\": dental groups can't surface your profile in search, and your name and contact info aren't exposed. When you apply to a specific role, only that dental group sees your application; no one else does.",
   },
   {
     q: "What kinds of roles will I find here?",
-    a: "Every role on DSO Hire is at a multi-location Dental Support Organization — from hygiene, assisting, and front-desk roles to dentist, specialist, and corporate operations roles (regional managers, HR, business development, etc.) at multi-location dental groups. If you work in dental, there's a path here.",
+    a: "Every role on DSO Hire is at a multi-location Dental Support Organization, from hygiene, assisting, and front-desk roles to dentist, specialist, and corporate operations roles (regional managers, HR, business development, etc.) at multi-location dental groups. If you work in dental, there's a path here.",
   },
   {
     q: "How is this different from Indeed, ZipRecruiter, or other dental job boards?",
-    a: "DSO Hire is dental-only and direct. Every employer is a multi-location dental group that agrees to our Acceptable Use Policy — staffing-agency reposts, recruiter skimming, and resume reselling are prohibited. Generic boards work for every industry, which means they don't work especially well for any one. We don't bury you in unrelated alerts, and we don't have agencies inserting themselves between you and the practice.",
+    a: "DSO Hire is dental-only and direct. Every employer is a multi-location dental group that agrees to our Acceptable Use Policy; staffing-agency reposts, recruiter skimming, and resume reselling are prohibited. Generic boards work for every industry, which means they don't work especially well for any one. We don't bury you in unrelated alerts, and we don't have agencies inserting themselves between you and the practice.",
   },
   {
     q: "Do you sell my data or share it with third parties?",
-    a: "Never. We don't sell candidate data, we don't share it with third parties, and we don't resell resumes. Employers see what you choose to share through your profile and applications — that's all.",
+    a: "Never. We don't sell candidate data, we don't share it with third parties, and we don't resell resumes. Employers see what you choose to share through your profile and applications; that's all.",
   },
   {
     q: "What happens after I apply?",
-    a: "Your application goes directly to the hiring team at the DSO — no recruiter middleman, no agency. You'll see status updates in your candidate dashboard and by email, and you can communicate with the DSO through the platform's messaging once they reach out.",
+    a: "Your application goes directly to the hiring team at the DSO: no recruiter middleman, no agency. You'll see status updates in your candidate dashboard and by email, and you can communicate with the DSO through the platform's messaging once they reach out.",
   },
 ];
 

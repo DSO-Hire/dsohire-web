@@ -58,7 +58,7 @@ export function JdChapter({
 
   return (
     <div>
-      <SceneHead title="Draft with AI — dental-accurate in seconds" pill="Grounded in your comp" />
+      <SceneHead title="Draft with AI: dental-accurate in seconds" pill="Grounded in your comp" />
       <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-5 items-start">
         <div>
           <div className="bg-card border border-[var(--rule)] px-3.5 py-3 text-xs font-bold mb-2">

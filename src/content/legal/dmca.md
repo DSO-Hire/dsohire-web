@@ -9,7 +9,7 @@ If you believe content on the Services infringes a copyright you own or are auth
 
 - A physical or electronic signature of the copyright owner or a person authorized to act on the copyright owner's behalf.
 - Identification of the copyrighted work claimed to have been infringed (or, if multiple copyrighted works at a single online site are covered by a single notification, a representative list of such works).
-- Identification of the material claimed to be infringing or the subject of infringing activity, sufficient to permit us to locate the material — such as the URL of the page on the Services where the material appears.
+- Identification of the material claimed to be infringing or the subject of infringing activity, sufficient to permit us to locate the material, such as the URL of the page on the Services where the material appears.
 - Information sufficient to permit us to contact the complaining party, including a mailing address, telephone number, and, if available, an email address.
 - A statement that the complaining party has a good-faith belief that use of the material in the manner complained of is not authorized by the copyright owner, its agent, or the law.
 - A statement that the information in the notification is accurate, and under penalty of perjury, that the complaining party is authorized to act on behalf of the owner of an exclusive right that is allegedly infringed.
@@ -18,7 +18,7 @@ If you believe content on the Services infringes a copyright you own or are auth
 
 Notices of claimed infringement should be sent to:
 
-DSO Hire LLC — DMCA Designated Agent
+DSO Hire LLC, DMCA Designated Agent
 4018 West 74th Street, Prairie Village, Kansas 66208, USA
 info@dsohire.com
 

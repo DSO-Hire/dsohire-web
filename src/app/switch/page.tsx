@@ -14,16 +14,16 @@ import { SiteShell } from "@/components/marketing/site-shell";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Switch to DSO Hire — Free White-Glove Migration",
+  title: "Switch to DSO Hire: Free White-Glove Migration",
   description:
-    "Moving from another ATS or job board? We migrate your open jobs, templates, screening setup, and team for you — free, typically within days. Run both systems in parallel until you're confident.",
+    "Moving from another ATS or job board? We migrate your open jobs, templates, screening setup, and team for you, free, typically within days. Run both systems in parallel until you're confident.",
 };
 
 const STEPS = [
   {
     n: "01",
     title: "Export, or just give us access to your exports",
-    body: "Every major ATS and job board can export jobs, templates, and team setups as CSV or spreadsheets. Send us what your current system gives you — messy is fine, that's our problem.",
+    body: "Every major ATS and job board can export jobs, templates, and team setups as CSV or spreadsheets. Send us what your current system gives you. Messy is fine, that's our problem.",
   },
   {
     n: "02",
@@ -33,12 +33,12 @@ const STEPS = [
   {
     n: "03",
     title: "Run both in parallel until you're sure",
-    body: "Keep your old system live while you take your first applications through DSO Hire. Cancel the old contract when you're confident — not before. No lock-in on our side either: your data exports from Settings any time.",
+    body: "Keep your old system live while you take your first applications through DSO Hire. Cancel the old contract when you're confident, not before. No lock-in on our side either: your data exports from Settings any time.",
   },
 ];
 
 const MIGRATES = [
-  "Open job postings — across every location, re-created in one flow",
+  "Open job postings, across every location, re-created in one flow",
   "Screening questions (or pick from our 130+ dental library)",
   "Offer-letter + email templates (rebuilt to match your tier's template set)",
   "Team members, roles, and per-location scopes",
@@ -63,7 +63,7 @@ export default function SwitchPage() {
           style={{ "--mk-delay": "140ms" } as React.CSSProperties}
           className="text-lg text-slate-body leading-[1.7] max-w-[640px]"
         >
-          The worst part of leaving an ATS is the move. So we do it for you —
+          The worst part of leaving an ATS is the move. So we do it for you:
           jobs, screening setup, templates, and your whole team with the
           right roles. White-glove, included on every tier, typically done
           in days.
@@ -114,10 +114,10 @@ export default function SwitchPage() {
             </h2>
             <p className="text-sm text-slate-body leading-[1.7] mb-4">
               We work from what your current system exports, and we&apos;ll
-              tell you exactly what made it over — itemized, before you
+              tell you exactly what made it over, itemized, before you
               cancel anything. One thing no ATS migration can honestly
               promise: past candidates as living profiles. Candidates here
-              are real accounts that people own, not rows we copy — so your
+              are real accounts that people own, not rows we copy. So your
               old applicant list stays with you as your export, and your
               pipeline refills through your live postings from day one.
             </p>
@@ -138,7 +138,7 @@ export default function SwitchPage() {
             {
               icon: Upload,
               title: "From per-listing job boards",
-              body: "Stop paying per posting, per location. One flat fee covers every practice you operate — and you get a real pipeline, not an inbox.",
+              body: "Stop paying per posting, per location. One flat fee covers every practice you operate, and you get a real pipeline, not an inbox.",
             },
             {
               icon: Users,
@@ -184,7 +184,7 @@ export default function SwitchPage() {
             style={{ "--mk-delay": "70ms" } as React.CSSProperties}
             className="text-base text-hero-foreground/65 leading-[1.7] max-w-[520px] mx-auto mb-9"
           >
-            One conversation and we&apos;ll scope the whole move — what
+            One conversation and we&apos;ll scope the whole move: what
             exports, what we rebuild, and how long it takes. Usually: days.
           </p>
           <div

@@ -46,7 +46,7 @@ export function ReferenceRequest({
       previewText={`${dsoName} would like a reference for ${candidateName}`}
     >
       <Text style={eyebrow}>Reference request</Text>
-      <Heading style={heading}>Hi {firstName} —</Heading>
+      <Heading style={heading}>Hi {firstName},</Heading>
 
       <Text style={paragraph}>
         <strong style={strong}>{dsoName}</strong> would like a reference for{" "}
@@ -62,7 +62,7 @@ export function ReferenceRequest({
       <Section style={cardSection}>
         <Text style={cardLabel}>What you'll be asked</Text>
         <Text style={cardCopy}>
-          Seven short questions about how you'd describe {candidateName}'s work —
+          Seven short questions about how you'd describe {candidateName}'s work:
           quality, reliability, teamwork, and what they're best at. About
           3-5 minutes total.
         </Text>
@@ -85,7 +85,7 @@ export function ReferenceRequest({
       </Text>
 
       <Text style={smallParagraph}>
-        Your responses go only to {dsoName}'s hiring team — DSO Hire doesn't
+        Your responses go only to {dsoName}'s hiring team; DSO Hire doesn't
         share them publicly.
       </Text>
     </Layout>

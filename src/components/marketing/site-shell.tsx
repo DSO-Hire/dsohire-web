@@ -138,7 +138,7 @@ export async function SiteNav({
 
   return (
     <nav className="fixed top-0 inset-x-0 z-50 h-[80px] px-6 sm:px-14 flex items-center justify-between backdrop-blur-md bg-ivory/85 border-b border-[var(--rule)]">
-      <Link href="/" className="flex items-center" aria-label="DSO Hire — home">
+      <Link href="/" className="flex items-center" aria-label="DSO Hire, home">
         <BrandLockup height={42} draw />
       </Link>
       <ul className="hidden md:flex items-center gap-7 list-none">

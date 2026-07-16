@@ -100,7 +100,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
               onChange={setLocations}
             />
             <CalcSlider
-              label="Hires per year — all locations"
+              label="Hires per year · all locations"
               value={hiresPerYear}
               display={String(hiresPerYear)}
               min={5}
@@ -150,7 +150,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
             />
 
             <p className="mt-5 text-[11.5px] text-slate-meta leading-snug max-w-[440px]">
-              Illustrative math — your inputs, our flat fees. Agency placement
+              Illustrative math: your inputs, our flat fees. Agency placement
               fees typically run 15–25% of first-year salary; sponsored
               listings on the major boards commonly run $200–$600 per posting
               per month. Adjust both to match your reality.
@@ -245,7 +245,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
               {boardSpend >= dsoHireAnnual && listings > 0 ? (
                 <>
                   Your job-board spend <strong className="text-hero-foreground">alone</strong>{" "}
-                  more than covers {tier.name} — every avoided placement fee
+                  more than covers {tier.name}; every avoided placement fee
                   after that is pure savings. Unlimited postings included.
                 </>
               ) : agencyHires > 0 ? (
@@ -259,13 +259,12 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
                   of {tier.name}
                   {boardSpend > 0 && boardCoversPct >= 10 ? (
                     <>
-                      {" "}
-                      — and your listings spend already covers{" "}
+                      , and your listings spend already covers{" "}
                       <strong className="text-hero-foreground">{boardCoversPct}%</strong>{" "}
                       of it before that.
                     </>
                   ) : (
-                    <> — unlimited hires included.</>
+                    <>. Unlimited hires included.</>
                   )}
                 </>
               ) : listings > 0 ? (
@@ -275,7 +274,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
                   <strong className="text-hero-foreground">
                     {Math.min(boardCoversPct, 100)}%
                   </strong>{" "}
-                  of {tier.name} — with unlimited postings across all{" "}
+                  of {tier.name}, with unlimited postings across all{" "}
                   {locations} locations instead of a meter running on each one.
                 </>
               ) : (

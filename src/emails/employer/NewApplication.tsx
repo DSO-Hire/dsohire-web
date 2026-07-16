@@ -44,7 +44,7 @@ export function NewApplication({
       previewText={`${candidateName} applied for ${jobTitle}`}
     >
       <Text style={eyebrow}>New application</Text>
-      <Heading style={heading}>Hi {recipientName} —</Heading>
+      <Heading style={heading}>Hi {recipientName},</Heading>
       <Text style={paragraph}>
         <strong style={strong}>{candidateName}</strong> just applied for{" "}
         <strong style={strong}>{jobTitle}</strong> at {jobLocations}.

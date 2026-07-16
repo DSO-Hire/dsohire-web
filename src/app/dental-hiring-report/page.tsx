@@ -39,7 +39,7 @@ export const revalidate = 21600; // 6 hours
 export const metadata: Metadata = {
   title: "Dental Hiring Report 2026 · DSO Hire",
   description:
-    "Anonymized compensation bands, role mix, and hiring velocity across the DSO Hire platform — updated continuously from real job postings and applications. Built for DSO operators, dental professionals, and industry analysts.",
+    "Anonymized compensation bands, role mix, and hiring velocity across the DSO Hire platform, updated continuously from real job postings and applications. Built for DSO operators, dental professionals, and industry analysts.",
   openGraph: {
     title: "Dental Hiring Report 2026",
     description:
@@ -72,7 +72,7 @@ export default async function HiringReportPage() {
           <p className="text-[16px] text-slate-body leading-relaxed mb-3">
             Real compensation bands, role mix, and hiring velocity drawn
             from the DSO Hire platform. Continuously updated as dental groups post
-            jobs and candidates apply — refreshed every six hours.
+            jobs and candidates apply, refreshed every six hours.
           </p>
           <p className="text-xs text-slate-meta uppercase tracking-wide">
             Last updated{" "}
@@ -127,7 +127,7 @@ export default async function HiringReportPage() {
           </h2>
           <p className="text-sm text-slate-body leading-relaxed max-w-[640px] mb-8">
             Median ranges from posted compensation across the platform.
-            P25 = lower quartile, P75 = upper quartile — useful for
+            P25 = lower quartile, P75 = upper quartile, which is useful for
             calibrating an offer against the broader market. Bands with
             fewer than {MIN_REPORT_SAMPLE_SIZE} samples are omitted to
             avoid misleading single-data-point figures.
@@ -182,7 +182,7 @@ export default async function HiringReportPage() {
           </h2>
           <p className="text-sm text-slate-body leading-relaxed max-w-[640px] mb-8">
             Top 15 states by application activity. Reflects job postings
-            on the platform and the candidates applying to them — not a
+            on the platform and the candidates applying to them, not a
             census of dental employment overall.
           </p>
 
@@ -199,7 +199,7 @@ export default async function HiringReportPage() {
             Methodology
           </div>
           <p className="text-xs text-slate-body leading-relaxed mb-3">
-            All figures are anonymized by construction — medians and
+            All figures are anonymized by construction: medians and
             percentile bands only, never individual employer data.
             Compensation bands use the midpoint of each posted range.
             Time-to-fill is calculated from a job&apos;s posted date to
@@ -311,7 +311,7 @@ function CompBandsTable({
           {title}
         </div>
         <div className="text-xs text-slate-meta italic">
-          Sample size below threshold — bands appear as the platform scales.
+          Sample size below threshold; bands appear as the platform scales.
         </div>
       </div>
     );

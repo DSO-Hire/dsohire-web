@@ -32,6 +32,6 @@ export const entries: ChangelogEntry[] = [
     date: "2026-05-29",
     kind: "improved",
     title: "Recruiter productivity analytics",
-    body: "See moves, messages, and outcomes per teammate — useful for Monday standups, not surveillance.",
+    body: "See moves, messages, and outcomes per teammate, useful for Monday standups, not surveillance.",
   },
 ];

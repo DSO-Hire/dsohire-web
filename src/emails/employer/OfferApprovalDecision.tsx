@@ -34,13 +34,13 @@ export function OfferApprovalDecision({
   const eyebrowText = approved ? "Offer approved" : "Offer not approved";
   const lead = approved
     ? `${deciderName} approved your offer to ${candidateName} for ${jobTitle}. It has been sent to the candidate.`
-    : `${deciderName} did not approve your offer to ${candidateName} for ${jobTitle}. Nothing was sent — you can revise the terms and resubmit.`;
+    : `${deciderName} did not approve your offer to ${candidateName} for ${jobTitle}. Nothing was sent; you can revise the terms and resubmit.`;
   const cta = approved ? "View the offer" : "Revise the offer";
 
   return (
     <Layout previewText={lead}>
       <Text style={approved ? eyebrowOk : eyebrowNo}>{eyebrowText}</Text>
-      <Heading style={heading}>Hi {recipientName} —</Heading>
+      <Heading style={heading}>Hi {recipientName},</Heading>
       <Text style={paragraph}>{lead}</Text>
 
       {note ? (

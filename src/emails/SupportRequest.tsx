@@ -49,7 +49,7 @@ export function SupportRequest({
     <Layout previewText={`Support request from ${authorName}`}>
       <Text style={eyebrow}>New support request</Text>
       <Heading style={heading}>
-        {authorName} — {dsoName}
+        {authorName} · {dsoName}
       </Heading>
 
       <Section style={metaSection}>
@@ -92,7 +92,7 @@ export function SupportRequest({
           <Section style={eventsSection}>
             {recentEvents.map((e, i) => (
               <Text key={i} style={eventRow}>
-                <code style={codeText}>{e.event_kind}</code> —{" "}
+                <code style={codeText}>{e.event_kind}</code>:{" "}
                 {e.summary}{" "}
                 <span style={metaLabel}>
                   ({new Date(e.created_at).toLocaleString()})

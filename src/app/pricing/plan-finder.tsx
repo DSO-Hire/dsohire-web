@@ -33,13 +33,13 @@ const QUESTIONS: Array<{ q: string; opts: string[] }> = [
 const TIER_NAMES = ["Solo", "Growth", "Scale", "Enterprise"] as const;
 
 const WHYS: Record<(typeof TIER_NAMES)[number], string> = {
-  Solo: "A handful of locations and open roles — Solo covers it at owner pricing, and you can move up any time without losing anything.",
+  Solo: "A handful of locations and open roles: Solo covers it at owner pricing, and you can move up any time without losing anything.",
   Growth:
-    "Multiple practices, a steady stream of roles, and a small team working the pipeline — Growth's 20 openings and 15 seats fit that footprint, with +3-seat packs if you outgrow them.",
+    "Multiple practices, a steady stream of roles, and a small team working the pipeline: Growth's 20 openings and 15 seats fit that footprint, with +3-seat packs if you outgrow them.",
   Scale:
-    "You're running real hiring volume across many practices — Scale's 100 concurrent openings, 50 seats, approval chains, and confidential searches are built for exactly this.",
+    "You're running real hiring volume across many practices. Scale's 100 concurrent openings, 50 seats, approval chains, and confidential searches are built for exactly this.",
   Enterprise:
-    "At your footprint, caps shouldn't exist. Enterprise is unlimited everything — talk to us and we'll map it to your org.",
+    "At your footprint, caps shouldn't exist. Enterprise is unlimited everything; talk to us and we'll map it to your org.",
 };
 
 export function PlanFinder() {

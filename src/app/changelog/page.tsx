@@ -22,7 +22,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Changelog",
   description:
-    "Every user-visible improvement to DSO Hire, as it ships. No vaporware — if it's on this page, it's live.",
+    "Every user-visible improvement to DSO Hire, as it ships. No vaporware: if it's on this page, it's live.",
 };
 
 const KIND_STYLES: Record<ChangelogKind, { label: string; className: string }> = {
@@ -108,7 +108,7 @@ function Hero({ lastShipped }: { lastShipped: string }) {
           className="text-lg text-slate-body leading-relaxed max-w-[560px] mb-7"
         >
           Every user-visible improvement to DSO Hire, as it lands. No
-          vaporware, no &ldquo;coming soon&rdquo; — if it&rsquo;s on this
+          vaporware, no &ldquo;coming soon.&rdquo; If it&rsquo;s on this
           page, it&rsquo;s live.
         </p>
         {lastShipped && (

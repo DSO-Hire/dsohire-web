@@ -76,7 +76,7 @@ export function MessageReceived({
   return (
     <Layout previewText={previewText}>
       <Text style={eyebrow}>New message</Text>
-      <Heading style={heading}>Hi {recipientName} —</Heading>
+      <Heading style={heading}>Hi {recipientName},</Heading>
       <Text style={paragraph}>{leadIn}</Text>
 
       <Section style={cardSection}>
@@ -98,7 +98,7 @@ export function MessageReceived({
         Replies sent on DSO Hire keep your conversation tied to the
         application so {senderRole === "candidate" ? "the hiring team" : "you"}{" "}
         can see context in one place. Please don&apos;t share medical
-        information here — discuss any accommodations or health-related
+        information here; discuss any accommodations or health-related
         context directly with HR.
       </Text>
       {senderRole === "employer" && candidateName ? (

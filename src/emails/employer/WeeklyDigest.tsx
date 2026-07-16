@@ -78,7 +78,7 @@ export function WeeklyDigest({
           : `${dsoName} · this week`}
       </Heading>
       <Text style={paragraph}>
-        Hi {recipientFirstName} — here&apos;s how hiring moved at{" "}
+        Hi {recipientFirstName}, here&apos;s how hiring moved at{" "}
         <strong style={strong}>{dsoName}</strong>{" "}over the past 7 days.
       </Text>
 
@@ -120,7 +120,7 @@ export function WeeklyDigest({
             Candidates sitting more than 14 days
           </Text>
           <Text style={smallParagraph}>
-            Worth a nudge — the longer an applicant waits, the more
+            Worth a nudge: the longer an applicant waits, the more
             likely they accept somewhere else.
           </Text>
           {staleCandidates.map((c) => (

@@ -180,12 +180,12 @@ function TierGrid({
           <div className="text-center max-w-[680px] mx-auto mb-7">
             <Eyebrow className="text-heritage-deep mb-3">Multi-location owner-operator?</Eyebrow>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink leading-[1.15] mb-3">
-              Solo — for groups of 2 to 5 locations.
+              Solo: for groups of 2 to 5 locations.
             </h2>
             <p className="text-sm text-slate-body leading-[1.65]">
               If you&apos;re running multiple practices under one ownership,
               Solo gives you the full hiring platform at owner pricing. DSO
-              Hire is built for multi-location operators — single-practice
+              Hire is built for multi-location operators; single-practice
               dentists won&apos;t get full value from the multi-location
               backbone yet, but the door&apos;s open whenever you grow.
             </p>
@@ -254,7 +254,7 @@ function TierGrid({
           className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-heritage-deep border border-heritage/30"
           style={{ background: "var(--heritage-tint)" }}
         >
-          Every cap shown is the enforced cap — what we advertise is what the
+          Every cap shown is the enforced cap: what we advertise is what the
           code allows
         </span>
       </p>
@@ -741,7 +741,7 @@ const COMPARE_GROUPS: MatrixGroup[] = [
         values: { solo: true, growth: true, scale: true, enterprise: true },
       },
       {
-        feature: "PracticeFit — AI candidate match-to-job",
+        feature: "PracticeFit: AI candidate match-to-job",
         values: { solo: true, growth: true, scale: true, enterprise: true },
       },
       {
@@ -750,7 +750,7 @@ const COMPARE_GROUPS: MatrixGroup[] = [
       },
       {
         // DSOFit shipped 2026-06-09 — corporate-side sibling of PracticeFit.
-        feature: "DSOFit — corporate-role fit scoring (finance, ops, HR, IT)",
+        feature: "DSOFit: corporate-role fit scoring (finance, ops, HR, IT)",
         values: { solo: true, growth: true, scale: true, enterprise: true },
       },
       {
@@ -938,7 +938,7 @@ function CompareMatrix({
   const renderGroups: MatrixGroup[] = movedRows.length
     ? [
         ...currentGroups,
-        { label: "On the roadmap — committed, not yet shipped", rows: movedRows },
+        { label: "On the roadmap: committed, not yet shipped", rows: movedRows },
       ]
     : currentGroups;
 
@@ -959,15 +959,15 @@ function CompareMatrix({
       <div>
         <p className="text-xs text-slate-meta mb-5 max-w-[680px] leading-relaxed">
           <strong className="text-ink font-semibold">Reading this matrix:</strong>{" "}
-          expand a category — the chips on each band show how much of it a
+          expand a category; the chips on each band show how much of it a
           tier includes before you open it. Checkmarks = available today, and
           every capacity number is code-enforced. Anything not yet live for
           any tier sits in the final{" "}
           <span className="text-2xs font-semibold">On the roadmap</span>{" "}
-          band — labeled <span className="text-2xs font-semibold">H2 2026</span>{" "}
+          band, labeled <span className="text-2xs font-semibold">H2 2026</span>{" "}
           (active roadmap) or <span className="text-2xs font-semibold">Phase 6+</span>{" "}
           (longer-term). We commit to features publicly so prospects see the
-          platform&apos;s shape — and nothing roadmapped masquerades as shipped.
+          platform&apos;s shape, and nothing roadmapped masquerades as shipped.
         </p>
         <CompareMatrixAccordion
           groups={renderGroups}
@@ -998,7 +998,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "How does annual billing work?",
-    a: "Switch the toggle to Annual and you're billed once a year at roughly 10% off the monthly rate — about a month and a half free. You can start monthly and move to annual (or back) anytime from your billing settings.",
+    a: "Switch the toggle to Annual and you're billed once a year at roughly 10% off the monthly rate (about a month and a half free). You can start monthly and move to annual (or back) anytime from your billing settings.",
   },
   {
     q: "Can I change tiers later?",
@@ -1006,7 +1006,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Are there per-listing or placement fees on top of the subscription?",
-    a: "No. The subscription is the entire cost — we never charge per listing, and we never take a cut of placements. Active-listing counts are tier-based (Solo: up to 5; Growth: up to 20; Scale and Enterprise: unlimited).",
+    a: "No. The subscription is the entire cost: we never charge per listing, and we never take a cut of placements. Active-listing counts are tier-based (Solo: up to 5; Growth: up to 20; Scale and Enterprise: unlimited).",
   },
   {
     q: "What payment methods do you accept?",
@@ -1018,11 +1018,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "Can I cancel anytime?",
-    a: "Yes. Cancel from your billing portal — you'll retain access through the end of your current billing period, and you won't be charged again.",
+    a: "Yes. Cancel from your billing portal; you'll retain access through the end of your current billing period, and you won't be charged again.",
   },
   {
     q: "Is there a free trial?",
-    a: "Not currently. We hold pricing transparent and flat — no trial, but you can cancel anytime from your billing portal with no penalty.",
+    a: "Not currently. We hold pricing transparent and flat: no trial, but you can cancel anytime from your billing portal with no penalty.",
   },
 ];
 
@@ -1067,7 +1067,7 @@ function FinalCta({ nextParam }: { nextParam: string | null }) {
           Still deciding which tier fits?
         </h2>
         <p className="text-base text-slate-body leading-[1.7] mb-8">
-          Most decisions take a 15-minute conversation — no sales pitch, no
+          Most decisions take a 15-minute conversation: no sales pitch, no
           demo gauntlet. Drop us a note and we&apos;ll get back to you the same
           business day.
         </p>

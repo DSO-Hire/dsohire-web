@@ -21,7 +21,7 @@ DSO Hire LLC uses cookies and similar technologies (pixels, local storage, sessi
 
 ### 3.1 Strictly necessary cookies
 
-Required for the Services to function. They are set in response to actions you take, such as logging in or filling out a form. You cannot opt out of strictly necessary cookies — without them, the Services will not work.
+Required for the Services to function. They are set in response to actions you take, such as logging in or filling out a form. You cannot opt out of strictly necessary cookies; without them, the Services will not work.
 
 ### 3.2 Performance and analytics cookies
 
@@ -29,7 +29,7 @@ Help us understand how the Services are used (which pages are popular, how long 
 
 ### 3.3 Functional cookies
 
-Remember choices you make to give you a better experience — such as your language, your saved searches, or whether you've dismissed a notification banner.
+Remember choices you make to give you a better experience, such as your language, your saved searches, or whether you've dismissed a notification banner.
 
 ### 3.4 Targeting / advertising cookies (limited use)
 
@@ -39,10 +39,10 @@ If we run paid marketing on platforms such as LinkedIn or Google, those platform
 
 You can control cookies in several ways:
 
-- Browser settings — most browsers let you block or delete cookies, including third-party cookies. Blocking strictly necessary cookies will prevent the Services from working.
-- Do Not Track and Global Privacy Control (GPC) signals — we honor GPC signals as required by applicable law
-- Account settings — when you are signed in, you can control marketing communications and certain analytics preferences in your account
-- Industry opt-outs — for ad-related cookies, see http://optout.aboutads.info and http://optout.networkadvertising.org
+- Browser settings: most browsers let you block or delete cookies, including third-party cookies. Blocking strictly necessary cookies will prevent the Services from working.
+- Do Not Track and Global Privacy Control (GPC) signals: we honor GPC signals as required by applicable law
+- Account settings: when you are signed in, you can control marketing communications and certain analytics preferences in your account
+- Industry opt-outs: for ad-related cookies, see http://optout.aboutads.info and http://optout.networkadvertising.org
 
 ## 5. Changes to this policy
 
