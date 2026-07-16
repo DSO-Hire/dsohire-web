@@ -575,7 +575,7 @@ async function finishParse(
       ok: false,
       errorCode: "ai_parse_failed",
       error:
-        "The parser hit an unexpected response shape. Try again or paste your details manually.",
+        "We couldn't read your resume automatically. Try uploading it again — if it still fails, you can enter your details manually and everything will work the same.",
     };
   }
 
