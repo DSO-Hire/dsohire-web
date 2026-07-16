@@ -13,7 +13,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Eye, VenetianMask, ArrowRight, ShieldCheck } from "lucide-react";
-import { saveVisibilityChoice, type VisibilityChoice } from "./actions";
+import { saveVisibilityChoice } from "./actions";
+import type { VisibilityChoice } from "@/lib/candidate/visibility-choice";
 import { Tag } from "@/components/brand/tag";
 
 const OPTIONS: ReadonlyArray<{
