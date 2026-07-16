@@ -313,6 +313,13 @@ export type ParseErrorCode =
 const MIN_INPUT_CHARS = 80;
 const MAX_INPUT_CHARS = 60_000;
 
+/**
+ * Output budget for the parse response. Haiku 4.5 supports up to 64K output
+ * tokens, but non-streaming requests should stay well under ~16K to avoid
+ * SDK HTTP timeouts — 16000 is the ceiling for this single-shot call.
+ */
+const MAX_OUTPUT_TOKENS = 16_000;
+
 export interface ParseResumeWithAIInput {
   /** Plain-text resume body from `extract.ts`. */
   text: string;
@@ -348,8 +355,11 @@ export async function parseResumeWithAI(
   try {
     response = await getAnthropic().messages.create({
       model: HAIKU_MODEL,
-      // Resumes are bounded; 4000 covers a long parsed payload comfortably.
-      max_tokens: 4000,
+      // The {value, confidence} wrapper roughly doubles output size, and a
+      // long executive resume overflowed 4000 on launch day (2026-07-16) —
+      // truncated JSON never closes, so extractJson fails. 16000 stays under
+      // the SDK's non-streaming timeout guidance with ~4x headroom.
+      max_tokens: MAX_OUTPUT_TOKENS,
       system: systemPrompt,
       messages: [{ role: "user", content: userPrompt }],
     });
@@ -419,7 +429,7 @@ export async function parseResumeFromPdfWithAI(
   try {
     response = await getAnthropic().messages.create({
       model: HAIKU_MODEL,
-      max_tokens: 4000,
+      max_tokens: MAX_OUTPUT_TOKENS,
       system: systemPrompt,
       messages: [
         {
@@ -483,6 +493,40 @@ async function finishParse(
     .map((b) => b.text)
     .join("\n");
 
+  // Truncated output means the JSON never closed — extractJson would fail
+  // with a misleading "unexpected response shape". Surface the real cause
+  // (launch-day incident 2026-07-16: an executive-length resume overflowed
+  // the old 4000-token cap) and log stop_reason so this never needs
+  // log-archaeology again.
+  if (response.stop_reason === "max_tokens") {
+    await logAiUsage({
+      dsoId: null,
+      userId,
+      feature: "resume_parse",
+      model: HAIKU_MODEL,
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
+      costUsdEstimate: estimateHaikuCostUsd(
+        response.usage.input_tokens,
+        response.usage.output_tokens
+      ),
+      requestMetadata: {
+        parse_error: "Model output truncated at max_tokens",
+        stop_reason: response.stop_reason,
+        raw_preview: rawText.slice(0, 500),
+        ...inputMeta,
+      },
+      succeeded: false,
+      errorMessage: "Model output truncated at max_tokens",
+    });
+    return {
+      ok: false,
+      errorCode: "ai_parse_failed",
+      error:
+        "This resume is too detailed for the parser in one pass. Try trimming to the most recent roles, or enter your details manually.",
+    };
+  }
+
   let parsed: ParsedResume;
   try {
     const json = extractJson(rawText);
@@ -520,6 +564,7 @@ async function finishParse(
       requestMetadata: {
         parse_error: message,
         zod_issues: zodIssues,
+        stop_reason: response.stop_reason,
         raw_preview: rawText.slice(0, 500),
         ...inputMeta,
       },
@@ -549,6 +594,7 @@ async function finishParse(
     costUsdEstimate: cost,
     requestMetadata: {
       ...inputMeta,
+      stop_reason: response.stop_reason,
       work_entries: parsed.work_history.length,
       license_entries: parsed.licenses.length,
       had_redactions: parsed.flagged_redactions.length > 0,
