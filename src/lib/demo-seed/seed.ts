@@ -278,11 +278,20 @@ export async function runDemoSeed(supa: Supa, opts: SeedOptions): Promise<SeedRe
     }
 
     // Demo Mode: the shared read-only viewer joins the HERO org as a
-    // recruiter whose permission_overrides revoke every capability (plus
-    // the __demo_viewer sentinel that memberBlockError detects for the
-    // friendly demo message). Belt on top of the restrictive no-write
-    // RLS policies keyed off the account's app_metadata.
+    // recruiter whose permission_overrides revoke every WRITE capability
+    // (plus the __demo_viewer sentinel that memberBlockError detects for
+    // the friendly demo message). View capabilities stay ON — they drive
+    // nav visibility, and a prospect must see applications, comp,
+    // analytics, and the talent pool. eeo.view stays off (sensitive-
+    // looking surface a demo doesn't need). Belt on top of the
+    // restrictive no-write RLS policies keyed off app_metadata.
     if (def.hero) {
+      const demoViewerVisible = new Set<string>([
+        "apps.view",
+        "comp.view",
+        "analytics.view",
+        "sourcing.view",
+      ]);
       await insertOne(supa, "dso_users", {
         auth_user_id: demoViewerAuthId,
         dso_id: dsoId,
@@ -294,7 +303,9 @@ export async function runDemoSeed(supa: Supa, opts: SeedOptions): Promise<SeedRe
         preferred_timezone: "America/Denver",
         permission_overrides: {
           __demo_viewer: true,
-          ...Object.fromEntries(ALL_CAPABILITIES.map((c) => [c, false])),
+          ...Object.fromEntries(
+            ALL_CAPABILITIES.map((c) => [c, demoViewerVisible.has(c)])
+          ),
         },
       });
       bump("dso_users");
