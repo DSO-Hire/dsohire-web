@@ -105,6 +105,36 @@ export async function getPracticeFit(
 }
 
 /**
+ * Cached-narrative read for SSR (2026-07-17 cost-conscious summary).
+ * Returns the stored AI match notes for a pair WITHOUT any freshness
+ * or hash validation — the client still fires the narrative action on
+ * expand, which hash-checks and regenerates only on drift (token-free
+ * on a hit). Serving the possibly-slightly-stale cached text instantly
+ * is the point: zero latency, zero tokens on the common path.
+ *
+ * RLS-scoped: returns nulls when the viewer can't see the row.
+ */
+export async function getCachedPracticeFitNarrative(
+  candidateId: string,
+  jobId: string
+): Promise<{ employer: string | null; candidate: string | null }> {
+  const none = { employer: null, candidate: null };
+  if (!candidateId || !jobId) return none;
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase
+    .from("practice_fit_scores")
+    .select("narrative_employer, narrative_candidate")
+    .eq("candidate_id", candidateId)
+    .eq("job_id", jobId)
+    .maybeSingle();
+  if (!data) return none;
+  return {
+    employer: (data.narrative_employer as string | null) ?? null,
+    candidate: (data.narrative_candidate as string | null) ?? null,
+  };
+}
+
+/**
  * Bulk getter — for the kanban / applications list where one job has
  * N candidates. Returns a Map keyed by candidate_id.
  *

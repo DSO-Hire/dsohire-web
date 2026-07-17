@@ -24,7 +24,7 @@
  * Client component because expand state + lazy fetch are interactive.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { FitWordmark, FitMark } from "@/components/practice-fit/brand/fit-wordmark";
@@ -52,6 +52,17 @@ export interface WhyThisMatchProps {
   /** Drives which narrative framing renders. Defaults to "employer". */
   audience?: PracticeFitNarrativeAudience;
   defaultOpen?: boolean;
+  /**
+   * 2026-07-17 cost-conscious summary — cached narratives read
+   * server-side (getCachedPracticeFitNarrative) so the summary renders
+   * instantly with zero tokens. On first expand we still call the
+   * action once: it hash-checks and only regenerates on input drift,
+   * which is token-free on the common cache-hit path. While that
+   * revalidation is in flight the cached text stays visible (no
+   * skeleton), and on failure the cached text survives.
+   */
+  initialNarrativeEmployer?: string | null;
+  initialNarrativeCandidate?: string | null;
 }
 
 interface NarrativeState {
@@ -67,37 +78,46 @@ export function WhyThisMatch({
   jobId,
   audience = "employer",
   defaultOpen = false,
+  initialNarrativeEmployer = null,
+  initialNarrativeCandidate = null,
 }: WhyThisMatchProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const hasInitial = Boolean(
+    audience === "candidate" ? initialNarrativeCandidate : initialNarrativeEmployer
+  );
   const [narrative, setNarrative] = useState<NarrativeState>({
-    status: "idle",
-    employer: null,
-    candidate: null,
+    status: hasInitial ? "ready" : "idle",
+    employer: initialNarrativeEmployer,
+    candidate: initialNarrativeCandidate,
     errorMessage: null,
   });
+  // One action call per mount, max — tracked separately from status so
+  // an SSR-cached narrative (status starts at "ready") still gets its
+  // single revalidation pass on first expand.
+  const requestedRef = useRef(false);
   const style = bucketStyle(fit.bucket, fit.product);
 
   // Lazy fetch on first open. Re-running narrative requests on every
-  // expand would waste tokens, so we bail if status !== "idle".
+  // expand would waste tokens, so requestedRef gates to one call.
   useEffect(() => {
     if (!open) return;
-    if (narrative.status !== "idle") return;
+    if (requestedRef.current) return;
     if (!candidateId || !jobId) return;
-    // bucket='low' bypass — surface the breakdown only. Leaving
-    // status='idle' is functionally equivalent to the prior 'skipped'
-    // sentinel since the render path only displays the narrative panel
-    // for status in {loading, ready, error}. Keeps setState out of the
-    // effect body (was tripping react-hooks/set-state-in-effect).
+    // bucket='low' bypass — surface the breakdown only. The render path
+    // only displays the narrative panel for status in {loading, ready,
+    // error}, so leaving status='idle' hides the band entirely.
     if (fit.bucket === "low") return;
+    requestedRef.current = true;
 
     let cancelled = false;
-    // Sync "loading" before async fetch — canonical pattern for showing
-    // a skeleton while the network request is in flight. The
-    // set-state-in-effect rule fires here but the alternative (deriving
-    // loading from a separate hook) buys nothing for a one-shot fetch
-    // gated on `narrative.status !== "idle"`.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setNarrative((s) => ({ ...s, status: "loading" }));
+    if (!hasInitial) {
+      // Sync "loading" before async fetch — canonical pattern for showing
+      // a skeleton while the network request is in flight. With an SSR
+      // cached narrative we skip this: the cached text stays visible while
+      // the revalidation runs silently.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setNarrative((s) => ({ ...s, status: "loading" }));
+    }
     generatePracticeFitNarrative({
       candidateId,
       jobId,
@@ -106,6 +126,9 @@ export function WhyThisMatch({
       .then((res) => {
         if (cancelled) return;
         if (!res.ok) {
+          // Revalidation failure with a cached narrative on screen is a
+          // silent no-op — stale-but-real beats an error banner.
+          if (hasInitial) return;
           setNarrative({
             status: "error",
             employer: null,
@@ -123,6 +146,7 @@ export function WhyThisMatch({
       })
       .catch((err) => {
         if (cancelled) return;
+        if (hasInitial) return;
         setNarrative({
           status: "error",
           employer: null,
@@ -134,7 +158,7 @@ export function WhyThisMatch({
     return () => {
       cancelled = true;
     };
-  }, [open, candidateId, jobId, audience, fit.bucket, narrative.status]);
+  }, [open, candidateId, jobId, audience, fit.bucket, hasInitial]);
 
   const narrativeText =
     audience === "candidate" ? narrative.candidate : narrative.employer;

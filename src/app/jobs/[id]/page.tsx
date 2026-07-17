@@ -38,7 +38,10 @@ import {
   buildJobPostingJsonLd,
   type PublicJob,
 } from "@/lib/distribution/public-jobs";
-import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
+import {
+  getPracticeFit,
+  getCachedPracticeFitNarrative,
+} from "@/lib/practice-fit/get-or-compute";
 import { PracticeFitChip } from "@/components/practice-fit/practice-fit-chip";
 import {
   PracticeFitPlaceholder,
@@ -255,6 +258,10 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   // Hoisted out of the inner block so the JSX can pass it to
   // WhyThisMatch for the v1 narrative fetch.
   let viewerCandidateId: string | null = null;
+  let cachedNarrative: { employer: string | null; candidate: string | null } = {
+    employer: null,
+    candidate: null,
+  };
   // Already-applied state (Cam 2026-05-08 PM) — drives Apply CTA swap
   // to "View my application" so candidates don't redundantly apply.
   let existingApplicationId: string | null = null;
@@ -285,6 +292,14 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
         .practice_fit_consent as string;
       if (consent !== "off") {
         practiceFit = await getPracticeFit(candidateId, id);
+        if (practiceFit) {
+          // Cached AI match notes render instantly (zero tokens); the
+          // client revalidates once on first expand.
+          cachedNarrative = await getCachedPracticeFitNarrative(
+            candidateId,
+            id
+          );
+        }
         if (!practiceFit) {
           practiceFitReason = classifyPlaceholderReason(
             candidateDesiredRoles,
@@ -500,6 +515,8 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
               candidateId={viewerCandidateId}
               jobId={id}
               audience="candidate"
+              initialNarrativeEmployer={cachedNarrative.employer}
+              initialNarrativeCandidate={cachedNarrative.candidate}
             />
           </div>
         ) : practiceFitReason === "role_mismatch" ? (

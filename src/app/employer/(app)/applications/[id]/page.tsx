@@ -121,7 +121,10 @@ import { AssistantContextRegistrar } from "@/components/support/assistant-contex
 import { Eyebrow } from "@/components/brand/eyebrow";
 import { ReviewNav } from "./review-nav";
 import { candidateDisplayName } from "@/lib/applications/candidate-display";
-import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
+import {
+  getPracticeFit,
+  getCachedPracticeFitNarrative,
+} from "@/lib/practice-fit/get-or-compute";
 import { WhyThisMatch } from "@/components/practice-fit/why-this-match";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import type {
@@ -245,6 +248,11 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     .candidate_id as string;
   const fitJobId = (rawApp as Record<string, unknown>).job_id as string;
   const practiceFit = await getPracticeFit(fitCandidateId, fitJobId);
+  // Cached AI match notes render instantly (zero tokens); the client
+  // revalidates once on mount.
+  const cachedNarrative = practiceFit
+    ? await getCachedPracticeFitNarrative(fitCandidateId, fitJobId)
+    : { employer: null, candidate: null };
 
   type AppRow = {
     id: string;
@@ -1603,6 +1611,9 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 candidateId={fitCandidateId}
                 jobId={fitJobId}
                 audience="employer"
+                defaultOpen
+                initialNarrativeEmployer={cachedNarrative.employer}
+                initialNarrativeCandidate={cachedNarrative.candidate}
               />
             ) : (
               <PracticeFitConsentOffBanner />

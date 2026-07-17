@@ -78,9 +78,10 @@ const NarrativeSchema = z.object({
  * Narrative prompt version — bump on any change to the narrative STRUCTURE
  * or system prompt. Folded into the narrative hash so existing cached
  * narratives regenerate under the new format. A.5 = the structured
- * "make it a 10" readout.
+ * "make it a 10" readout. A.6 = product-aware branding (DSOFit pairs
+ * get DSOFit vocabulary instead of clinical PracticeFit dimensions).
  */
-const NARRATIVE_PROMPT_VERSION = "a5-2026-06-03";
+const NARRATIVE_PROMPT_VERSION = "a6-2026-07-17";
 
 // ─────────────────────────────────────────────────────────────────────
 // Public action
@@ -94,12 +95,6 @@ export async function generatePracticeFitNarrative(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Please sign in." };
-
-  // AI abuse guard — cooldown + rolling daily cap before the model call.
-  const rate = await checkAiRateLimit(user.id, "practice_fit_narrative");
-  if (!rate.allowed) {
-    return { ok: false, error: rate.message ?? "Please try again shortly." };
-  }
 
   // RLS-scoped read of the existing fit row. If RLS blocks us, we
   // never proceed to the prompt — protects against fishing for
@@ -164,6 +159,11 @@ export async function generatePracticeFitNarrative(
     }
   }
 
+  // Same product-derivation rule as get-or-compute's rowToResult: a
+  // DSOFit row's role dimension is labeled "Function".
+  const product: "practicefit" | "dsofit" =
+    dims.role_fit?.label === "Function" ? "dsofit" : "practicefit";
+
   const fit: FitResult = {
     score: row.score as number,
     bucket,
@@ -172,6 +172,7 @@ export async function generatePracticeFitNarrative(
     top_factors: row.top_factors as FitDimensionKey[],
     coverage: { scored_weight, total_weight, scored_count, total_count },
     input_hash: row.input_hash as string,
+    product,
   };
 
   const newHash = computeNarrativeHash(fit, ctx);
@@ -190,7 +191,28 @@ export async function generatePracticeFitNarrative(
     };
   }
 
-  // Cache miss / hash drift — call Haiku.
+  // Cache miss / hash drift — everything past this point costs tokens,
+  // so the spend guards live HERE, not at the top of the action. A
+  // cache hit must never bounce off a cooldown (the 2026-07-17 fix:
+  // the guard used to run first, so even an instant cached read could
+  // return "wait 3 seconds").
+  const rate = await checkAiRateLimit(user.id, "practice_fit_narrative");
+  if (!rate.allowed) {
+    return { ok: false, error: rate.message ?? "Please try again shortly." };
+  }
+
+  // Platform-wide circuit breaker — bounds worst-case daily spend in
+  // dollars no matter how many users are hammering the feature. Cached
+  // narratives keep serving while tripped; only fresh generation stops.
+  const breaker = await checkNarrativeGlobalDailyCap();
+  if (!breaker.allowed) {
+    return {
+      ok: false,
+      error:
+        "Match notes are temporarily paused — the dimension breakdown below covers the same ground.",
+    };
+  }
+
   const dsoIdForLogging =
     input.audience === "employer" ? ctx.dsoId : null;
 
@@ -199,7 +221,7 @@ export async function generatePracticeFitNarrative(
     response = await getAnthropic().messages.create({
       model: HAIKU_MODEL,
       max_tokens: 800,
-      system: NARRATIVE_SYSTEM_PROMPT,
+      system: buildNarrativeSystemPrompt(product),
       messages: [{ role: "user", content: buildNarrativeUserPrompt(fit, ctx) }],
     });
   } catch (err) {
@@ -326,6 +348,38 @@ export async function generatePracticeFitNarrative(
     narrative_candidate: parsed.candidate_narrative.trim(),
     fresh: true,
   };
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Global circuit breaker
+// ─────────────────────────────────────────────────────────────────────
+
+/**
+ * Platform-wide rolling-24h cap on narrative GENERATIONS (successful
+ * model calls). At Haiku pricing (~$0.003/narrative) the default 500
+ * caps worst-case spend at ~$1.65/day platform-wide. Override with
+ * PRACTICE_FIT_NARRATIVE_DAILY_CAP in Vercel env. Fails OPEN on read
+ * error — same policy as checkAiRateLimit.
+ */
+async function checkNarrativeGlobalDailyCap(): Promise<{ allowed: boolean }> {
+  const cap = Number(process.env.PRACTICE_FIT_NARRATIVE_DAILY_CAP ?? 500);
+  if (!Number.isFinite(cap) || cap <= 0) return { allowed: true };
+  const admin = createSupabaseServiceRoleClient();
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { count, error } = await admin
+    .from("ai_usage_events")
+    .select("id", { count: "exact", head: true })
+    .eq("feature", "practice_fit_narrative")
+    .eq("succeeded", true)
+    .gte("created_at", since);
+  if (error || count === null) return { allowed: true };
+  if (count >= cap) {
+    console.warn(
+      `[practice-fit/narrative] global daily cap tripped (${count}/${cap})`
+    );
+    return { allowed: false };
+  }
+  return { allowed: true };
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -464,6 +518,7 @@ function computeNarrativeHash(
 ): string {
   const canonical = JSON.stringify({
     prompt_version: NARRATIVE_PROMPT_VERSION,
+    product: fit.product ?? "practicefit",
     score: fit.score,
     bucket: fit.bucket,
     adjustments: fit.adjustments.map((a) => ({
@@ -517,7 +572,14 @@ function computeNarrativeHash(
 // Prompt
 // ─────────────────────────────────────────────────────────────────────
 
-const NARRATIVE_SYSTEM_PROMPT = `You write dental-literate "match notes" for DSO Hire, a dental hiring platform. Each candidate-job pair has a structured PracticeFit score (0-100, bucketed Excellent / Strong / Solid / Light) built from weighted dimensions: Role, State licensure, PMS fluency, Certifications, Location/commute, Compensation, Specialty, Skills, Years of experience, Employment type, DSO size, and Schedule. A dimension may be "not scored" when one side lacks data — it's excluded, never penalized. Some pairs also carry an ADJUSTMENT: a CAP (a deal-breaker such as wrong-state clinical licensure ceilings the score — this is informational only, NEVER an auto-screen) or a BOOST (the marquee dental signals all line up). The math is done; your job is to translate it into a crisp, scannable readout.
+function buildNarrativeSystemPrompt(
+  product: "practicefit" | "dsofit"
+): string {
+  const dimensionSentence =
+    product === "dsofit"
+      ? `Each candidate-job pair has a structured DSOFit score (0-100, bucketed Excellent / Strong / Solid / Light) built from weighted dimensions: Function, Seniority and scope, Multi-site experience, Dental-domain depth, Leadership scope, Compensation, Work mode, and Travel. These are corporate back-office roles at a DSO (RCM, credentialing, payroll, IT, marketing, ops) — NOT clinical chairside roles, so never invent clinical signals like licensure or PMS fluency unless they appear in the input.`
+      : `Each candidate-job pair has a structured PracticeFit score (0-100, bucketed Excellent / Strong / Solid / Light) built from weighted dimensions: Role, State licensure, PMS fluency, Certifications, Location/commute, Compensation, Specialty, Skills, Years of experience, Employment type, DSO size, and Schedule.`;
+  return `You write dental-literate "match notes" for DSO Hire, a dental hiring platform. ${dimensionSentence} A dimension may be "not scored" when one side lacks data — it's excluded, never penalized. Some pairs also carry an ADJUSTMENT: a CAP (a deal-breaker such as wrong-state clinical licensure ceilings the score — this is informational only, NEVER an auto-screen) or a BOOST (the marquee dental signals all line up). The math is done; your job is to translate it into a crisp, scannable readout.
 
 Produce TWO readouts from the SAME facts:
   • employer_narrative — addressed to a DSO recruiter; refer to the candidate by first name (or "this candidate" if no name).
@@ -539,13 +601,15 @@ LENGTH: 45-110 words per readout. Tight and scannable.
 
 OUTPUT: Return ONLY a single JSON object — no surrounding prose, no code fences:
 { "employer_narrative": string, "candidate_narrative": string }`;
+}
 
 function buildNarrativeUserPrompt(
   fit: FitResult,
   ctx: NarrativeContext
 ): string {
   const lines: string[] = [];
-  lines.push(`Practice Fit score: ${fit.score} / 100 (bucket: ${fit.bucket})`);
+  const brand = fit.product === "dsofit" ? "DSOFit" : "PracticeFit";
+  lines.push(`${brand} score: ${fit.score} / 100 (bucket: ${fit.bucket})`);
   lines.push("");
   lines.push("Top contributing dimensions (ordered by contribution desc):");
   for (const key of fit.top_factors) {

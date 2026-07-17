@@ -44,7 +44,10 @@ import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fi
 import { PracticeFitMark } from "@/components/practice-fit/brand/practice-fit-mark";
 import { WhyThisMatch } from "@/components/practice-fit/why-this-match";
 import { classifyPlaceholderReason } from "@/components/practice-fit/placeholder";
-import { getPracticeFit } from "@/lib/practice-fit/get-or-compute";
+import {
+  getPracticeFit,
+  getCachedPracticeFitNarrative,
+} from "@/lib/practice-fit/get-or-compute";
 import { getDisplayedDsoName } from "@/lib/dso/affiliation-display";
 import type { Metadata } from "next";
 
@@ -219,6 +222,11 @@ export default async function CandidateApplicationDetailPage({
   const practiceFitReason = practiceFit
     ? null
     : classifyPlaceholderReason(candidateDesiredRoles, job?.role_category);
+  // Cached AI match notes render instantly (zero tokens); the client
+  // revalidates once on first expand.
+  const cachedNarrative = practiceFit
+    ? await getCachedPracticeFitNarrative(candidate.id as string, app.job_id)
+    : { employer: null, candidate: null };
 
   // Phase 5A — interview proposals to show the candidate. Picker
   // priority: most-recent BOOKED beats most-recent PENDING. If the
@@ -381,6 +389,8 @@ export default async function CandidateApplicationDetailPage({
                 candidateId={candidate.id as string}
                 jobId={app.job_id}
                 audience="candidate"
+                initialNarrativeEmployer={cachedNarrative.employer}
+                initialNarrativeCandidate={cachedNarrative.candidate}
               />
             </section>
           ) : practiceFitReason === "role_mismatch" ? (
