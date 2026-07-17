@@ -19,6 +19,7 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import { geocodeCityState, geocodeStreetAddress } from "@/lib/geocoding/mapbox";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { SUPPORT_EMAIL } from "@/lib/contact";
@@ -48,6 +49,9 @@ export async function setLocationLogoUrl(
     return { ok: false, error: "Missing location id." };
   }
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -160,6 +164,9 @@ export async function createLocation(
   }
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   const { data: inserted, error } = await supabase
     .from("dso_locations")
@@ -223,6 +230,9 @@ export async function updateLocation(
   if (validationError) return { ok: false, error: validationError };
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // Fetch the existing row so we can decide whether to re-geocode +
   // detect an affiliation toggle for audit logging.
@@ -411,6 +421,9 @@ export async function deleteLocation(
   }
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // Block delete if any non-deleted job still references this location.
   // job_locations has ON DELETE CASCADE on location_id, so without this guard

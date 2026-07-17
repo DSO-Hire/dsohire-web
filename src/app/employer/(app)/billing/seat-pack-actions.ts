@@ -24,6 +24,7 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import { getStripe } from "@/lib/stripe/server";
 import { can } from "@/lib/permissions/capabilities";
 import {
@@ -121,6 +122,11 @@ async function persistAndRevalidate(dsoId: string, qty: number): Promise<void> {
 
 /** Add one +3 seat pack to the subscription. */
 export async function addSeatPack(): Promise<SeatPackResult> {
+  // Demo Mode: read-only sessions cannot write.
+  const supabase = await createSupabaseServerClient();
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, message: demoBlock };
+
   const loaded = await loadContext();
   if ("error" in loaded) return { ok: false, message: loaded.error };
   const { ctx } = loaded;
@@ -171,6 +177,11 @@ export async function addSeatPack(): Promise<SeatPackResult> {
 
 /** Remove one +3 seat pack — blocked if it would drop below current usage. */
 export async function removeSeatPack(): Promise<SeatPackResult> {
+  // Demo Mode: read-only sessions cannot write.
+  const supabase = await createSupabaseServerClient();
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, message: demoBlock };
+
   const loaded = await loadContext();
   if ("error" in loaded) return { ok: false, message: loaded.error };
   const { ctx } = loaded;
@@ -180,7 +191,6 @@ export async function removeSeatPack(): Promise<SeatPackResult> {
   }
 
   // Guard: the new cap must still cover everyone currently seated.
-  const supabase = await createSupabaseServerClient();
   const seatsUsed = await getSeatsUsed(supabase, ctx.dsoId);
   const newCap = resolveCaps(ctx.tier, ctx.seatPackQty - 1).maxSeats;
   if (newCap !== null && seatsUsed > newCap) {

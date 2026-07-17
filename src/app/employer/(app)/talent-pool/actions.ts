@@ -12,6 +12,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { logProspectActivity } from "@/lib/sourcing/pipeline";
 
@@ -26,6 +27,9 @@ export async function saveCandidateToPool(
   opts?: { notes?: string; tags?: string[] }
 ): Promise<TalentPoolResult> {
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -122,6 +126,9 @@ export async function removeCandidateFromPool(
   entryId: string
 ): Promise<TalentPoolResult> {
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -184,6 +191,9 @@ export async function updatePoolEntry(
   patch: { notes?: string | null; tags?: string[] | null }
 ): Promise<TalentPoolResult> {
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const update: Record<string, unknown> = {};
   if (patch.notes !== undefined) update.notes = patch.notes;
   if (patch.tags !== undefined) {

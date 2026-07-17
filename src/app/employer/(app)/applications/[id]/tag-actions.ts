@@ -12,6 +12,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import {
   isTagColor,
   MAX_TAG_LABEL_LENGTH,
@@ -56,6 +57,11 @@ export async function addApplicationTag(
   const color: TagColor = isTagColor(rawColor) ? rawColor : "slate";
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -110,6 +116,11 @@ export async function removeApplicationTag(
   if (!tagId) return { ok: false, error: "Missing tag." };
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const {
     data: { user },
   } = await supabase.auth.getUser();

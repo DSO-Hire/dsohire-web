@@ -18,6 +18,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 
 export interface PreferenceRow {
   event_kind: string;
@@ -35,6 +36,9 @@ export async function saveEmployerNotificationPreferences(
   if (rows.length === 0) return { ok: true, saved: 0 };
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const {
     data: { user },
   } = await supabase.auth.getUser();

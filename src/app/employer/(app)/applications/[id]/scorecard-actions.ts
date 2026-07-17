@@ -21,6 +21,7 @@ import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { can } from "@/lib/permissions/capabilities";
 import { capabilityBlockError } from "@/lib/permissions/guard";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import {
   getRubricById,
   parseAttributeScores,
@@ -134,6 +135,11 @@ export async function upsertScorecardDraft({
   const cleanOverallNote = sanitizeOverallNote(overallNote);
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -268,6 +274,11 @@ export async function submitScorecard(
   if (!scorecardId) return { ok: false, error: "Missing scorecard id." };
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -353,6 +364,11 @@ export async function deleteScorecardDraft(
   if (!scorecardId) return { ok: false, error: "Missing scorecard id." };
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -10,6 +10,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import { can } from "@/lib/permissions/capabilities";
 import { recordAuditEvent } from "@/lib/audit/record";
 
@@ -53,6 +54,10 @@ export async function updateAffiliationRevealPolicy(
   const policy = policyRaw as AffiliationRevealPolicy;
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   const {
     data: { user },
@@ -153,6 +158,10 @@ export async function updateCorporateAffiliationPolicy(
   const policy = policyRaw as CorporateAffiliationPolicy;
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   const {
     data: { user },

@@ -23,6 +23,8 @@
  */
 
 import { moveApplicationStage } from "./actions";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import { attachStatusEventNote } from "@/lib/applications/status-event-notes";
 import type { StageKind } from "@/lib/applications/stages";
 import { validateDisposition } from "@/lib/applications/disposition-reasons";
@@ -70,6 +72,11 @@ export async function rejectWithReason(
   reason: string,
   dispositionCode?: string | null
 ): Promise<RejectActionResult> {
+  // Demo Mode: read-only sessions cannot write.
+  const supabase = await createSupabaseServerClient();
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   return moveAndAttachNote(applicationId, "rejected", reason, dispositionCode ?? null);
 }
 
@@ -78,5 +85,10 @@ export async function withdrawWithReason(
   reason: string,
   dispositionCode?: string | null
 ): Promise<RejectActionResult> {
+  // Demo Mode: read-only sessions cannot write.
+  const supabase = await createSupabaseServerClient();
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   return moveAndAttachNote(applicationId, "withdrawn", reason, dispositionCode ?? null);
 }

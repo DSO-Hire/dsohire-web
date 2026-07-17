@@ -68,6 +68,7 @@ import {
   type ScreeningQuestionPayload,
 } from "./job-shared";
 import { capabilityBlockError } from "@/lib/permissions/guard";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import {
   parseConfidentialFields,
   syncJobConfidentiality,
@@ -84,6 +85,10 @@ export async function createJob(
   if ("error" in parsed) return { ok: false, error: parsed.error };
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // #83 Phase 2 — capability gates: creating needs jobs.create; creating
   // straight to ACTIVE additionally needs jobs.publish.
@@ -341,6 +346,10 @@ export async function updateJob(
   if ("error" in parsed) return { ok: false, error: parsed.error };
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // #83 Phase 2 — editing needs jobs.edit.
   const editBlock = await capabilityBlockError(supabase, "jobs.edit", {
@@ -626,6 +635,10 @@ export async function updateJobBasicsSection(
 
   const supabase = await createSupabaseServerClient();
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   // #83 Phase 2 — section edits need jobs.edit.
   const editBlock = await capabilityBlockError(supabase, "jobs.edit", { dsoId });
   if (editBlock) return { ok: false, error: editBlock };
@@ -683,6 +696,10 @@ export async function updateJobDescriptionSection(
   }
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // #83 Phase 2 — section edits need jobs.edit.
   const editBlock = await capabilityBlockError(supabase, "jobs.edit", { dsoId });
@@ -865,6 +882,10 @@ export async function updateJobDetailsSection(
   }
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // #83 Phase 2 — section edits need jobs.edit.
   const editBlock = await capabilityBlockError(supabase, "jobs.edit", { dsoId });
@@ -1095,6 +1116,10 @@ export async function updateJobScreeningSection(
 
   const supabase = await createSupabaseServerClient();
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   // #83 Phase 2 — section edits need jobs.edit.
   const editBlock = await capabilityBlockError(supabase, "jobs.edit", { dsoId });
   if (editBlock) return { ok: false, error: editBlock };
@@ -1189,6 +1214,10 @@ export async function setJobStatus(
   }
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // Snapshot the prior status + the title (for system-message body) so
   // we know whether this transition is the "filled" event we want to
@@ -1414,6 +1443,11 @@ export async function updateJobSchedule(
   }
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -1497,6 +1531,10 @@ export async function setJobVisibility(
 
   const supabase = await createSupabaseServerClient();
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   // Snapshot title + dso_id for the audit log + the public-page revalidate.
   const { data: priorJob } = await supabase
     .from("jobs")
@@ -1572,6 +1610,10 @@ export async function cloneJob(formData: FormData): Promise<void> {
   if (!jobId) return;
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return;
 
   const {
     data: { user },
@@ -1752,6 +1794,10 @@ export async function softDeleteJob(
   if (!jobId) return { ok: false, error: "Missing job ID." };
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // Snapshot title + dso_id BEFORE the soft-delete so we can audit-log
   // with full context.

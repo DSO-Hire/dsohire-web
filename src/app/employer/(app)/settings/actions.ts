@@ -8,6 +8,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 
 /**
  * Persist a DSO logo URL after <ImageUpload> finishes its storage write.
@@ -18,6 +19,9 @@ export async function setDsoLogoUrl(
   url: string | null
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -76,6 +80,9 @@ export async function updatePassword(
   }
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const {
     data: { user },
   } = await supabase.auth.getUser();

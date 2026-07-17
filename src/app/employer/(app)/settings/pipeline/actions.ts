@@ -25,6 +25,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import { can } from "@/lib/permissions/capabilities";
 import { getActiveSubscription } from "@/lib/billing/subscription";
 import { recordAuditEvent } from "@/lib/audit/record";
@@ -158,6 +159,10 @@ export async function addStage(input: {
   if (!gate.ok) return gate;
   const { supabase, userId, dsoId } = gate.scope;
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   if (!isValidKind(input.kind)) {
     return { ok: false, error: "Pick a valid stage kind." };
   }
@@ -237,6 +242,10 @@ export async function renameStage(
   if (!gate.ok) return gate;
   const { supabase, userId, dsoId } = gate.scope;
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   if (!id) return { ok: false, error: "Missing stage id." };
   const trimmed = label.trim();
   if (!trimmed || trimmed.length > 40) {
@@ -315,6 +324,10 @@ export async function recolorStage(
   if (!gate.ok) return gate;
   const { supabase, userId, dsoId } = gate.scope;
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   if (!id) return { ok: false, error: "Missing stage id." };
   if (!isValidColor(color_class)) {
     return { ok: false, error: "Pick a color from the palette." };
@@ -355,6 +368,10 @@ export async function setStageHidden(
   const gate = await getAdminScope();
   if (!gate.ok) return gate;
   const { supabase, userId, dsoId } = gate.scope;
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   if (!id) return { ok: false, error: "Missing stage id." };
 
@@ -444,6 +461,10 @@ export async function setStageDefault(
   if (!gate.ok) return gate;
   const { supabase, userId, dsoId } = gate.scope;
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   if (!id) return { ok: false, error: "Missing stage id." };
 
   const { data: row, error: rowErr } = await supabase
@@ -521,6 +542,10 @@ export async function deleteStage(
   const gate = await getAdminScope();
   if (!gate.ok) return gate;
   const { supabase, userId, dsoId } = gate.scope;
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   if (!id) return { ok: false, error: "Missing stage id." };
 
@@ -621,6 +646,10 @@ export async function reorderStages(
   const gate = await getAdminScope();
   if (!gate.ok) return gate;
   const { supabase, userId, dsoId } = gate.scope;
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   if (!Array.isArray(orderedIds) || orderedIds.length === 0) {
     return { ok: false, error: "Nothing to reorder." };

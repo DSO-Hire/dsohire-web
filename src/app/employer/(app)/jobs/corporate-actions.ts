@@ -127,6 +127,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { capabilityBlockError } from "@/lib/permissions/guard";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import {
   parseConfidentialFields,
   syncJobConfidentiality,
@@ -682,6 +683,10 @@ export async function createCorporateJob(
 
   const supabase = await createSupabaseServerClient();
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   // #83 Phase 2 — capability gates (parity with createJob): jobs.create to
   // create, plus jobs.publish when creating straight to ACTIVE.
   const createBlock = await capabilityBlockError(supabase, "jobs.create", {
@@ -890,6 +895,10 @@ export async function updateCorporateJob(
   if ("error" in parsed) return { ok: false, error: parsed.error };
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // #83 Phase 2 — editing needs jobs.edit.
   const editBlock = await capabilityBlockError(supabase, "jobs.edit", { dsoId });
@@ -1157,6 +1166,10 @@ export async function updateCorporateJobBasicsSection(
 
   const supabase = await createSupabaseServerClient();
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   // #83 Phase 2 — section edits need jobs.edit.
   const editBlock = await capabilityBlockError(supabase, "jobs.edit", { dsoId });
   if (editBlock) return { ok: false, error: editBlock };
@@ -1252,6 +1265,10 @@ export async function updateCorporateJobDetailsSection(
   if ("error" in parsed) return { ok: false, error: parsed.error };
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // #83 Phase 2 — section edits need jobs.edit.
   const editBlock = await capabilityBlockError(supabase, "jobs.edit", { dsoId });

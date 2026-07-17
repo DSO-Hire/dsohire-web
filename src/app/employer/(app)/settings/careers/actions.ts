@@ -15,6 +15,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import { getActingMember, memberBlockError } from "@/lib/permissions/guard";
 
 export interface CareersActionState {
@@ -29,6 +30,9 @@ export async function setJobDistribution(
   if (!jobId) return { ok: false, error: "Missing job." };
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const member = await getActingMember(supabase);
   const block = memberBlockError(member, "settings.manage");
   if (block || !member) return { ok: false, error: block ?? "Sign in required." };

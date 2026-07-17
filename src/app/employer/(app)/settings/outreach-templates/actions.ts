@@ -9,6 +9,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 
 export interface TemplateActionResult {
   ok: boolean;
@@ -28,6 +29,9 @@ export async function createOutreachTemplate(formData: FormData): Promise<Templa
   }
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -70,6 +74,9 @@ export async function updateOutreachTemplate(formData: FormData): Promise<Templa
   }
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const { error, data } = await supabase
     .from("dso_outreach_templates")
     .update({ name, subject, body })
@@ -86,6 +93,9 @@ export async function updateOutreachTemplate(formData: FormData): Promise<Templa
 
 export async function deleteOutreachTemplate(id: string): Promise<TemplateActionResult> {
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const { error, data } = await supabase
     .from("dso_outreach_templates")
     .delete()

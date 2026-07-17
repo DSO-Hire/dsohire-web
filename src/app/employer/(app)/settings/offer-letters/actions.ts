@@ -16,6 +16,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import { recordAuditEvent } from "@/lib/audit/record";
 
 export interface TemplateActionResult {
@@ -107,6 +108,9 @@ export async function createTemplate(
   if (err) return { ok: false, error: err };
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const { data: inserted, error } = await supabase
     .from("dso_offer_letter_templates")
     .insert({
@@ -162,6 +166,9 @@ export async function updateTemplate(
   if (err) return { ok: false, error: err };
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const { error, data } = await supabase
     .from("dso_offer_letter_templates")
     .update({ name, body })
@@ -203,6 +210,9 @@ export async function archiveTemplate(id: string): Promise<TemplateActionResult>
   if (!id) return { ok: false, error: "Missing template id." };
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const { error, data } = await supabase
     .from("dso_offer_letter_templates")
     .update({ is_archived: true })
@@ -244,6 +254,9 @@ export async function restoreTemplate(id: string): Promise<TemplateActionResult>
   if (!id) return { ok: false, error: "Missing template id." };
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const { error, data } = await supabase
     .from("dso_offer_letter_templates")
     .update({ is_archived: false })
@@ -287,6 +300,9 @@ export async function deleteTemplate(id: string): Promise<TemplateActionResult> 
   if (!id) return { ok: false, error: "Missing template id." };
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // Defensive count of historic sends. The FK is ON DELETE SET NULL so
   // a delete WOULD succeed without breaking the audit trail, but we

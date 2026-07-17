@@ -10,6 +10,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 
 export async function assignApplication(
   applicationId: string,
@@ -17,6 +18,11 @@ export async function assignApplication(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   if (!applicationId) return { ok: false, error: "Missing application." };
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const {
     data: { user },
   } = await supabase.auth.getUser();

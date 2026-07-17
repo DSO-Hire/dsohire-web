@@ -25,6 +25,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import { can } from "@/lib/permissions/capabilities";
 import {
   CUSTOM_KIND_PREFIX,
@@ -98,6 +99,10 @@ export async function upsertTemplate(input: {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   if (!isPredefinedKind(input.kind)) {
     return { ok: false, error: "Unknown template kind." };
   }
@@ -150,6 +155,10 @@ export async function revertTemplate(input: {
 }): Promise<Result> {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   if (!isPredefinedKind(input.kind)) {
     return { ok: false, error: "Unknown template kind." };
@@ -248,6 +257,10 @@ export async function createCustomTemplate(input: {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const tierOk = await dsoCanUseCustomTemplates(ctx.supabase, ctx.dsoId);
   if (!tierOk) {
     return {
@@ -310,6 +323,10 @@ export async function updateCustomTemplate(input: {
 }): Promise<Result> {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   const tierOk = await dsoCanUseCustomTemplates(ctx.supabase, ctx.dsoId);
   if (!tierOk) {
@@ -380,6 +397,10 @@ export async function archiveCustomTemplate(input: {
 }): Promise<Result> {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   const { data: existing, error: lookupErr } = await ctx.supabase
     .from("email_templates")

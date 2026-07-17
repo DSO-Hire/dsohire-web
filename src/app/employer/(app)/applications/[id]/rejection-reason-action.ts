@@ -28,6 +28,7 @@
 import { z } from "zod";
 import type Anthropic from "@anthropic-ai/sdk";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import {
   getAnthropic,
   HAIKU_MODEL,
@@ -92,6 +93,10 @@ export async function suggestRejectionReason(
   }
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   const {
     data: { user },

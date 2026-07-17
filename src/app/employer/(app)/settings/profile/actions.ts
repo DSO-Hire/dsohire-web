@@ -27,6 +27,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import { can } from "@/lib/permissions/capabilities";
 import { recordAuditEvent } from "@/lib/audit/record";
 import {
@@ -157,6 +158,10 @@ export async function updateDsoName(input: { name: string }): Promise<Result> {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const name = input.name.trim().replace(/\s+/g, " ");
   if (name.length < 2) {
     return { ok: false, error: "Enter your DSO's name (at least 2 characters)." };
@@ -206,6 +211,10 @@ export async function updateDsoName(input: { name: string }): Promise<Result> {
 export async function upsertSlug(input: { slug: string }): Promise<Result> {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   const slug = input.slug.trim().toLowerCase();
   if (!SLUG_REGEX.test(slug)) {
@@ -260,6 +269,10 @@ export async function upsertAbout(input: {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const mission = input.mission?.trim() ? input.mission.trim() : null;
   const description = input.description?.trim() ? input.description.trim() : null;
 
@@ -297,6 +310,10 @@ export async function setDsoBannerUrl(
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const { error } = await ctx.supabase
     .from("dsos")
     .update({ banner_url: url })
@@ -323,6 +340,10 @@ export async function addPhoto(input: {
 }): Promise<Result> {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   const { count } = await ctx.supabase
     .from("dso_photos")
@@ -359,6 +380,10 @@ export async function updatePhotoCaption(input: {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const { error } = await ctx.supabase
     .from("dso_photos")
     .update({ caption: input.caption?.trim() || null })
@@ -380,6 +405,10 @@ export async function deletePhoto(input: {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const { error } = await ctx.supabase
     .from("dso_photos")
     .delete()
@@ -400,6 +429,10 @@ export async function reorderPhotos(input: {
 }): Promise<Result> {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // Sequential UPDATEs is fine for max-6 rows. Locked pattern for bulk
   // ordering — see project_bulk_actions_shipped_2026_05_04.md.
@@ -432,6 +465,10 @@ export async function upsertWhyJoinUs(input: {
 }): Promise<Result> {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   if (input.blocks.length > MAX_WHY_BLOCKS) {
     return {
@@ -494,6 +531,10 @@ export async function upsertBrandAndCulture(input: {
 }): Promise<Result> {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   if (input.culture_chips.length > MAX_CULTURE_CHIPS) {
     return {
@@ -563,6 +604,10 @@ export async function upsertCompanyDetails(input: {
 }): Promise<Result> {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // Website — optional. Normalize a bare domain to https:// so DSOs can
   // type "yourdso.com" without thinking about the scheme.
@@ -708,6 +753,10 @@ export async function upsertPracticeProfile(input: {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const practice_pace = cleanEnum(input.practice_pace, PRACTICE_PACE_VALUES);
   const autonomy_level = cleanEnum(input.autonomy_level, AUTONOMY_LEVEL_VALUES);
   const mentorship_offered = cleanEnum(input.mentorship_offered, MENTORSHIP_VALUES);
@@ -765,6 +814,10 @@ export async function upsertContactCta(input: {
 }): Promise<Result> {
   const ctx = await getDsoAdminContext();
   if (!ctx.ok) return ctx;
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   const label = input.label?.trim() || null;
   const url = input.url?.trim() || null;

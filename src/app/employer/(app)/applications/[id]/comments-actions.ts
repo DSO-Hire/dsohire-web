@@ -19,6 +19,7 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { CommentMention } from "@/emails/employer/CommentMention";
 
@@ -97,6 +98,11 @@ export async function createApplicationComment({
   }
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -171,6 +177,11 @@ export async function updateApplicationComment({
   }
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -244,6 +255,11 @@ export async function deleteApplicationComment(
   if (!commentId) return { ok: false, error: "Missing comment id." };
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const {
     data: { user },
   } = await supabase.auth.getUser();

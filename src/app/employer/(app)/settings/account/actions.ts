@@ -11,6 +11,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 
 type Result = { ok: true } | { ok: false; error: string };
 
@@ -29,6 +30,9 @@ export async function updatePreferredTimezone(
   }
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -66,6 +70,9 @@ export async function updateMyProfile(input: {
   coverageArea: string; // free text when regional
 }): Promise<Result> {
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -151,6 +158,9 @@ export async function updateMyProfile(input: {
  */
 export async function setMyAvatarUrl(url: string | null): Promise<Result> {
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -19,6 +19,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { capabilityBlockError } from "@/lib/permissions/guard";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import {
   KIND_DEFAULT_LABELS,
   STAGE_KINDS,
@@ -73,6 +74,11 @@ export async function updateApplicationStatus(
   if (!id || !isStageKind(next)) {
     return { ok: false, error: "Invalid status transition." };
   }
+
+  // Demo Mode: read-only sessions cannot write.
+  const supabase = await createSupabaseServerClient();
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   const result = await moveApplicationStage(id, { kind: next });
   if (!result.ok) return { ok: false, error: result.error };
@@ -177,6 +183,10 @@ export async function moveApplicationStage(
   }
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   const resolved = await resolveTargetStage(supabase, applicationId, target);
   if (!resolved) {
@@ -398,6 +408,10 @@ export async function saveEmployerNotes(
   if (!id) return { ok: false, error: "Missing application id." };
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // #83 Phase 2 — internal notes are feedback → apps.scorecard.
   const notesBlock = await capabilityBlockError(supabase, "apps.scorecard");
