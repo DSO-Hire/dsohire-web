@@ -11,6 +11,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { dsoCanUseOfferApprovals } from "@/lib/offers/approval-tier";
 import { can } from "@/lib/permissions/capabilities";
+import { isDemoDeployment, isDemoViewerUser } from "@/lib/demo/mode";
 import { diffOffers } from "@/lib/offers/diff";
 import { OfferApprovalsManager, type PendingOffer } from "./offer-approvals-manager";
 
@@ -37,7 +38,11 @@ export default async function OfferApprovalsPage() {
   // not the raw role — a recruiter granted offers.approve via override can
   // now actually reach the queue (the old role check stranded the grant).
   // Owner/admin presets include it, so their behavior is unchanged.
+  // Demo Mode: the read-only viewer has offers.approve revoked (writes
+  // stay blocked), but should still see the approval queue in the tour.
+  const demoViewer = isDemoDeployment() && isDemoViewerUser(user);
   if (
+    !demoViewer &&
     !can(
       role,
       (me as Record<string, unknown>).permission_overrides,

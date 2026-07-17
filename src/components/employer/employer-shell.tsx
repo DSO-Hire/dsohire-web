@@ -137,6 +137,15 @@ export interface EmployerShellProps {
   /** Demo Mode — slim banner node rendered above the main column (null
    * everywhere except a demo_viewer session on the demo deployment). */
   topBanner?: React.ReactNode;
+  /**
+   * Demo Mode — a read-only viewer keeps ALL its write capabilities
+   * revoked (writes blocked by RLS + the demo guards), which would
+   * otherwise gut the nav, since nav visibility keys off those same
+   * "manage" capabilities. When true, show every nav item so a prospect
+   * sees the full product; the pages render read-only and every write is
+   * still blocked. Prod/normal sessions leave this false.
+   */
+  showAllNav?: boolean;
   /** Effective permissions (role preset + overrides) — resolved in the layout. */
   navPerms: Partial<Record<Capability, boolean>>;
   /** Nav badge counts — resolved server-side in the layout. */
@@ -162,6 +171,7 @@ export interface EmployerShellProps {
 export function EmployerShell({
   children,
   topBanner,
+  showAllNav = false,
   navPerms,
   inboxUnread,
   newApplications,
@@ -178,8 +188,10 @@ export function EmployerShell({
   dsoId,
 }: EmployerShellProps) {
   // #83 Phase 2 — nav visibility is capability-driven (resolved upstream).
+  // Demo Mode override: show everything so a read-only prospect sees the
+  // whole product (writes stay blocked regardless).
   const visibleNav = NAV.filter(
-    (item) => !item.requiresCap || navPerms[item.requiresCap]
+    (item) => showAllNav || !item.requiresCap || navPerms[item.requiresCap]
   ).map((item) => {
     if (item.id === "inbox") return { ...item, badge: inboxUnread };
     if (item.id === "applications") return { ...item, badge: newApplications };

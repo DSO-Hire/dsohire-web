@@ -151,16 +151,17 @@ export default async function EmployerAppLayout({
     : null;
 
   // Demo Mode: slim persistent banner for the read-only viewer session.
-  const demoBanner =
-    isDemoDeployment() && isDemoViewerUser(user) ? (
-      <div className="bg-heritage-deep text-cream text-2xs font-semibold tracking-[1.5px] uppercase text-center px-4 py-1.5">
-        Demo mode · live product, read-only · data resets nightly
-      </div>
-    ) : null;
+  const isDemoViewer = isDemoDeployment() && isDemoViewerUser(user);
+  const demoBanner = isDemoViewer ? (
+    <div className="bg-heritage-deep text-cream text-2xs font-semibold tracking-[1.5px] uppercase text-center px-4 py-1.5">
+      Demo mode · live product, read-only · data resets nightly
+    </div>
+  ) : null;
 
   return (
     <EmployerShell
       topBanner={demoBanner}
+      showAllNav={isDemoViewer}
       navPerms={navPerms}
       inboxUnread={inboxUnread}
       newApplications={newApplications}

@@ -10,6 +10,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { isDemoDeployment, isDemoViewerUser } from "@/lib/demo/mode";
 import { dsoCanUseAutomationRules } from "@/lib/automations/tier";
 import { dsoCanUseSequences } from "@/lib/sequences/tier";
 import { AutomationsManager } from "./automations-manager";
@@ -54,7 +55,12 @@ export default async function AutomationsPage({ searchParams }: PageProps) {
   if (!me) redirect("/employer/onboarding");
   const dsoId = me.dso_id as string;
   const role = me.role as string;
-  if (role !== "owner" && role !== "admin") redirect("/employer/dashboard");
+  // Demo Mode: the read-only viewer is a recruiter (writes stay blocked),
+  // but should still see Automations as part of the product tour.
+  const demoViewer = isDemoDeployment() && isDemoViewerUser(user);
+  if (role !== "owner" && role !== "admin" && !demoViewer) {
+    redirect("/employer/dashboard");
+  }
 
   const canManage = await dsoCanUseAutomationRules(supabase, dsoId);
   const canManageSequences = await dsoCanUseSequences(supabase, dsoId);
