@@ -26,6 +26,7 @@ import {
 } from "@/lib/auth/mfa";
 import { getActiveSubscription } from "@/lib/billing/subscription";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 
 /**
  * Resolve the signed-in user's DSO membership so we can scope MFA audit
@@ -72,6 +73,10 @@ export async function enrollTotp(): Promise<
 > {
   const ctx = await getAuthedUser();
   if (!ctx.ok) return ctx;
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // Scrub any leftover unverified "DSO Hire" factor from a prior abandoned
   // attempt (e.g., user closed the tab mid-flow). The regular client's
@@ -140,6 +145,10 @@ export async function verifyEnrollment(input: {
 }): Promise<Result<{ recoveryCodes: string[] }>> {
   const ctx = await getAuthedUser();
   if (!ctx.ok) return ctx;
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   const trimmed = input.code.replace(/\s+/g, "");
   if (!/^\d{6}$/.test(trimmed)) {
@@ -230,6 +239,10 @@ export async function disableMfa(input: {
   const ctx = await getAuthedUser();
   if (!ctx.ok) return ctx;
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const trimmed = input.code.replace(/\s+/g, "");
   if (!/^\d{6}$/.test(trimmed)) {
     return { ok: false, error: "Enter the 6-digit code to confirm." };
@@ -296,6 +309,10 @@ export async function regenerateRecoveryCodes(input: {
   const ctx = await getAuthedUser();
   if (!ctx.ok) return ctx;
 
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const trimmed = input.code.replace(/\s+/g, "");
   if (!/^\d{6}$/.test(trimmed)) {
     return { ok: false, error: "Enter the 6-digit code to confirm." };
@@ -355,6 +372,10 @@ export async function setOrgRequireMfa(input: {
 }): Promise<Result> {
   const ctx = await getAuthedUser();
   if (!ctx.ok) return ctx;
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   const { data: dsoUser } = await ctx.supabase
     .from("dso_users")

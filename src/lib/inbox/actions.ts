@@ -19,6 +19,7 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import type { ThreadNote, ThreadStageStep } from "./types";
 
 type Result =
@@ -42,6 +43,9 @@ export async function archiveThread(applicationId: string): Promise<Result> {
   if (!applicationId) return { ok: false, error: "Missing application id." };
   const ctx = await getUser();
   if (!ctx.ok) return ctx;
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   const { error } = await ctx.supabase
     .from("inbox_archived_threads")
@@ -68,6 +72,9 @@ export async function unarchiveThread(
   if (!applicationId) return { ok: false, error: "Missing application id." };
   const ctx = await getUser();
   if (!ctx.ok) return ctx;
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   const { error } = await ctx.supabase
     .from("inbox_archived_threads")
@@ -102,6 +109,9 @@ export async function markThreadRead(
   if (!applicationId) return { ok: false, error: "Missing application id." };
   const ctx = await getUser();
   if (!ctx.ok) return ctx;
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // Determine audience from the user's profile state. Candidates have
   // a row in `candidates`; everyone else with a dso_users row is on

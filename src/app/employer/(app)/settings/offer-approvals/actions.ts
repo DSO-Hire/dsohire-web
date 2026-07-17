@@ -17,6 +17,7 @@ import { dsoCanUseOfferApprovals } from "@/lib/offers/approval-tier";
 import { parseOfferApprovalPolicy } from "@/lib/offers/approval-policy";
 import { parsePermissionOverrides } from "@/lib/permissions/capabilities";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 
 export type SettingsResult = { ok: true } | { ok: false; error: string };
 
@@ -57,6 +58,11 @@ export async function updateOfferApprovalPolicy(input: {
   if (!who.ok) return who;
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   if (!(await dsoCanUseOfferApprovals(supabase, who.dsoId))) {
     return { ok: false, error: "Offer approvals are a Scale feature. Upgrade to configure them." };
   }
@@ -109,6 +115,11 @@ export async function setTeammateCanSendDirectly(
   if (!who.ok) return who;
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   if (!(await dsoCanUseOfferApprovals(supabase, who.dsoId))) {
     return { ok: false, error: "Offer approvals are a Scale feature. Upgrade to configure them." };
   }

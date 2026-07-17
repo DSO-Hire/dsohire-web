@@ -22,12 +22,18 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 
 export async function acceptInvitation(formData: FormData): Promise<void> {
   const token = String(formData.get("token") ?? "").trim();
   if (!token) redirect("/employer/sign-in");
 
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) redirect(`/employer/invite/${token}`);
+
   const {
     data: { user },
   } = await supabase.auth.getUser();

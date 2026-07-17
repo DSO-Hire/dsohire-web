@@ -78,6 +78,55 @@ export async function ensureAuthUser(
   return data.user.id;
 }
 
+/**
+ * Demo Mode (spec 2026-07-16): the shared read-only viewer account.
+ * app_metadata.demo_viewer=true is the mark the restrictive no-write RLS
+ * policies key off — it can ONLY be set here via the admin API, never by
+ * the user. Same shared demo password; the account is provably read-only
+ * at the DB layer, so handing out the login is safe by construction.
+ */
+export const DEMO_VIEWER_LOCAL = "demo.viewer";
+
+export async function ensureDemoViewerAuthUser(
+  supa: Supa,
+  map: Map<string, string>
+): Promise<string> {
+  const email = demoEmail(DEMO_VIEWER_LOCAL);
+  const found = map.get(email.toLowerCase());
+  const appMeta = { demo_viewer: true };
+  const userMeta = {
+    full_name: "Demo Viewer",
+    [SEED_BATCH_KEY]: SEED_BATCH,
+    role_during_signup: "employer",
+  };
+  if (found) {
+    const { error } = await supa.auth.admin.updateUserById(found, {
+      password: DEMO_PASSWORD,
+      user_metadata: userMeta,
+      app_metadata: appMeta,
+      email_confirm: true,
+    });
+    if (error) {
+      throw new Error(`[demo-seed] updateUser ${email} failed: ${error.message}`);
+    }
+    return found;
+  }
+  const { data, error } = await supa.auth.admin.createUser({
+    email,
+    password: DEMO_PASSWORD,
+    email_confirm: true,
+    user_metadata: userMeta,
+    app_metadata: appMeta,
+  });
+  if (error || !data?.user) {
+    throw new Error(
+      `[demo-seed] createUser ${email} failed: ${error?.message ?? "no user"}`
+    );
+  }
+  map.set(email.toLowerCase(), data.user.id);
+  return data.user.id;
+}
+
 /** Provision the named LOGIN accounts (employers + the two candidate logins). */
 export async function ensureDemoAuthUsers(
   supa: Supa,

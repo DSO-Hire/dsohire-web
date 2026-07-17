@@ -22,6 +22,7 @@ import {
   type Capability,
   CAPABILITY_META,
 } from "@/lib/permissions/capabilities";
+import { demoWriteBlockError, DEMO_BLOCK_MESSAGE } from "@/lib/demo/mode";
 
 type SupabaseClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
@@ -83,11 +84,29 @@ function capLabel(cap: Capability): string {
  * Friendly form-error when `member` lacks `cap`; null = allowed.
  * Accepts null member so callers can pipe getActingMember straight in.
  */
+/**
+ * The seeded demo viewer's dso_users row plants a `__demo_viewer: true`
+ * sentinel in permission_overrides (alongside all-false capability
+ * revocations). Detecting it here lets actions that preload the member
+ * show the demo message instead of a "ask an owner" permission error.
+ * Unknown keys are ignored by effectivePermissions, so the sentinel has
+ * no effect on the permission math itself.
+ */
+export function isDemoViewerMember(member: ActingMember | null): boolean {
+  const o = member?.permissionOverrides;
+  return (
+    !!o &&
+    typeof o === "object" &&
+    (o as Record<string, unknown>).__demo_viewer === true
+  );
+}
+
 export function memberBlockError(
   member: ActingMember | null,
   cap: Capability
 ): string | null {
   if (!member) return "You don't have access to this organization.";
+  if (isDemoViewerMember(member)) return DEMO_BLOCK_MESSAGE;
   if (memberCan(member, cap)) return null;
   return `Your account doesn't have permission to ${capLabel(cap)}. An owner or admin can grant this on the Team page.`;
 }
@@ -101,6 +120,12 @@ export async function capabilityBlockError(
   cap: Capability,
   opts?: { dsoId?: string }
 ): Promise<string | null> {
+  // Demo Mode: a demo viewer gets the friendly demo message instead of a
+  // confusing "ask an owner to grant this" permission error. Their seeded
+  // membership also revokes every capability, so this is UX on top of an
+  // already-closed door (see src/lib/demo/mode.ts for the full model).
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return demoBlock;
   const member = await getActingMember(supabase, opts);
   return memberBlockError(member, cap);
 }

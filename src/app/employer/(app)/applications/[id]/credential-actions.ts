@@ -29,6 +29,7 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 
 const CREDENTIAL_BUCKET = "candidate-credentials";
 
@@ -193,6 +194,10 @@ export async function verifyCredential(
   rowId: string,
   applicationId: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(await createSupabaseServerClient());
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const scope = await resolveScope(kind, rowId, applicationId);
   if (!scope.ok) return scope;
   const { ctx } = scope;
@@ -249,6 +254,10 @@ export async function unverifyCredential(
   rowId: string,
   applicationId: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(await createSupabaseServerClient());
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const scope = await resolveScope(kind, rowId, applicationId);
   if (!scope.ok) return scope;
   const { ctx } = scope;
@@ -304,6 +313,10 @@ export async function markCredentialExpired(
   rowId: string,
   applicationId: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(await createSupabaseServerClient());
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const scope = await resolveScope(kind, rowId, applicationId);
   if (!scope.ok) return scope;
   const { ctx } = scope;

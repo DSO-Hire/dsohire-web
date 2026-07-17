@@ -10,7 +10,7 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
-import { SEED_BATCH } from "../src/lib/demo-seed/constants";
+import { SEED_BATCH, DEMO_PASSWORD } from "../src/lib/demo-seed/constants";
 import { HERO_SLUG as HERO } from "../src/lib/demo-seed/data";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || "";
@@ -256,7 +256,96 @@ async function main(): Promise<void> {
   const { data: evCount } = await supa.rpc("demo_seed_count_events");
   check("backdated analytics events present", (Number(evCount) || 0) > 100, `${evCount ?? 0} events`);
 
+  await verifyDemoViewerReadOnly(heroId);
+
   finish();
+}
+
+/**
+ * Demo Mode role-sim (spec risk #1): sign in AS the demo viewer with the
+ * anon key and prove writes bounce at the DB layer. Requires
+ * NEXT_PUBLIC_SUPABASE_ANON_KEY (skips with a failure note if absent —
+ * this check must never silently pass).
+ */
+async function verifyDemoViewerReadOnly(heroId: string): Promise<void> {
+  const anonKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "";
+  if (!anonKey) {
+    check("demo viewer role-sim ran", false, "NEXT_PUBLIC_SUPABASE_ANON_KEY not set");
+    return;
+  }
+
+  // Every RLS table must carry the three restrictive demo policies.
+  const { data: missing } = await supa.rpc("demo_seed_missing_demo_policies");
+  if (missing !== null && missing !== undefined) {
+    const list = missing as string[];
+    check(
+      "restrictive demo_viewer policies on every RLS table",
+      list.length === 0,
+      list.length ? `missing: ${list.slice(0, 5).join(", ")}` : "all covered"
+    );
+  }
+
+  const viewer = createClient(SUPABASE_URL, anonKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+  const { data: signIn, error: signInErr } = await viewer.auth.signInWithPassword({
+    email: "demo.viewer@demo.dsohire.com",
+    password: DEMO_PASSWORD,
+  });
+  check("demo viewer can sign in", !!signIn?.user && !signInErr, signInErr?.message ?? "");
+  if (!signIn?.user) return;
+  check(
+    "viewer JWT carries demo_viewer mark",
+    signIn.user.app_metadata?.demo_viewer === true
+  );
+
+  // Reads work.
+  const { data: readJobs, error: readErr } = await viewer
+    .from("jobs")
+    .select("id")
+    .eq("dso_id", heroId)
+    .limit(1);
+  check("viewer can READ hero jobs", !readErr && (readJobs ?? []).length > 0, readErr?.message ?? "");
+
+  // Writes bounce: representative INSERT / UPDATE / DELETE across the
+  // surfaces a prospect can reach. RLS returns either an explicit error
+  // or a silent zero-row result; both count as blocked — what matters is
+  // that the row is unchanged / absent.
+  const { data: insData, error: insErr } = await viewer
+    .from("saved_searches")
+    .insert({ dso_id: heroId, name: "role-sim probe" })
+    .select();
+  check("viewer INSERT blocked", !!insErr || (insData ?? []).length === 0, insErr?.message ?? "silent zero-row");
+
+  const jobId = (readJobs ?? [])[0]?.id as string | undefined;
+  if (jobId) {
+    const { data: updData, error: updErr } = await viewer
+      .from("jobs")
+      .update({ title: "role-sim probe" })
+      .eq("id", jobId)
+      .select();
+    check("viewer UPDATE blocked", !!updErr || (updData ?? []).length === 0, updErr?.message ?? "silent zero-row");
+    const { data: probe } = await supa.from("jobs").select("title").eq("id", jobId).single();
+    check(
+      "job title unchanged after probe",
+      !!probe && (probe as { title: string }).title !== "role-sim probe"
+    );
+
+    const { data: delData, error: delErr } = await viewer
+      .from("jobs")
+      .delete()
+      .eq("id", jobId)
+      .select();
+    check("viewer DELETE blocked", !!delErr || (delData ?? []).length === 0, delErr?.message ?? "silent zero-row");
+    const { count: stillThere } = await supa
+      .from("jobs")
+      .select("id", { count: "exact", head: true })
+      .eq("id", jobId);
+    check("job row still exists after delete probe", (stillThere ?? 0) === 1);
+  }
+
+  await viewer.auth.signOut();
 }
 
 function finish(): void {

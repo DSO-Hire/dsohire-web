@@ -32,6 +32,7 @@ import {
 } from "@/lib/data-export/build-zip";
 import { getStripe } from "@/lib/stripe/server";
 import { SUPPORT_EMAIL } from "@/lib/contact";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 
 const SOFT_DELETE_GRACE_DAYS = 30;
 
@@ -390,6 +391,10 @@ export async function softDeleteOrg(input: {
 
   const ctx = await getOwnerContext();
   if (!ctx.ok) return ctx;
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(ctx.supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   if (
     input.dsoNameTyped.trim().toLowerCase() !== ctx.dsoName.trim().toLowerCase()

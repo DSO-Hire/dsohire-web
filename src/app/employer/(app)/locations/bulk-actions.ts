@@ -32,6 +32,7 @@ import {
 } from "@/lib/supabase/server";
 import { geocodeCityState, geocodeStreetAddress } from "@/lib/geocoding/mapbox";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import { normalizeWebsite } from "@/lib/url/normalize-website";
 
 const MAX_ROWS = 1000;
@@ -202,6 +203,11 @@ export async function bulkAddLocations(
   formData: FormData
 ): Promise<BulkAddLocationsResult> {
   const supabase = await createSupabaseServerClient();
+
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
+
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -42,8 +42,10 @@ import {
   type Visibility,
 } from "./data";
 import { cleanupLegacyDemoData, wipeDemoSeed } from "./wipe";
+import { ALL_CAPABILITIES } from "@/lib/permissions/capabilities";
 import {
   ensureDemoAuthUsers,
+  ensureDemoViewerAuthUser,
   ensureAuthUser,
   loadAuthUserMap,
   type DemoLoginSpec,
@@ -156,7 +158,9 @@ export async function runDemoSeed(supa: Supa, opts: SeedOptions): Promise<SeedRe
   const authMap = await loadAuthUserMap(supa);
   const logins = await ensureDemoAuthUsers(supa, authMap, loginSpecs);
   const authByLocal = new Map(logins.map((l) => [l.local, l.authUserId]));
-  log(`Provisioned ${logins.length} demo logins`);
+  // Demo Mode: shared read-only viewer (app_metadata.demo_viewer=true).
+  const demoViewerAuthId = await ensureDemoViewerAuthUser(supa, authMap);
+  log(`Provisioned ${logins.length} demo logins + read-only viewer`);
 
   // Every candidate needs a non-guest auth account (discovery filters guests).
   // Login candidates reuse their login account; the rest are passwordless.
@@ -269,6 +273,29 @@ export async function runDemoSeed(supa: Supa, opts: SeedOptions): Promise<SeedRe
         bio: def.recruiter.bio ?? null,
         base_location_id: locationIds[0],
         preferred_timezone: "America/Denver",
+      });
+      bump("dso_users");
+    }
+
+    // Demo Mode: the shared read-only viewer joins the HERO org as a
+    // recruiter whose permission_overrides revoke every capability (plus
+    // the __demo_viewer sentinel that memberBlockError detects for the
+    // friendly demo message). Belt on top of the restrictive no-write
+    // RLS policies keyed off the account's app_metadata.
+    if (def.hero) {
+      await insertOne(supa, "dso_users", {
+        auth_user_id: demoViewerAuthId,
+        dso_id: dsoId,
+        role: "recruiter",
+        first_name: "Demo",
+        last_name: "Viewer",
+        title: "Guided demo",
+        base_location_id: locationIds[0],
+        preferred_timezone: "America/Denver",
+        permission_overrides: {
+          __demo_viewer: true,
+          ...Object.fromEntries(ALL_CAPABILITIES.map((c) => [c, false])),
+        },
       });
       bump("dso_users");
     }

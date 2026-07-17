@@ -32,6 +32,7 @@ import { getUnreadCount, getNewApplicationCount } from "@/lib/inbox/queries";
 import { getMfaState } from "@/lib/auth/mfa";
 import { readMfaTrustCookie } from "@/lib/auth/mfa-trust";
 import { getActiveLocationId } from "@/lib/employer/active-location";
+import { isDemoDeployment, isDemoViewerUser } from "@/lib/demo/mode";
 import { EmployerShell, type Role } from "@/components/employer/employer-shell";
 
 export default async function EmployerAppLayout({
@@ -149,8 +150,17 @@ export default async function EmployerAppLayout({
     ? locations.find((l) => l.id === activeLocationId) ?? null
     : null;
 
+  // Demo Mode: slim persistent banner for the read-only viewer session.
+  const demoBanner =
+    isDemoDeployment() && isDemoViewerUser(user) ? (
+      <div className="bg-heritage-deep text-cream text-2xs font-semibold tracking-[1.5px] uppercase text-center px-4 py-1.5">
+        Demo mode · live product, read-only · data resets nightly
+      </div>
+    ) : null;
+
   return (
     <EmployerShell
+      topBanner={demoBanner}
       navPerms={navPerms}
       inboxUnread={inboxUnread}
       newApplications={newApplications}

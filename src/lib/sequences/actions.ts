@@ -17,6 +17,7 @@ import {
   createSupabaseServerClient,
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import { dsoCanUseSequences } from "./tier";
 import { processDueSequences } from "./process";
 import { isBlocked } from "@/lib/sourcing/blocklist";
@@ -103,6 +104,9 @@ export async function saveSequence(input: {
     return { ok: false, error: "You don't have permission to edit sequences." };
   }
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   if (!(await dsoCanUseSequences(supabase, who.dsoId))) {
     return { ok: false, error: "Drip sequences are a Scale feature. Upgrade to use them." };
   }
@@ -162,6 +166,9 @@ export async function setSequenceEnabled(
     return { ok: false, error: "You don't have permission to change sequences." };
   }
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const { error } = await supabase
     .from("automation_sequences")
     .update({ is_enabled: enabled, updated_at: new Date().toISOString() })
@@ -179,6 +186,9 @@ export async function deleteSequence(id: string): Promise<SeqResult> {
     return { ok: false, error: "You don't have permission to delete sequences." };
   }
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const { error } = await supabase
     .from("automation_sequences")
     .delete()
@@ -201,6 +211,9 @@ export async function enrollInSequence(
     return { ok: false, error: "You don't have permission to start sequences." };
   }
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   if (!(await dsoCanUseSequences(supabase, who.dsoId))) {
     return { ok: false, error: "Drip sequences are a Scale feature." };
   }
@@ -312,6 +325,9 @@ export async function enrollProspectInSequence(
     return { ok: false, error: "You don't have permission to start sequences." };
   }
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   if (!(await dsoCanUseSequences(supabase, who.dsoId))) {
     return { ok: false, error: "Drip sequences are a Scale feature." };
   }
@@ -430,6 +446,10 @@ export async function runSequencesNow(): Promise<
   if (!who.canManage) {
     return { ok: false, error: "You don't have permission to run sequences." };
   }
+  // Demo Mode: read-only sessions cannot write.
+  const supabase = await createSupabaseServerClient();
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   try {
     const r = await processDueSequences(who.dsoId);
     revalidatePath("/employer/automations");
@@ -454,6 +474,10 @@ export async function stopEnrollment(enrollmentId: string): Promise<SeqResult> {
   if (!who.perms["apps.message"]) {
     return { ok: false, error: "You don't have permission to stop sequences." };
   }
+  // Demo Mode: read-only sessions cannot write.
+  const supabase = await createSupabaseServerClient();
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const admin = createSupabaseServiceRoleClient();
   const { data: enr } = await admin
     .from("automation_sequence_enrollments")

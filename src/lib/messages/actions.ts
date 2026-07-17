@@ -25,6 +25,7 @@ import {
   createSupabaseServiceRoleClient,
 } from "@/lib/supabase/server";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import { can } from "@/lib/permissions/capabilities";
 import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { dispatchCandidateEmail } from "@/lib/email/templates/dispatch";
@@ -166,6 +167,9 @@ export async function sendApplicationMessage({
   }
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -418,6 +422,14 @@ export async function bulkMessageApplications(
   }
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) {
+    return {
+      succeeded: [],
+      failed: applicationIds.map((id) => ({ id, error: demoBlock })),
+    };
+  }
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -671,6 +683,9 @@ export async function editApplicationMessage({
   }
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -710,6 +725,9 @@ export async function deleteApplicationMessage(
   if (!messageId) return { ok: false, error: "Missing message id." };
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -754,6 +772,9 @@ export async function markApplicationMessageRead(
   if (!messageId) return { ok: false, error: "Missing message id." };
 
   const supabase = await createSupabaseServerClient();
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
   const {
     data: { user },
   } = await supabase.auth.getUser();

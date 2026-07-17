@@ -134,6 +134,9 @@ const GROUP_LABELS: Record<NavGroup, string> = {
 
 export interface EmployerShellProps {
   children: React.ReactNode;
+  /** Demo Mode — slim banner node rendered above the main column (null
+   * everywhere except a demo_viewer session on the demo deployment). */
+  topBanner?: React.ReactNode;
   /** Effective permissions (role preset + overrides) — resolved in the layout. */
   navPerms: Partial<Record<Capability, boolean>>;
   /** Nav badge counts — resolved server-side in the layout. */
@@ -158,6 +161,7 @@ export interface EmployerShellProps {
 
 export function EmployerShell({
   children,
+  topBanner,
   navPerms,
   inboxUnread,
   newApplications,
@@ -337,6 +341,7 @@ export function EmployerShell({
 
       {/* ── Main column ── */}
       <div className="flex-1 min-w-0 flex flex-col">
+        {topBanner}
         {/* Mobile top bar */}
         <header className="lg:hidden sticky top-0 z-30 h-[64px] px-5 flex items-center justify-between border-b border-[var(--rule)] bg-ivory/95 backdrop-blur-md">
           <Link href="/employer/dashboard">

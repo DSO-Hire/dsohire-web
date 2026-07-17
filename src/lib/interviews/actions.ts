@@ -62,6 +62,7 @@ async function syncInterviewProposalCardStatus(
   }
 }
 import { recordAuditEvent } from "@/lib/audit/record";
+import { demoWriteBlockError } from "@/lib/demo/mode";
 import { InterviewProposed } from "@/emails/candidate/InterviewProposed";
 import { InterviewBooked } from "@/emails/InterviewBooked";
 import {
@@ -109,6 +110,9 @@ export async function proposeInterview(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not signed in." };
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   if (!input.applicationId) return { ok: false, error: "Missing application." };
   if (
@@ -346,6 +350,9 @@ export async function cancelInterviewProposal(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not signed in." };
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   const { data: prior } = await supabase
     .from("interview_proposals")
@@ -396,6 +403,9 @@ export async function bookInterviewSlot(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not signed in." };
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // Insert booking. The DB unique(proposal_id) constraint blocks dupes.
   const { data: booking, error: bErr } = await supabase
@@ -680,6 +690,9 @@ export async function cancelInterviewBooking(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not signed in." };
+  // Demo Mode: read-only sessions cannot write.
+  const demoBlock = await demoWriteBlockError(supabase);
+  if (demoBlock) return { ok: false, error: demoBlock };
 
   // Snapshot for audit + path revalidation before delete.
   //
