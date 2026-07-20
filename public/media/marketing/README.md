@@ -1,4 +1,4 @@
-# DSO Hire launch marketing assets
+# DSO Hire marketing assets
 
 Produced 2026-07-10 by the dsohire-marketing pipeline (source comps + raw
 footage live in the sibling `dsohire-studio` repo); hero re-cut 2026-07-13
@@ -14,6 +14,9 @@ verbatim from the canon SVGs.
 | `launch-video-v3.mp4` | 1920x1080 | 63s | Library cut: light macro, short. Quick follow-up posts. |
 | `linkedin-feed-1x1.mp4` | 1080x1080 | 28s | LinkedIn feed workhorse. Captions burned, music-only — works muted. |
 | `linkedin-vertical-9x16.mp4` | 1080x1920 | 24s | LinkedIn vertical / mobile. Captions clear of the bottom UI safe area. |
+| `candidate-video-9x16.mp4` | 1080x1920 | 1:03 | **Candidate film hero** (2026-07-20, "Built for you, too"): phone-first vertical, Samantha VO (ElevenLabs v3, one continuous take), bespoke ElevenLabs Music score, custom SFX library, captions burned. The privacy reveal (masked "Dental Hygienist in Denver" -> Maria) is the centerpiece. Instagram/TikTok/LinkedIn vertical + candidate-page embed candidate. |
+| `candidate-video-1x1.mp4` | 1080x1080 | 1:03 | Candidate film, LinkedIn feed square (film centered on living navy field). Captions burned — works muted. |
+| `candidate-video-16x9.mp4` | 1920x1080 | 1:03 | Candidate film, landscape (site embeds, YouTube). Same boxed treatment. |
 | `logo-reveal.mp4` | 1920x1080 | 5s | Brand sting. Also the source of the end-card motif on every clip. |
 | `og-image.png` | 1200x630 | — | LinkedIn post / link-preview material. NOTE: the site's `og:image` is served dynamically by `src/app/opengraph-image.tsx` and was intentionally NOT replaced. |
 | `linkedin-banner.png` | 1128x191 | — | LinkedIn company page header. |
