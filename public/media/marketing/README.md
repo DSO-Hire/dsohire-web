@@ -14,6 +14,9 @@ verbatim from the canon SVGs.
 | `launch-video-v3.mp4` | 1920x1080 | 63s | Library cut: light macro, short. Quick follow-up posts. |
 | `linkedin-feed-1x1.mp4` | 1080x1080 | 28s | LinkedIn feed workhorse. Captions burned, music-only — works muted. |
 | `linkedin-vertical-9x16.mp4` | 1080x1920 | 24s | LinkedIn vertical / mobile. Captions clear of the bottom UI safe area. |
+| `dso-video-16x9.mp4` | 1920x1080 | 1:44 | **DSO film hero** (2026-07-22, "One hire, start to finish"): buyer-side narrative following a Denver hygiene chair through every feature to the hire. Real product recorded in motion, Alex Professional VO (one take), bespoke score (peak at the yes), franchise climax shared with the candidate film (Maria unmasks). From ProRes master. Site embed, sales sends, YouTube. |
+| `dso-video-1x1.mp4` | 1080x1080 | 1:44 | DSO film, LinkedIn feed square (boxed on living navy). Captions burned. |
+| `dso-video-9x16.mp4` | 1080x1920 | 1:44 | DSO film, vertical (boxed). Captions burned. |
 | `candidate-video-9x16.mp4` | 1080x1920 | 1:03 | **Candidate film hero** (2026-07-20, "Built for you, too"): phone-first vertical, Samantha VO (ElevenLabs v3, one continuous take), bespoke ElevenLabs Music score, custom SFX library, captions burned. The privacy reveal (masked "Dental Hygienist in Denver" -> Maria) is the centerpiece. Instagram/TikTok/LinkedIn vertical + candidate-page embed candidate. |
 | `candidate-video-1x1.mp4` | 1080x1080 | 1:03 | Candidate film, LinkedIn feed square (film centered on living navy field). Captions burned — works muted. |
 | `candidate-video-16x9.mp4` | 1920x1080 | 1:03 | Candidate film, landscape (site embeds, YouTube). Same boxed treatment. |
