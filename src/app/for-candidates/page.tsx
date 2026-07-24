@@ -53,6 +53,7 @@ import { Button } from "@/components/ui/button";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { PracticeFitTeaser } from "@/components/marketing/practicefit-teaser";
+import { FilmSection } from "@/components/marketing/film-section";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { DsoFitWordmark } from "@/components/practice-fit/brand/dsofit-wordmark";
 import { candidateCtaResolver } from "@/lib/marketing/candidate-cta";
@@ -88,6 +89,14 @@ export default async function ForCandidatesPage() {
   return (
     <SiteShell>
       <Hero ctaHref={dashboardHref} />
+      <FilmSection
+        eyebrow="One minute, your side of it"
+        headline="Look around. On your terms."
+        sub="How DSO Hire works when you're the one quietly looking: a five minute assessment, real openings with pay posted, and your name stays yours until you say the word."
+        src="/media/marketing/candidate-video-9x16.mp4"
+        poster="/media/marketing/candidate-video-poster.jpg"
+        vertical
+      />
       <PracticeFitCandidateBand
         ctaHref={assessmentHref}
         assessmentHref={assessmentHref}

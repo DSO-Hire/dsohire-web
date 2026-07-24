@@ -50,6 +50,7 @@ import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { CountUp } from "@/components/marketing/motion";
 import { FitDial } from "@/components/marketing/fit-dial";
 import type { Metadata } from "next";
+import { FilmSection } from "@/components/marketing/film-section";
 
 export const metadata: Metadata = {
   title: "Dental Group Hiring Platform: Flat-Fee Job Board for Multi-Location Practices",
@@ -72,6 +73,13 @@ export default function ForDsosPage() {
     <SiteShell ctaIntent="dso">
       <Hero />
       <ProofStrip />
+      <FilmSection
+        eyebrow="Two minutes, start to finish"
+        headline="One hire, from open chair to signed offer."
+        sub="Follow a Denver hygiene chair through the whole platform: the posting drafts itself, PracticeFit builds the short list, your team works one pipeline, and the offer routes to the right approver."
+        src="/media/marketing/dso-video-16x9.mp4"
+        poster="/media/marketing/dso-video-poster.jpg"
+      />
       <ProblemSection />
       <RoiMath />
       <PracticeFitBand />
