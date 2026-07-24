@@ -394,7 +394,7 @@ function HeroKanbanPreview() {
           landing (globals.css .hk-notif). Rotation moved from inline style
           into the class so the animation composes with it. */}
       <div
-        className="hk-notif absolute -bottom-5 -left-6 bg-card border border-[var(--rule)] px-4 py-3.5 flex items-center gap-3 max-w-[260px]"
+        className="hk-notif absolute -bottom-5 left-0 sm:-left-6 bg-card border border-[var(--rule)] px-4 py-3.5 flex items-center gap-3 max-w-[300px]"
         style={{
           boxShadow: "var(--elevation-2)",
         }}
@@ -403,7 +403,7 @@ function HeroKanbanPreview() {
           M
         </span>
         <div className="text-xs text-ink leading-snug font-semibold">
-          Maya moved Dr. Chen to Interview
+          Maya moved Dr. Sarah Chen to Interview
           <small className="block text-2xs font-normal text-slate-body tracking-[0.3px] mt-0.5">
             Realtime sync · just now
           </small>
