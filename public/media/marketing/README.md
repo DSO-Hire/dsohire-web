@@ -28,3 +28,15 @@ verbatim from the canon SVGs.
 
 Upload rule: LinkedIn videos are always **native uploads** — never a
 YouTube link (external links get suppressed in feed reach).
+
+## YouTube (channel: DSO Hire, uploaded 2026-07-24)
+
+| Film | URL |
+|------|-----|
+| Launch film (V5.2, 1:24) | https://youtu.be/ht1CKCXyuB4 |
+| Candidate film (16:9 blurred-fill, 1:03) | https://youtu.be/JEC3xc9Obpo |
+| DSO film / full product tour (1:44) | https://youtu.be/9BHoibB--PI |
+
+Site embeds stay SELF-HOSTED (no YouTube chrome / related videos); LinkedIn
+stays NATIVE upload. YouTube exists for Google search results, buyer
+diligence, and universal embedding elsewhere.
