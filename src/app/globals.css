@@ -1871,16 +1871,15 @@ html {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   Hero doors v2 (2026-09-28) — src/components/marketing/hero-doors.tsx.
+   Hero doors v3 (2026-09-28) — src/components/marketing/hero-doors.tsx.
    Above the fold, so everything is pure CSS: the default (un-animated)
-   styles ARE the first frame, and the loops only run under
+   styles ARE a complete frame, and the loops only run under
    prefers-reduced-motion: no-preference.
    ═══════════════════════════════════════════════════════════════ */
 
 .hd-door {
-  min-height: 560px;
   box-shadow: 0 34px 70px -36px rgba(7, 15, 28, 0.55), 0 14px 28px -16px rgba(7, 15, 28, 0.22);
-  transition: transform 0.5s var(--spring), opacity 0.4s ease, filter 0.4s ease, box-shadow 0.5s ease;
+  transition: transform 0.5s var(--spring), box-shadow 0.5s ease;
 }
 .hd-door-ink { background: linear-gradient(165deg, #1b2d4d 0%, #14233f 55%, #0f1b31 100%); }
 .hd-door-green { background: linear-gradient(165deg, #5a8a6e 0%, #4d7a60 45%, #2f5d4f 100%); }
@@ -1900,87 +1899,99 @@ html {
 }
 .hd-door-green .hd-glow { background: radial-gradient(circle, rgba(247, 244, 237, 0.22), transparent 62%); }
 
-/* The peeking product window */
+/* Previews: identical height on both doors, fully inside the door */
 .hd-window {
-  height: 214px; /* same peek on both doors; the bottom bleeds off the edge */
+  height: 292px;
   overflow: hidden;
-  box-shadow: 0 30px 60px -24px rgba(5, 12, 24, 0.6);
+  box-shadow: 0 26px 50px -26px rgba(5, 12, 24, 0.6);
+  transition: transform 0.6s var(--spring), box-shadow 0.6s ease;
 }
-.hd-peek {
-  transform: translateY(6px);
-  transition: transform 0.6s var(--spring);
-}
+.hd-jobs-body { height: calc(292px - 38px); }
 @media (hover: hover) {
-  .hd-door:hover { transform: translateY(-4px); }
-  .hd-door:hover .hd-peek { transform: translateY(-8px); }
-  .hd-doors:has(.hd-door:hover) .hd-door:not(:hover) { transform: translateY(3px) scale(0.99); }
-  .hd-doors:has(.hd-door:hover) .hd-door:not(:hover) .hd-peek { transform: translateY(14px); }
+  .hd-door:hover { transform: translateY(-4px); box-shadow: 0 44px 80px -36px rgba(7, 15, 28, 0.6), 0 16px 32px -16px rgba(7, 15, 28, 0.25); }
+  .hd-door:hover .hd-window { transform: translateY(-4px); box-shadow: 0 34px 60px -26px rgba(5, 12, 24, 0.65); }
 }
 
-/* Reduced motion / first frame: second & third job cards hidden,
-   drop slot + toast hidden, counts show "before". */
+/* Receipt strike line (drawn across the agency fee) */
+.hd-strike::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: 52%;
+  height: 1.5px;
+  background: var(--stage-brick);
+  transform-origin: left;
+}
+
+/* Complete static frame (reduced motion / pre-animation): every receipt
+   row printed, final total, first job card. */
+.hd-total:not([data-k="3"]) { opacity: 0; }
 .hd-job:not([data-k="0"]) { opacity: 0; }
-.hd-slot, .hd-toast, .hd-count-b { opacity: 0; }
 
 @media (prefers-reduced-motion: no-preference) {
   .hd-dot { animation: live-pulse 2.2s var(--ease-settle) infinite; }
 
-  /* Pipeline loop, 7.5s: lift → glide Screening→Interview → land → toast → reset */
-  .hd-mover { animation: hd-move 7.5s var(--ease-settle) infinite both; }
-  .hd-slot { animation: hd-slot 7.5s ease infinite both; }
-  .hd-toast { animation: hd-toast 7.5s var(--ease-settle) infinite both; }
-  .hd-count-a { animation: hd-count-a 7.5s ease infinite both; }
-  .hd-count-b { animation: hd-count-b 7.5s ease infinite both; }
+  /* Receipt loop, 10s: rows print at 6/18/30/42%, hold, clear, repeat */
+  .hd-row { animation: hd-row 10s var(--ease-settle) infinite both; }
+  .hd-row[data-k="1"] { animation-name: hd-row-1; }
+  .hd-row[data-k="2"] { animation-name: hd-row-2; }
+  .hd-row[data-k="3"] { animation-name: hd-row-3; }
+  .hd-row .hd-strike::after { animation: hd-strike 10s var(--ease-settle) infinite both; }
+  .hd-row[data-k="1"] .hd-strike::after { animation-name: hd-strike-1; }
+  .hd-row[data-k="2"] .hd-strike::after { animation-name: hd-strike-2; }
+  .hd-row[data-k="3"] .hd-strike::after { animation-name: hd-strike-3; }
+  .hd-row .hd-check { animation: hd-check 10s var(--spring) infinite both; }
+  .hd-row[data-k="1"] .hd-check { animation-name: hd-check-1; }
+  .hd-row[data-k="2"] .hd-check { animation-name: hd-check-2; }
+  .hd-row[data-k="3"] .hd-check { animation-name: hd-check-3; }
+  .hd-total { animation: hd-total-0 10s ease infinite both; }
+  .hd-total[data-k="1"] { animation-name: hd-total-1; }
+  .hd-total[data-k="2"] { animation-name: hd-total-2; }
+  .hd-total[data-k="3"] { animation-name: hd-total-3; }
+  .hd-total[data-k="z"] { animation-name: hd-total-z; }
 
-  /* Jobs loop, 3 cards × 3.4s */
+  /* Jobs loop: 3 cards × 3.4s */
   .hd-job {
     opacity: 0;
     animation: hd-job 10.2s var(--ease-settle) infinite both;
-    animation-delay: calc(var(--k) * 3.4s + 0.8s);
+    animation-delay: calc(var(--k) * 3.4s + 0.6s);
   }
   .hd-ring {
     animation: hd-ring 10.2s var(--ease-settle) infinite both;
-    animation-delay: calc(var(--k) * 3.4s + 0.8s);
+    animation-delay: calc(var(--k) * 3.4s + 0.6s);
   }
 }
 
-@keyframes hd-move {
-  0%   { transform: none; opacity: 0; }
-  3%   { transform: none; opacity: 1; box-shadow: none; }
-  12%  { transform: none; box-shadow: none; }
-  17%  { transform: translateY(-2px) rotate(-2deg) scale(1.05); box-shadow: 0 16px 30px -12px rgba(20,35,63,0.45), 0 0 0 2px rgba(77,122,96,0.55); }
-  38%  { transform: translateX(calc(100% + 0.5rem)) translateY(-2px) rotate(-2deg) scale(1.05); box-shadow: 0 16px 30px -12px rgba(20,35,63,0.45), 0 0 0 2px rgba(77,122,96,0.55); }
-  42%  { transform: translateX(calc(100% + 0.5rem)); box-shadow: 0 0 0 3px rgba(77,122,96,0.55); }
-  50%  { transform: translateX(calc(100% + 0.5rem)); box-shadow: 0 0 0 0 rgba(77,122,96,0); opacity: 1; }
-  90%  { transform: translateX(calc(100% + 0.5rem)); opacity: 1; }
-  96%, 100% { transform: translateX(calc(100% + 0.5rem)); opacity: 0; }
-}
-@keyframes hd-slot {
-  0%, 13%  { opacity: 0; }
-  18%, 39% { opacity: 1; }
-  44%, 100% { opacity: 0; }
-}
-@keyframes hd-toast {
-  0%, 46%  { opacity: 0; transform: translateY(12px) scale(0.97); }
-  52%, 86% { opacity: 1; transform: none; }
-  92%, 100% { opacity: 0; transform: translateY(6px); }
-}
-@keyframes hd-count-a {
-  0%, 40%  { opacity: 1; transform: none; }
-  44%, 94% { opacity: 0; transform: translateY(-6px); }
-  100%     { opacity: 1; transform: none; }
-}
-@keyframes hd-count-b {
-  0%, 40%  { opacity: 0; transform: translateY(6px); }
-  44%, 94% { opacity: 1; transform: none; }
-  100%     { opacity: 0; }
-}
+/* Row k prints at (6 + 12k)% and clears at 92%. */
+@keyframes hd-row   { 0%, 4%  { opacity: 0; transform: translateY(6px); } 8%, 90%  { opacity: 1; transform: none; } 96%, 100% { opacity: 0; } }
+@keyframes hd-row-1 { 0%, 16% { opacity: 0; transform: translateY(6px); } 20%, 90% { opacity: 1; transform: none; } 96%, 100% { opacity: 0; } }
+@keyframes hd-row-2 { 0%, 28% { opacity: 0; transform: translateY(6px); } 32%, 90% { opacity: 1; transform: none; } 96%, 100% { opacity: 0; } }
+@keyframes hd-row-3 { 0%, 40% { opacity: 0; transform: translateY(6px); } 44%, 90% { opacity: 1; transform: none; } 96%, 100% { opacity: 0; } }
+@keyframes hd-strike   { 0%, 8%  { transform: scaleX(0); } 12%, 100% { transform: scaleX(1); } }
+@keyframes hd-strike-1 { 0%, 20% { transform: scaleX(0); } 24%, 100% { transform: scaleX(1); } }
+@keyframes hd-strike-2 { 0%, 32% { transform: scaleX(0); } 36%, 100% { transform: scaleX(1); } }
+@keyframes hd-strike-3 { 0%, 44% { transform: scaleX(0); } 48%, 100% { transform: scaleX(1); } }
+@keyframes hd-check   { 0%, 7%  { transform: scale(0); } 10%, 100% { transform: none; } }
+@keyframes hd-check-1 { 0%, 19% { transform: scale(0); } 22%, 100% { transform: none; } }
+@keyframes hd-check-2 { 0%, 31% { transform: scale(0); } 34%, 100% { transform: none; } }
+@keyframes hd-check-3 { 0%, 43% { transform: scale(0); } 46%, 100% { transform: none; } }
+/* Total steps up as each strike lands. Before the first row: $0 is
+   implied by all totals hidden, so total 0 fades in with row 0. */
+@keyframes hd-total-z { 0%, 10% { opacity: 1; transform: none; } 13%, 96% { opacity: 0; transform: translateY(-6px); } 99%, 100% { opacity: 1; transform: none; } }
+@keyframes hd-total-0 { 0%, 10% { opacity: 0; transform: translateY(6px); } 13%, 23% { opacity: 1; transform: none; } 26%, 100% { opacity: 0; transform: translateY(-6px); } }
+@keyframes hd-total-1 { 0%, 23% { opacity: 0; transform: translateY(6px); } 26%, 35% { opacity: 1; transform: none; } 38%, 100% { opacity: 0; transform: translateY(-6px); } }
+@keyframes hd-total-2 { 0%, 35% { opacity: 0; transform: translateY(6px); } 38%, 47% { opacity: 1; transform: none; } 50%, 100% { opacity: 0; transform: translateY(-6px); } }
+@keyframes hd-total-3 { 0%, 47% { opacity: 0; transform: translateY(6px); } 50%, 90% { opacity: 1; transform: scale(1); } 53% { transform: scale(1.08); } 96%, 100% { opacity: 0; } }
+
+/* Clean handoff: the outgoing card clears (30→32.5%) just as the next
+   one's slot begins (33.3%), so two cards never double-expose. */
 @keyframes hd-job {
-  0%   { opacity: 0; transform: translateY(18px) scale(0.97); }
-  5%   { opacity: 1; transform: none; }
+  0%   { opacity: 0; transform: translateY(14px) scale(0.98); }
+  4%   { opacity: 1; transform: none; }
   30%  { opacity: 1; transform: none; }
-  35%  { opacity: 0; transform: translateY(-12px) scale(0.98); }
-  100% { opacity: 0; transform: translateY(-12px) scale(0.98); }
+  32.5% { opacity: 0; transform: translateY(-10px) scale(0.99); }
+  100% { opacity: 0; transform: translateY(-10px) scale(0.99); }
 }
 @keyframes hd-ring {
   0%, 3% { stroke-dashoffset: var(--c); }
