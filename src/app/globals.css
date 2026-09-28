@@ -921,56 +921,6 @@ html, body {
    Doors that demonstrate + the live-inventory marquee.
 ═══════════════════════════════════════════════════════════════ */
 
-/* ── Door miniature: kanban (navy door) ──
-   The chip LIVES in the Interview column's reserved slot and slides in
-   from one column to its left via transform — column-relative, so the
-   landing can never miss (v1 used absolute page math + dark heritage on
-   navy; invisible — Cam caught it). heritage-bright pops on ink. */
-.mini-kb-chip {
-  height: 14px;
-  background: #8db8a3; /* heritage-bright — readable on the navy door */
-  opacity: 0;
-  position: relative;
-  z-index: 2;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .mini-kb-chip {
-    animation: mini-kb-slide 1.1s cubic-bezier(0.45, 0.05, 0.25, 1) 1.4s forwards;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .mini-kb-chip { opacity: 1; }
-}
-@keyframes mini-kb-slide {
-  0% { opacity: 0; transform: translateX(calc(-100% - 22px)) translateY(0); }
-  15% { opacity: 1; transform: translateX(calc(-100% - 22px)) translateY(-3px) rotate(-2deg); }
-  80% { opacity: 1; transform: translateX(0) translateY(-2px) rotate(1deg); }
-  100% { opacity: 1; transform: translateX(0) translateY(0) rotate(0); }
-}
-
-/* ── Door miniature: fit dial (green door) ──
-   Small ring fills to 92% ~1.2s after load; the score fades up with it. */
-.mini-dial-arc {
-  stroke-dasharray: 163.4; /* 2πr, r=26 */
-  stroke-dashoffset: 163.4;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .mini-dial-arc {
-    animation: mini-dial-fill 1.2s var(--ease-settle) 1.2s forwards;
-  }
-  .mini-dial-num {
-    opacity: 0;
-    animation: mk-fade 0.5s ease-out 1.7s forwards;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .mini-dial-arc { stroke-dashoffset: 13.1; } /* 92% filled */
-  .mini-dial-num { opacity: 1; }
-}
-@keyframes mini-dial-fill {
-  to { stroke-dashoffset: 13.1; }
-}
-
 /* ── Live-inventory marquee ──
    Duplicated track translating -50%; pauses on hover; reduced-motion
    falls back to a normal scrollable row. */
@@ -1918,4 +1868,121 @@ html {
    and push past the frame on phones. */
 .bx-scene .grid:not([class*="grid-cols"]) {
   grid-template-columns: minmax(0, 1fr);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Hero doors v2 (2026-09-28) — src/components/marketing/hero-doors.tsx.
+   Above the fold, so everything is pure CSS: the default (un-animated)
+   styles ARE the first frame, and the loops only run under
+   prefers-reduced-motion: no-preference.
+   ═══════════════════════════════════════════════════════════════ */
+
+.hd-door {
+  min-height: 560px;
+  box-shadow: 0 34px 70px -36px rgba(7, 15, 28, 0.55), 0 14px 28px -16px rgba(7, 15, 28, 0.22);
+  transition: transform 0.5s var(--spring), opacity 0.4s ease, filter 0.4s ease, box-shadow 0.5s ease;
+}
+.hd-door-ink { background: linear-gradient(165deg, #1b2d4d 0%, #14233f 55%, #0f1b31 100%); }
+.hd-door-green { background: linear-gradient(165deg, #5a8a6e 0%, #4d7a60 45%, #2f5d4f 100%); }
+.hd-grid {
+  background-image:
+    linear-gradient(rgba(247, 244, 237, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(247, 244, 237, 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(180deg, #000 0%, transparent 70%);
+}
+.hd-glow {
+  right: -18%;
+  top: -22%;
+  width: 70%;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(141, 184, 163, 0.32), transparent 62%);
+}
+.hd-door-green .hd-glow { background: radial-gradient(circle, rgba(247, 244, 237, 0.22), transparent 62%); }
+
+/* The peeking product window */
+.hd-window {
+  height: 214px; /* same peek on both doors; the bottom bleeds off the edge */
+  overflow: hidden;
+  box-shadow: 0 30px 60px -24px rgba(5, 12, 24, 0.6);
+}
+.hd-peek {
+  transform: translateY(6px);
+  transition: transform 0.6s var(--spring);
+}
+@media (hover: hover) {
+  .hd-door:hover { transform: translateY(-4px); }
+  .hd-door:hover .hd-peek { transform: translateY(-8px); }
+  .hd-doors:has(.hd-door:hover) .hd-door:not(:hover) { transform: translateY(3px) scale(0.99); }
+  .hd-doors:has(.hd-door:hover) .hd-door:not(:hover) .hd-peek { transform: translateY(14px); }
+}
+
+/* Reduced motion / first frame: second & third job cards hidden,
+   drop slot + toast hidden, counts show "before". */
+.hd-job:not([data-k="0"]) { opacity: 0; }
+.hd-slot, .hd-toast, .hd-count-b { opacity: 0; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .hd-dot { animation: live-pulse 2.2s var(--ease-settle) infinite; }
+
+  /* Pipeline loop, 7.5s: lift → glide Screening→Interview → land → toast → reset */
+  .hd-mover { animation: hd-move 7.5s var(--ease-settle) infinite both; }
+  .hd-slot { animation: hd-slot 7.5s ease infinite both; }
+  .hd-toast { animation: hd-toast 7.5s var(--ease-settle) infinite both; }
+  .hd-count-a { animation: hd-count-a 7.5s ease infinite both; }
+  .hd-count-b { animation: hd-count-b 7.5s ease infinite both; }
+
+  /* Jobs loop, 3 cards × 3.4s */
+  .hd-job {
+    opacity: 0;
+    animation: hd-job 10.2s var(--ease-settle) infinite both;
+    animation-delay: calc(var(--k) * 3.4s + 0.8s);
+  }
+  .hd-ring {
+    animation: hd-ring 10.2s var(--ease-settle) infinite both;
+    animation-delay: calc(var(--k) * 3.4s + 0.8s);
+  }
+}
+
+@keyframes hd-move {
+  0%   { transform: none; opacity: 0; }
+  3%   { transform: none; opacity: 1; box-shadow: none; }
+  12%  { transform: none; box-shadow: none; }
+  17%  { transform: translateY(-2px) rotate(-2deg) scale(1.05); box-shadow: 0 16px 30px -12px rgba(20,35,63,0.45), 0 0 0 2px rgba(77,122,96,0.55); }
+  38%  { transform: translateX(calc(100% + 0.5rem)) translateY(-2px) rotate(-2deg) scale(1.05); box-shadow: 0 16px 30px -12px rgba(20,35,63,0.45), 0 0 0 2px rgba(77,122,96,0.55); }
+  42%  { transform: translateX(calc(100% + 0.5rem)); box-shadow: 0 0 0 3px rgba(77,122,96,0.55); }
+  50%  { transform: translateX(calc(100% + 0.5rem)); box-shadow: 0 0 0 0 rgba(77,122,96,0); opacity: 1; }
+  90%  { transform: translateX(calc(100% + 0.5rem)); opacity: 1; }
+  96%, 100% { transform: translateX(calc(100% + 0.5rem)); opacity: 0; }
+}
+@keyframes hd-slot {
+  0%, 13%  { opacity: 0; }
+  18%, 39% { opacity: 1; }
+  44%, 100% { opacity: 0; }
+}
+@keyframes hd-toast {
+  0%, 46%  { opacity: 0; transform: translateY(12px) scale(0.97); }
+  52%, 86% { opacity: 1; transform: none; }
+  92%, 100% { opacity: 0; transform: translateY(6px); }
+}
+@keyframes hd-count-a {
+  0%, 40%  { opacity: 1; transform: none; }
+  44%, 94% { opacity: 0; transform: translateY(-6px); }
+  100%     { opacity: 1; transform: none; }
+}
+@keyframes hd-count-b {
+  0%, 40%  { opacity: 0; transform: translateY(6px); }
+  44%, 94% { opacity: 1; transform: none; }
+  100%     { opacity: 0; }
+}
+@keyframes hd-job {
+  0%   { opacity: 0; transform: translateY(18px) scale(0.97); }
+  5%   { opacity: 1; transform: none; }
+  30%  { opacity: 1; transform: none; }
+  35%  { opacity: 0; transform: translateY(-12px) scale(0.98); }
+  100% { opacity: 0; transform: translateY(-12px) scale(0.98); }
+}
+@keyframes hd-ring {
+  0%, 3% { stroke-dashoffset: var(--c); }
+  18%, 100% { stroke-dashoffset: calc(var(--c) * (1 - var(--fit) / 100)); }
 }
