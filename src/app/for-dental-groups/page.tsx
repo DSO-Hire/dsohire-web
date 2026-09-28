@@ -25,12 +25,11 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  Check,
+  ArrowUpRight,
   ClipboardList,
   Columns3,
   FileSignature,
   MessageCircle,
-  Minus,
   Search,
   ShieldCheck,
   Star,
@@ -45,12 +44,16 @@ import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fi
 import { DsoFitWordmark } from "@/components/practice-fit/brand/dsofit-wordmark";
 import { DsoFitMark } from "@/components/practice-fit/brand/dsofit-mark";
 import { getAllTiers, type TierConfig } from "@/lib/stripe/prices";
-import { SiteShell, BrandLockup } from "@/components/marketing/site-shell";
+import { SiteShell } from "@/components/marketing/site-shell";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
-import { CountUp } from "@/components/marketing/motion";
 import { FitDial } from "@/components/marketing/fit-dial";
 import type { Metadata } from "next";
 import { FilmSection } from "@/components/marketing/film-section";
+import { FeeStrip } from "@/components/marketing/fee-strip";
+import { DemoBand } from "@/components/marketing/demo-band";
+import { CtaBand } from "@/components/marketing/cta-band";
+import { RoiCalculator, type RoiInitial } from "@/components/marketing/roi-calculator";
+import { DEMO_URL } from "@/lib/marketing/demo";
 
 export const metadata: Metadata = {
   title: "Dental Group Hiring Platform: Flat-Fee Job Board for Multi-Location Practices",
@@ -68,11 +71,19 @@ export const metadata: Metadata = {
   ],
 };
 
-export default function ForDsosPage() {
+export default async function ForDsosPage({
+  searchParams,
+}: {
+  searchParams: Promise<RoiInitial>;
+}) {
+  const initial = await searchParams;
+  const tiers = getAllTiers();
+  const entryPrice = Math.min(...tiers.map((t) => t.monthlyPrice));
   return (
     <SiteShell ctaIntent="dso">
-      <Hero />
-      <ProofStrip />
+      <div className="mk-numbered">
+      <Hero entryPrice={entryPrice} />
+      <FeeStrip entryPrice={entryPrice} />
       <FilmSection
         eyebrow="Two minutes, start to finish"
         headline="One hire, from open chair to signed offer."
@@ -80,14 +91,35 @@ export default function ForDsosPage() {
         src="/media/marketing/dso-video-16x9.mp4"
         poster="/media/marketing/dso-video-poster.jpg"
       />
-      <ProblemSection />
-      <RoiMath />
+      <RoiCalculator
+        id="calculator"
+        eyebrow="Run your numbers"
+        heading="What does hiring cost your group today?"
+        className="px-6 sm:px-14 py-24 sm:py-28 max-w-[1240px] mx-auto"
+        initial={initial}
+        tiers={tiers.map((t) => ({
+          id: t.id,
+          name: t.name,
+          annualMonthly: t.annualMonthlyEquivalent,
+          maxActiveJobs: t.maxActiveJobs,
+        }))}
+      />
       <PracticeFitBand />
       <FeatureShowcase />
+      <DemoBand />
       <PricingTeaser />
-      <HowItWorks />
       <FAQ />
-      <FinalCta />
+      <CtaBand
+        title={
+          <>
+            Stop paying per hire.{" "}
+            <span className="text-heritage-bright">Start hiring per location.</span>
+          </>
+        }
+        sub="Look around the live product first, start posting today, or have us walk you through it. Whichever pace suits your group."
+        sourceContext={{ page: "for-dental-groups" }}
+      />
+      </div>
     </SiteShell>
   );
 }
@@ -96,7 +128,7 @@ export default function ForDsosPage() {
    HERO
 ═══════════════════════════════════════════════════════ */
 
-function Hero() {
+function Hero({ entryPrice }: { entryPrice: number }) {
   return (
     <section className="relative overflow-hidden pt-[140px] pb-28 px-6 sm:px-14">
       {/* 80px grid */}
@@ -127,8 +159,7 @@ function Hero() {
               horizontal space with the kanban illustration anymore. */}
         <div className="mb-8">
           <span
-            data-reveal
-            className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-ink border border-heritage/35"
+            className="mk-hero inline-flex flex-wrap items-center gap-x-2 gap-y-1 px-3 py-1.5 text-xs font-semibold text-ink border border-heritage/35 [&>span]:whitespace-nowrap"
             style={{
               background: "var(--heritage-tint)",
               boxShadow: "0 0 0 4px var(--heritage-glow)",
@@ -151,9 +182,8 @@ function Hero() {
               lg+ for the same reason — `absolute` positioning on a wrapped
               inline element only sits under the last line and looks broken. */}
         <h1
-          data-reveal
           style={{ "--mk-delay": "60ms" } as React.CSSProperties}
-          className="text-4xl sm:text-5xl md:text-7xl lg:text-[80px] font-extrabold tracking-[-0.025em] leading-[1.05] text-ink mb-12"
+          className="mk-hero text-4xl sm:text-5xl md:text-7xl lg:text-[80px] font-extrabold tracking-[-0.035em] leading-[1.02] text-ink mb-7 sm:mb-12 text-balance"
         >
           Every practice. Every role.{" "}
           <br className="hidden sm:inline" />
@@ -172,39 +202,43 @@ function Hero() {
               (vs. ~49% in the old layout) and sits inset cleanly without
               crowding the right edge. */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-12 lg:gap-16 items-start">
-          <div data-reveal style={{ "--mk-delay": "130ms" } as React.CSSProperties}>
-            <p className="text-lg sm:text-xl text-slate-body leading-relaxed mb-10">
-              Built for multi-location dental groups, from DSOs to independent
-              owners running a handful of practices. Subscribe once and post
-              across every location you operate: flat monthly fee, no
-              per-listing charges, no 15–25% placement fees, no recruiter
-              middlemen.
+          <div className="mk-hero" style={{ "--mk-delay": "130ms" } as React.CSSProperties}>
+            <p className="text-lg sm:text-xl text-slate-body leading-relaxed mb-8 sm:mb-10 text-pretty">
+              One flat monthly fee covers every location you run, from a
+              handful of practices to a national DSO. No per-listing charges,
+              no 15–25% placement fees, no recruiter in the middle.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3.5 mb-9">
-              <Button asChild variant="primary" size="xl">
-                <Link href="#pricing">
-                  Start Posting Jobs
+            <div className="flex flex-wrap items-center gap-3.5 mb-5">
+              <Button asChild variant="heritage" size="xl" className="btn-lift">
+                <a href={DEMO_URL} target="_blank" rel="noopener">
+                  See it live, no sign-up
+                  <ArrowUpRight className="size-4" />
+                </a>
+              </Button>
+              <Button asChild variant="outline" size="xl" className="btn-lift">
+                <Link href="/employer/sign-up">
+                  Start posting jobs
                   <ArrowRight className="size-3.5" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="xl">
-                <Link href="/contact">
-                  Contact Sales
-                </Link>
-              </Button>
             </div>
+            <Link
+              href="#calculator"
+              className="group inline-flex items-center gap-1.5 text-sm font-semibold text-heritage-deep hover:text-ink transition-colors mb-9"
+            >
+              Or run your group&apos;s numbers in a minute
+              <ArrowRight className="size-3.5 rotate-90 transition-transform group-hover:translate-y-0.5" />
+            </Link>
 
-            <div className="flex items-center gap-2.5 text-xs text-slate-body tracking-[0.4px]">
-              <span className="block w-1.5 h-1.5 bg-heritage rounded-full" />
-              <span>
-                Plans from <strong className="text-ink font-bold tabular">$399/mo</strong> · Multi-location native · No placement fees
-              </span>
+            <div className="fine-print text-2xs font-bold uppercase tracking-[1.6px] text-slate-meta leading-relaxed">
+              No placement fees · No per-listing fees · Cancel anytime · Plans from{" "}
+              <span className="text-ink tabular">${entryPrice}/mo</span>
             </div>
           </div>
 
           {/* Right cell: stylized employer kanban preview, now wider */}
-          <div data-reveal style={{ "--mk-delay": "220ms" } as React.CSSProperties}>
+          <div className="mk-hero" style={{ "--mk-delay": "220ms" } as React.CSSProperties}>
             <HeroKanbanPreview />
           </div>
         </div>
@@ -441,313 +475,6 @@ function HeroKanbanCard({ name, role, days, heat, comments, score }: HeroCard) {
               {comments}
             </span>
           )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════
-   PROOF STRIP
-═══════════════════════════════════════════════════════ */
-
-function ProofStrip() {
-  return (
-    <div className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 py-8">
-      <div className="max-w-[1240px] mx-auto flex flex-wrap items-center justify-between gap-10">
-        <Eyebrow className="text-slate-body">
-          Designed With{" "}
-          <strong className="text-ink">Mid-Market Dental Group Operators</strong>
-        </Eyebrow>
-        <div className="flex flex-wrap gap-9 items-center">
-          <ProofTagline>Multi-Location Dental Groups</ProofTagline>
-          <ProofTagline>No Per-Listing Fees</ProofTagline>
-          <ProofTagline>Flat Monthly Fee</ProofTagline>
-          <ProofTagline>No Placement Charges</ProofTagline>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ProofTagline({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="font-extrabold tracking-[-0.3px] text-sm text-slate-meta opacity-55">
-      {children}
-    </span>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════
-   THE PROBLEM
-═══════════════════════════════════════════════════════ */
-
-function ProblemSection() {
-  return (
-    <section className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 py-24">
-      <div className="max-w-[1240px] mx-auto">
-        <Eyebrow className="text-heritage-deep mb-3.5">
-          The Math Today
-        </Eyebrow>
-        <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[760px] mb-6">
-          The two options on the market weren&apos;t built for the way you actually hire.
-        </h2>
-        <p className="text-base text-slate-body leading-[1.7] max-w-[640px] mb-12">
-          Today&apos;s mid-market DSO has two real choices, and both punish you for
-          operating at scale.
-        </p>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-[var(--rule)] border border-[var(--rule)]">
-          <ProblemCard
-            heading="Per-listing job boards"
-            tagline="Built for solo practices. Priced per listing."
-            points={[
-              "Per-listing pricing means a 30-location group posting an associate role at three offices pays three times",
-              "Typically no native multi-location posting, so recruiters re-enter the same job over and over",
-              "Rarely built for teams, so office managers and regional directors each need their own login",
-              "Designed around individual practice owners, not multi-site operators",
-            ]}
-          />
-          <ProblemCard
-            heading="Staffing agencies"
-            tagline="Effective, but priced for one-off executive searches."
-            points={[
-              "15–25% of first-year salary per placement. A $200K associate dentist costs you $30–50K in placement fees alone",
-              "Routine roles (hygienists, dental assistants, office managers) move slowly through agency pipelines",
-              "Limited visibility into the candidate pipeline: you see who they choose to share",
-              "No leverage as your hiring volume grows. Hiring 10 people doesn't get you a discount",
-            ]}
-          />
-          <AnswerCard />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/**
- * AnswerCard — the branded DSO Hire pivot inside the "Two Real Choices" grid.
- * Spans both columns at lg+, sits flush below the two ProblemCards via the
- * grid's gap-px rule so it reads as the third element of the comparison
- * without restructuring the rhetorical 2-card framing.
- */
-function AnswerCard() {
-  return (
-    <div className="lg:col-span-2 relative bg-hero text-hero-foreground p-10 lg:p-12 overflow-hidden">
-      {/* Heritage hairline marks the rhetorical pivot from problem to answer. */}
-      <span aria-hidden className="absolute top-0 inset-x-0 h-[3px] bg-heritage" />
-      {/* Soft heritage glow for the same depth treatment used on /how-it-works. */}
-      <div
-        aria-hidden
-        className="absolute pointer-events-none"
-        style={{
-          top: "50%",
-          right: "-15%",
-          width: "520px",
-          height: "520px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, var(--heritage-glow), transparent 65%)",
-          transform: "translateY(-50%)",
-        }}
-      />
-
-      <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_1.35fr] gap-10 lg:gap-14">
-        <div>
-          <BrandLockup dark height={42} />
-          <h3 className="text-[26px] sm:text-[32px] font-extrabold tracking-[-0.8px] leading-tight mt-8 mb-4">
-            A flat-fee hiring platform, built for dental groups.
-          </h3>
-          <p className="text-sm text-hero-foreground/70 leading-[1.7] max-w-[420px]">
-            Subscribe once, post across every practice you operate. One
-            account, no per-listing fees, no placement fees, cancel anytime.
-          </p>
-        </div>
-
-        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-7 gap-y-3.5 list-none lg:pt-2 self-center">
-          {[
-            "One subscription covers every location",
-            "Unlimited hiring, no per-listing or placement fees",
-            "Multi-location job posting in a single flow",
-            "Team accounts for your recruiters and regional managers",
-          ].map((item, i) => (
-            <li
-              key={i}
-              className="flex items-start gap-2.5 text-sm text-hero-foreground leading-[1.55]"
-            >
-              <Check
-                className="h-4 w-4 text-heritage-light flex-shrink-0 mt-0.5"
-                strokeWidth={3}
-              />
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-function ProblemCard({
-  heading,
-  tagline,
-  points,
-}: {
-  heading: string;
-  tagline: string;
-  points: string[];
-}) {
-  return (
-    <div className="bg-card p-10">
-      <h3 className="text-[22px] font-extrabold tracking-[-0.6px] text-ink mb-2">
-        {heading}
-      </h3>
-      <div className="text-sm text-slate-body mb-6 leading-snug">
-        {tagline}
-      </div>
-      <ul className="list-none border-t border-[var(--rule)] pt-5">
-        {points.map((point, i) => (
-          <li
-            key={i}
-            className="text-sm text-slate-body py-2.5 flex items-start gap-2.5 leading-[1.55]"
-          >
-            <Minus className="h-4 w-4 text-slate-meta/50 flex-shrink-0 mt-0.5" />
-            <span>{point}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════
-   ROI MATH
-═══════════════════════════════════════════════════════ */
-
-function RoiMath() {
-  return (
-    <section className="px-6 sm:px-14 py-28 max-w-[1240px] mx-auto">
-      <Eyebrow className="text-heritage-deep mb-3.5">
-        Run The Numbers
-      </Eyebrow>
-      <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[760px] mb-6">
-        For a 25-practice DSO, the cost case takes about a minute.
-      </h2>
-      <p className="text-base text-slate-body leading-[1.7] max-w-[640px] mb-12">
-        These are illustrative numbers based on the average mid-market DSO we
-        designed for. Plug in your own and the conclusion holds.
-      </p>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-[var(--rule)] border border-[var(--rule)]">
-        <RoiCard
-          label="What you spend today"
-          accent="slate"
-          revealDelay={0}
-          rows={[
-            { item: "Per-listing job boards (15 active × ~$99/mo)", value: "$1,485 / mo" },
-            { item: "1 staffing-agency hire/quarter ($30K avg fee)", value: "$10,000 / mo" },
-            { item: "Recruiter time re-entering jobs across listings", value: "Hidden" },
-          ]}
-          total={
-            <>
-              ≈ <CountUp to={11500} prefix="$" /> / mo
-            </>
-          }
-          totalLabel={
-            <>
-              Annual: ~<CountUp to={138000} prefix="$" />
-            </>
-          }
-        />
-        <RoiCard
-          label="What DSO Hire costs"
-          accent="heritage"
-          revealDelay={110}
-          rows={[
-            { item: "Growth tier subscription", value: "$699 / mo" },
-            { item: "Per-listing fees", value: "$0" },
-            { item: "Placement fees", value: "$0" },
-          ]}
-          total={
-            <>
-              <CountUp to={699} prefix="$" /> / mo
-            </>
-          }
-          totalLabel={
-            <>
-              Annual: <CountUp to={8388} prefix="$" />
-            </>
-          }
-        />
-      </div>
-
-      <div
-        data-reveal
-        className="mt-10 bg-hero text-hero-foreground p-8 sm:p-10"
-      >
-        <Eyebrow className="text-heritage-light mb-3">
-          Net difference
-        </Eyebrow>
-        <div className="text-2xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-tight">
-          DSO Hire pays for itself in the first month, every month, on a single
-          replaced agency hire.
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function RoiCard({
-  label,
-  rows,
-  total,
-  totalLabel,
-  accent,
-  revealDelay,
-}: {
-  label: string;
-  rows: Array<{ item: string; value: string }>;
-  /** ReactNode so the totals can carry #115 FOH-1 CountUp animations. */
-  total: React.ReactNode;
-  totalLabel: React.ReactNode;
-  accent: "slate" | "heritage";
-  revealDelay?: number;
-}) {
-  return (
-    <div
-      data-reveal
-      style={
-        revealDelay
-          ? ({ "--mk-delay": `${revealDelay}ms` } as React.CSSProperties)
-          : undefined
-      }
-      className="bg-card p-10"
-    >
-      <Eyebrow
-        className={`mb-6 ${
-          accent === "heritage" ? "text-heritage-deep" : "text-slate-body"
-        }`}
-      >
-        {label}
-      </Eyebrow>
-      <ul className="list-none border-t border-[var(--rule)] pb-4">
-        {rows.map((row, i) => (
-          <li
-            key={i}
-            className="flex items-baseline justify-between gap-6 py-3.5 border-b border-[var(--rule)] text-sm"
-          >
-            <span className="text-slate-body">{row.item}</span>
-            <span className="font-bold text-ink whitespace-nowrap tabular">
-              {row.value}
-            </span>
-          </li>
-        ))}
-      </ul>
-      <div className="pt-4 mt-2">
-        <div className="text-3xl font-extrabold tracking-[-1px] text-ink tabular">
-          {total}
-        </div>
-        <div className="text-xs font-semibold text-slate-meta mt-1 tabular">
-          {totalLabel}
         </div>
       </div>
     </div>
@@ -999,7 +726,7 @@ function FeatureCard({ feature }: { feature: ShowcaseFeature }) {
         tone={isLive ? "heritage" : "neutral"}
         className="absolute top-5 right-5"
       >
-        {isLive ? "Available now" : "Coming H2 2026"}
+        {isLive ? "Available now" : "On the roadmap"}
       </Tag>
 
       {/* Heritage-tinted icon square */}
@@ -1017,75 +744,6 @@ function FeatureCard({ feature }: { feature: ShowcaseFeature }) {
       <p className="text-[14.5px] text-slate-body leading-[1.65]">
         {feature.body}
       </p>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════
-   HOW IT WORKS — DARK BAND
-═══════════════════════════════════════════════════════ */
-
-function HowItWorks() {
-  return (
-    <section id="how" className="bg-hero text-hero-foreground px-6 sm:px-14 py-28 relative overflow-hidden">
-      {/* Heritage glow */}
-      <div
-        aria-hidden
-        className="absolute pointer-events-none"
-        style={{
-          top: "50%",
-          left: "80%",
-          width: "540px",
-          height: "540px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, var(--heritage-glow), transparent 65%)",
-          transform: "translate(-50%, -50%)",
-        }}
-      />
-
-      <div className="relative max-w-[1240px] mx-auto">
-        <Eyebrow className="text-heritage mb-3.5">
-          How It Works
-        </Eyebrow>
-        <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-hero-foreground max-w-[720px] mb-5">
-          From subscription to staffed in three steps.
-        </h2>
-        <p className="text-base text-hero-foreground/60 max-w-[620px] leading-[1.7] mb-14">
-          Most dental groups are posting their first role within an hour of signing up.
-        </p>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mt-6">
-          <HowStep
-            n="01"
-            title="Subscribe in minutes"
-            body="Pick the tier that matches your practice count, pay through Stripe, and your DSO account is live. No demos required, no sales calls, no implementation fees."
-          />
-          <HowStep
-            n="02"
-            title="Post once, hire across every location"
-            body="Write a role once and assign it to as many of your practices as you need. Your whole team (recruiters, regional managers, office managers) posts and reviews under a single account."
-          />
-          <HowStep
-            n="03"
-            title="Review, interview, hire"
-            body="Applications land in a shared dashboard with status tracking. Move candidates through your pipeline, leave internal notes, and hire without paying a placement fee on the way out."
-          />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function HowStep({ n, title, body }: { n: string; title: string; body: string }) {
-  return (
-    <div className="border-t border-hero-foreground/10 pt-7">
-      <Eyebrow className="text-heritage mb-4">
-        Step {n}
-      </Eyebrow>
-      <div className="text-[22px] font-extrabold tracking-[-0.6px] text-hero-foreground mb-3.5 leading-tight">
-        {title}
-      </div>
-      <div className="text-sm text-hero-foreground/70 leading-[1.7]">{body}</div>
     </div>
   );
 }
@@ -1128,7 +786,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
   // ivory text, heritage-green floating "Most Popular" pill above the card, and
   // a heritage-green CTA button. Non-featured cards lift on hover for parity
   // with the rest of the marketing surfaces.
-  const isFeatured = tier.badge === "Most popular";
+  const isFeatured = tier.badge === "Our pick";
   return (
     <div
       className={`relative p-9 flex flex-col motion-safe:transition-all motion-safe:duration-200 ${
@@ -1139,7 +797,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
     >
       {isFeatured && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-heritage text-primary-foreground text-xs font-semibold whitespace-nowrap z-10">
-          Most Popular
+          Our pick for multi-region groups
         </div>
       )}
 
@@ -1180,7 +838,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
         }`}
       >
         {tier.id === "solo" && "For privately-owned 2–5 location groups"}
-        {tier.id === "growth" && "Most chosen for growing groups"}
+        {tier.id === "growth" && "Up to 20 listings for regional groups"}
         {tier.id === "scale" && "Up to 100 listings + per-location analytics"}
         {tier.id === "enterprise" && "Account management included"}
       </div>
@@ -1221,47 +879,17 @@ function PricingTier({ tier }: { tier: TierConfig }) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   FINAL CTA
-═══════════════════════════════════════════════════════ */
-
-function FinalCta() {
-  return (
-    <section className="bg-ivory px-6 sm:px-14 py-24 text-center">
-      <div className="max-w-[680px] mx-auto">
-        <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-5">
-          15-minute call. No demo gauntlet. No sales script.
-        </h2>
-        <p className="text-base text-slate-body leading-[1.7] mb-9">
-          Built for dental groups by people who know the business of
-          dentistry. The same team that writes the product answers the
-          email. Ask the questions you actually want answered.
-        </p>
-        <div className="flex flex-wrap gap-3.5 justify-center">
-          <Button asChild variant="primary" size="xl">
-            <Link href="/contact">
-              Contact Us
-              <ArrowRight className="size-3.5" />
-            </Link>
-          </Button>
-          <Button asChild variant="outline" size="xl">
-            <Link href="/pricing">
-              See Pricing
-            </Link>
-          </Button>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════
    FAQ — employer-buying questions
 ═══════════════════════════════════════════════════════ */
 
 const FAQ_ITEMS = [
   {
     q: "What does the subscription actually cover?",
-    a: "Multi-location job postings, the full applicant pipeline with kanban + scorecards + team comments, candidate dashboards, branded company page, application + candidate data exports for your HR records, and Stripe-secured billing. Pricing scales with your practice count; features are the same depth at every paid tier. Active-listing caps are tier-based: Solo up to 5, Growth up to 20, Scale and Enterprise unlimited.",
+    a: "Multi-location job postings, the full applicant pipeline with kanban + scorecards + team comments, candidate dashboards, branded company page, application + candidate data exports for your HR records, and Stripe-secured billing. Pricing scales with your practice count; features are the same depth at every paid tier. Active-listing caps are tier-based: Solo up to 5, Growth up to 20, Scale up to 100, Enterprise unlimited. Hiring itself is never capped: applications, hires, and hiring managers are unlimited on every tier.",
+  },
+  {
+    q: "Can we try it before we pay?",
+    a: "Yes. The live demo signs you into a working dental group account with sample data: the pipeline, PracticeFit scores, offers, and analytics are all the real product, just read-only. No sign-up and no sales call. When you're ready for your own account, plans start month to month.",
   },
   {
     q: "Can I cancel or change tiers anytime?",
@@ -1281,11 +909,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "How fast can we get started?",
-    a: "Most dental groups are posting their first role within an hour of signing up. Sign up, pay through Stripe, add your locations, and you're live. No implementation fees, no demo gauntlet, no sales call required.",
+    a: "Same day. Sign up, pay through Stripe, add your locations, and publish. There's no implementation project, no setup fee, and no sales call required. Want to look first? The live demo opens with no sign-up.",
   },
   {
     q: "What about Indeed, LinkedIn, and the other major job boards?",
-    a: "Today, every DSO Hire job is searchable on the platform and indexed by Google for Jobs. Cross-posting integrations to Indeed, LinkedIn, and Facebook are on the H2 2026 roadmap. Until then, many dental groups cross-post manually using the listing copy we generate.",
+    a: "Today, every DSO Hire job is searchable on the platform and indexed by Google for Jobs. A syndication feed for aggregators like Indeed is built and switches on as our first employer listings go live. Until it does, you can cross-post anywhere using the listing copy we generate.",
   },
 ];
 
@@ -1293,7 +921,7 @@ function FAQ() {
   return (
     <section className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 pt-24 pb-24">
       <div className="max-w-[860px] mx-auto">
-        <Eyebrow className="text-heritage-deep mb-3.5">
+        <Eyebrow data-kick className="text-heritage-deep mb-3.5">
           FAQ
         </Eyebrow>
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-12">
@@ -1310,7 +938,7 @@ function FAQ() {
 ═══════════════════════════════════════════════════════ */
 
 function SectionEyebrow({ children }: { children: React.ReactNode }) {
-  return <Eyebrow className="text-heritage-deep mb-3.5">{children}</Eyebrow>;
+  return <Eyebrow data-kick className="text-heritage-deep mb-3.5">{children}</Eyebrow>;
 }
 
 function SectionHeadline({ children }: { children: React.ReactNode }) {

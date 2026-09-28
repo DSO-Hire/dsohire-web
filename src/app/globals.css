@@ -334,13 +334,14 @@ html, body {
        After the entrance completes, all animated styles evaporate. */
     animation: route-enter var(--duration-base) var(--ease-settle) backwards;
   }
+  /* Transform-only (2026-09-28): starting from opacity 0 made every
+     page's largest element invisible for the first frames, which delays
+     LCP. Same lesson as the EDC Lighthouse pass (50 to 87 mobile). */
   @keyframes route-enter {
     from {
-      opacity: 0;
       transform: translateY(6px);
     }
     to {
-      opacity: 1;
       transform: translateY(0);
     }
   }
@@ -765,10 +766,11 @@ html, body {
     animation-delay: var(--mk-delay, 0ms);
   }
 }
+/* Lift-only, no opacity: an element that starts invisible is not an LCP
+   candidate until it fades in, so opacity here costs real LCP time. */
 @keyframes mk-hero-rise {
   from {
-    opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(14px);
   }
 }
 
@@ -1475,4 +1477,198 @@ html, body {
     animation: none !important;
     filter: none !important;
   }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   Marketing refresh (2026-09-28): patterns ported from the EDC site,
+   tuned to the DSO Hire doctrine (precise, settling, architectural;
+   no parallax, no cursor effects, square corners).
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Sampled critically-damped spring, ~4% overshoot. Buttons and cards
+     "land" instead of sliding linearly. Falls back to ease-settle where
+     linear() is unsupported. */
+  --spring: var(--ease-settle);
+}
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --spring: linear(0, 0.009, 0.035 2.1%, 0.141 4.4%, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%, 1.017 19.4%, 1.041 22.1%, 1.043 24.8%, 1.035 27.7%, 1.012 34.8%, 1.001 42.4%, 0.998 56.9%, 1);
+  }
+}
+
+/* Route changes jump; in-page anchors (#calculator) glide. Pairs with
+   data-scroll-behavior="smooth" on <html> (Next reads it and disables
+   smooth scrolling during router navigations). */
+html[data-scroll-behavior="smooth"] {
+  scroll-behavior: smooth;
+}
+html {
+  scroll-padding-top: 96px;
+}
+
+/* ── Button lift: hover rises 2px on the spring, press compresses ── */
+.btn-lift {
+  transition:
+    transform 0.32s var(--spring),
+    box-shadow 0.32s var(--ease-settle),
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .btn-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px -12px rgba(20, 35, 63, 0.45);
+  }
+}
+.btn-lift:active {
+  transform: translateY(0) scale(0.985);
+  transition-duration: 0.08s;
+}
+
+/* ── Grain: kills gradient banding on the dark bands ── */
+.grain {
+  isolation: isolate;
+}
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.grain > :not(.absolute) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Auto-numbered section eyebrows: "THE MATH TODAY · 01" ──
+   Any <Eyebrow data-kick> inside .mk-numbered gets the next number. */
+.mk-numbered {
+  counter-reset: mk-sec;
+}
+.mk-numbered [data-kick] {
+  counter-increment: mk-sec;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+}
+.mk-numbered [data-kick]::before {
+  content: "";
+  width: 22px;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.8;
+}
+.mk-numbered [data-kick]::after {
+  content: "· " counter(mk-sec, decimal-leading-zero);
+  opacity: 0.55;
+}
+
+/* ── Fee blocks: the fee squares tip over one by one on reveal ── */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  html.mk-armed [data-reveal] .fee-lost,
+  html.mk-armed [data-reveal] .fee-tick {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  [data-reveal].mk-in .fee-lost,
+  [data-reveal].mk-in .fee-tick {
+    transform: none;
+    opacity: 1;
+    transition:
+      transform 0.5s var(--spring),
+      opacity 0.3s ease;
+    transition-delay: calc(420ms + var(--i, 0) * 22ms);
+  }
+  [data-reveal].mk-in .fee-lost {
+    transition-delay: calc(700ms + (var(--i, 0) - 16) * 140ms);
+  }
+}
+
+/* ── Live dot + demo rows ── */
+@media (prefers-reduced-motion: no-preference) {
+  .live-dot {
+    animation: live-pulse 2.2s var(--ease-settle) infinite;
+  }
+  [data-reveal].mk-in .demo-row {
+    animation: demo-row-in 0.55s var(--spring) both;
+    animation-delay: calc(500ms + var(--i, 0) * 140ms);
+  }
+}
+@keyframes live-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(141, 184, 163, 0.55); }
+  60% { box-shadow: 0 0 0 6px rgba(141, 184, 163, 0); }
+}
+@keyframes demo-row-in {
+  from { transform: translateX(14px); opacity: 0; }
+}
+
+/* ── Closing CTA band: gradient that lands on the footer's exact color,
+   so band + footer read as one dark surface (EDC e2c2a38). ── */
+.cta-band {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 0%, rgba(77, 122, 96, 0.35), transparent 70%),
+    linear-gradient(180deg, #1b2d4d 0%, var(--hero) 100%);
+}
+
+/* ── LeadHandoff success state settles in ── */
+@media (prefers-reduced-motion: no-preference) {
+  .lead-done {
+    animation: mk-hero-rise 0.45s var(--spring) both;
+  }
+}
+
+/* ── Marketing nav: glass that firms up once you scroll, and gets out
+   of the way while you read (hides scrolling down, returns on any
+   scroll up). Driven by NavScrollState (data attributes on <nav>). ── */
+.site-nav {
+  transition:
+    transform 0.42s var(--ease-settle),
+    background-color 0.24s ease,
+    box-shadow 0.24s ease,
+    border-color 0.24s ease;
+}
+.site-nav[data-scrolled="true"] {
+  box-shadow: 0 8px 28px -18px rgba(20, 35, 63, 0.35);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .site-nav[data-hidden="true"] {
+    transform: translateY(-100%);
+  }
+}
+.site-nav:focus-within {
+  transform: none;
+}
+
+/* Nav micro-interactions: hovered link keeps focus, siblings recede;
+   underline draws from the left on the spring. */
+@media (hover: hover) {
+  .nav-links:has(> li > a:hover) > li > a:not(:hover) {
+    opacity: 0.55;
+  }
+}
+.nav-links > li > a {
+  transition: opacity 0.2s ease, color 0.12s ease;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 2px;
+  background: var(--heritage);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s var(--spring);
+}
+.nav-link:hover::after,
+.nav-link:focus-visible::after {
+  transform: scaleX(1);
 }

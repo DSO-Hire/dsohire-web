@@ -25,7 +25,7 @@ export function FilmSection({
     <section className="bg-card border-y border-[var(--rule)] px-6 sm:px-14 py-24">
       <div className="max-w-[1240px] mx-auto">
         <div className="max-w-[640px] mb-10">
-          <Eyebrow>{eyebrow}</Eyebrow>
+          <Eyebrow data-kick>{eyebrow}</Eyebrow>
           <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mt-4 mb-4">
             {headline}
           </h2>
@@ -40,8 +40,8 @@ export function FilmSection({
             preload="metadata"
             className={
               vertical
-                ? "w-full max-w-[400px] border border-[var(--rule)] bg-ink"
-                : "w-full max-w-[960px] border border-[var(--rule)] bg-ink"
+                ? "w-full max-w-[400px] aspect-[9/16] border border-[var(--rule)] bg-ink"
+                : "w-full max-w-[960px] aspect-video border border-[var(--rule)] bg-ink"
             }
           />
         </div>

@@ -28,7 +28,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Start a DSO Subscription",
   description:
-    "Sign up your dental group for DSO Hire. One flat monthly fee, unlimited multi-location postings, no placement fees.",
+    "Sign up your dental group for DSO Hire. One flat monthly fee for every location, no placement fees.",
 };
 
 interface PageProps {

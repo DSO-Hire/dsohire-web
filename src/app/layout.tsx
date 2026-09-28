@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     template: "%s · DSO Hire",
   },
   description:
-    "Dental hiring, done direct. The hiring platform built for mid-market Dental Support Organizations: flat-fee, unlimited multi-location postings, no placement fees, no per-listing surcharges.",
+    "Dental hiring, done direct. The hiring platform built for mid-market Dental Support Organizations: flat-fee, multi-location postings, no placement fees, no per-listing surcharges.",
   metadataBase: new URL("https://dsohire.com"),
   // ───────────────────────────────────────────────────────────────
   // ENV-DRIVEN INDEXING GATE — shared with robots.ts via isIndexingAllowed()
@@ -64,6 +64,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
       className={cn("h-full", "antialiased", manrope.variable, "font-sans")}
     >

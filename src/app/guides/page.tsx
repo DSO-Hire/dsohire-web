@@ -7,6 +7,7 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { ReportSignup } from "@/components/marketing/report-signup";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { loadAllGuides } from "@/lib/guides/loader";
 import type { Metadata } from "next";
@@ -71,6 +72,7 @@ export default function GuidesIndexPage() {
           </ul>
         </div>
       </section>
+      <ReportSignup page="guides" />
     </SiteShell>
   );
 }

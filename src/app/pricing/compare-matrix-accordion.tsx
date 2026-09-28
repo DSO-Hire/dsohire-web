@@ -114,7 +114,7 @@ export function CompareMatrixAccordion({
             >
               {t.featured && (
                 <Tag tone="heritage" className="absolute top-2 right-2.5 bg-heritage text-primary-foreground">
-                  Most popular
+                  Our pick
                 </Tag>
               )}
               <div className="text-sm font-extrabold tracking-[-0.4px] text-hero-foreground mb-0.5">

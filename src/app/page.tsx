@@ -32,6 +32,7 @@
  */
 
 import Link from "next/link";
+import { DEMO_URL } from "@/lib/marketing/demo";
 import Image from "next/image";
 import {
   ArrowRight,
@@ -152,9 +153,11 @@ function Hero({ live }: { live: HomeLiveSnapshot }) {
         )}
 
         {/* ── The equal-weight dual entry — now demonstrating, not describing.
-            Candidate door leads on mobile (Cam 2026-07-10: candidates are
-            the bulk of phone traffic); employer door keeps the left slot
-            on md+ so the desktop composition is unchanged. ── */}
+            Employer door leads at every width (Cam 2026-09-28, reversing
+            the 07-10 candidate-first mobile order): DSO buyers are the
+            paying side, and candidates still get "Browse jobs" as the nav's
+            signed-out CTA. The employer door's secondary is the live demo,
+            the lowest-commitment step a buyer can take. ── */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-left">
           <DoorwayPanel
             accent="ink"
@@ -166,8 +169,8 @@ function Hero({ live }: { live: HomeLiveSnapshot }) {
             demo={<MiniKanban />}
             ctaLabel="Explore dental group hiring"
             ctaHref="/for-dental-groups"
-            secondaryLabel="See pricing"
-            secondaryHref="/pricing"
+            secondaryLabel="See the live demo, no sign-up"
+            secondaryHref={DEMO_URL}
             revealDelay={200}
           />
           <DoorwayPanel
@@ -183,7 +186,6 @@ function Hero({ live }: { live: HomeLiveSnapshot }) {
             secondaryLabel="How it works for candidates"
             secondaryHref="/for-candidates"
             revealDelay={280}
-            className="order-first md:order-none"
           />
         </div>
       </div>

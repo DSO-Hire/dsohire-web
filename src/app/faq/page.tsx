@@ -136,7 +136,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: "Where do my jobs get distributed and who sees them?",
-        a: "Every DSO Hire job is searchable across the platform and published to Google for Jobs, so it surfaces in Google search results. Direct syndication to aggregators like Indeed and LinkedIn is on our roadmap for later in 2026. We'd rather tell you that plainly than imply reach we don't have yet.",
+        a: "Every DSO Hire job is searchable across the platform and published to Google for Jobs, so it surfaces in Google search results. A syndication feed for aggregators like Indeed is built and switches on as our first employer listings go live. We'd rather tell you that plainly than imply reach we don't have yet.",
       },
       {
         q: "How do I review and manage applicants?",
@@ -148,7 +148,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: "How fast can we get set up?",
-        a: "Fast. Sign up, choose a plan, pay through Stripe, and your account is live in minutes; most dental groups post their first role within an hour of signing up. There's no setup fee and no implementation project.",
+        a: "Fast. Sign up, choose a plan, pay through Stripe, and your account is live in minutes. Posting a role takes a few minutes more, and our AI draft does most of the writing. There's no setup fee and no implementation project.",
       },
       {
         q: "Is DSO Hire right for a single-location practice?",

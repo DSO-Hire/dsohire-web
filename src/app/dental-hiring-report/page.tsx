@@ -24,6 +24,7 @@ import {
   Users,
   Clock,
 } from "lucide-react";
+import { ReportSignup } from "@/components/marketing/report-signup";
 import { SiteShell } from "@/components/marketing/site-shell";
 import {
   getHiringReportSnapshot,
@@ -229,7 +230,7 @@ export default async function HiringReportPage() {
           <CallToActionCard
             eyebrow="DSO Operators"
             title="Post a job and join the next report."
-            description="Every job you post strengthens the platform's view of the dental hiring market. Job posting on DSO Hire is flat-rate, unlimited multi-location."
+            description="Every job you post strengthens the platform's view of the dental hiring market. Job posting on DSO Hire is one flat rate across every location."
             cta="Pricing"
             href="/pricing"
           />
@@ -264,6 +265,7 @@ export default async function HiringReportPage() {
           }),
         }}
       />
+      <ReportSignup page="dental-hiring-report" />
     </SiteShell>
   );
 }

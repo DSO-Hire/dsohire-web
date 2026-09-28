@@ -16,6 +16,7 @@ import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ArrowRight } from "lucide-react";
+import { ReportSignup } from "@/components/marketing/report-signup";
 import { SiteShell } from "@/components/marketing/site-shell";
 import {
   loadGuide,
@@ -125,6 +126,7 @@ export default async function GuidePage({ params }: PageProps) {
           </section>
         )}
       </article>
+      <ReportSignup page="guide" />
     </SiteShell>
   );
 }

@@ -7,7 +7,7 @@
  *
  *   Solo        $399/mo   ($359/mo billed annually)  — 5 active openings · 5 seats
  *   Growth      $699/mo   ($629/mo billed annually)  — 20 active openings · 15 seats
- *   Scale       $1,499/mo ($1,349/mo billed annually)— 100 active openings · 50 seats   [most popular]
+ *   Scale       $1,499/mo ($1,349/mo billed annually)— 100 active openings · 50 seats   [our pick]
  *   Enterprise  $2,999/mo ($2,699/mo billed annually)— unlimited · unlimited
  *
  * Caps are code-enforced (#88): the advertised number === the enforced number.
@@ -135,7 +135,7 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
       "Everything in Growth, plus:",
       "Per-location dashboards",
       "Cross-location benchmarking",
-      "Custom approval chains (H2 2026)",
+      "Custom approval chains (on the roadmap)",
     ],
     maxActiveJobs: 100,
     maxSeats: 50,
@@ -143,7 +143,8 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
     stripePriceIdTestAnnual: "price_1TZCSj0uFxwSh1FnkuUbRajm",
     stripePriceIdLive: "price_1TtWMv16EBfaEQpfnoHjfgwS",
     stripePriceIdLiveAnnual: "price_1TtWNC16EBfaEQpfdCI5G9pm",
-    badge: "Most popular",
+    // Honest opinion, not a popularity stat (no customers to count yet).
+    badge: "Our pick",
   },
   enterprise: {
     id: "enterprise",
@@ -159,8 +160,8 @@ export const PRICING_TIERS: Record<PricingTier, TierConfig> = {
       "Unlimited active openings · unlimited admin seats",
       "Everything in Scale, plus:",
       "Audit log with indefinite retention",
-      "Dedicated CSM + SLA (H2 2026)",
-      "SSO / SAML + SOC 2 (H2 2026)",
+      "Dedicated CSM + SLA (on the roadmap)",
+      "SSO / SAML + SOC 2 (on the roadmap)",
       "BAA-readiness for HIPAA workflows",
     ],
     maxActiveJobs: null,

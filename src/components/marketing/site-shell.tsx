@@ -19,6 +19,8 @@ import { INFO_EMAIL as SUPPORT_EMAIL, INFO_MAILTO as SUPPORT_MAILTO } from "@/li
 import { MobileMenu } from "./mobile-menu";
 import { LensToggle } from "./lens-toggle";
 import { MotionMount } from "./motion";
+import { NavScrollState } from "./nav-scroll-state";
+import { DEMO_URL } from "@/lib/marketing/demo";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { ToastProvider } from "@/components/app/toast";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -137,11 +139,12 @@ export async function SiteNav({
   }
 
   return (
-    <nav className="fixed top-0 inset-x-0 z-50 h-[80px] px-6 sm:px-14 flex items-center justify-between backdrop-blur-md bg-ivory/85 border-b border-[var(--rule)]">
-      <Link href="/" className="flex items-center" aria-label="DSO Hire, home">
+    <nav className="site-nav fixed top-0 inset-x-0 z-50 h-[80px] px-6 sm:px-10 xl:px-14 flex items-center justify-between gap-6 backdrop-blur-xl backdrop-saturate-150 bg-ivory/80 border-b border-[var(--rule)]">
+      <NavScrollState />
+      <Link href="/" className="flex items-center shrink-0" aria-label="DSO Hire, home">
         <BrandLockup height={42} draw />
       </Link>
-      <ul className="hidden md:flex items-center gap-7 list-none">
+      <ul className="nav-links hidden md:flex items-center gap-5 lg:gap-7 list-none">
         {/* Dual-lens segmented control — "For DSOs | Job Candidates".
             Client island (needs usePathname for active-lens state); the
             right segment is also the hover trigger for the role dropdown. */}
@@ -167,8 +170,21 @@ export async function SiteNav({
           </Link>
         </li>
         <NavLink href="/pricing">Pricing</NavLink>
-        <NavLink href="/about">About</NavLink>
-        <NavLink href="/contact">Contact</NavLink>
+        {/* The self-serve demo is the lowest-commitment step a DSO can
+            take; it earns a permanent slot. About + Contact moved to the
+            footer and the mobile drawer to make room (nav decrowd,
+            2026-09-28). */}
+        <li className="hidden lg:block">
+          <a
+            href={DEMO_URL}
+            target="_blank"
+            rel="noopener"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-body hover:text-ink transition-colors whitespace-nowrap"
+          >
+            <span aria-hidden className="live-dot size-1.5 bg-heritage" />
+            Live demo
+          </a>
+        </li>
       </ul>
       <div className="flex items-center gap-2.5 sm:gap-3">
         {/* Toggles live in the hamburger drawer below lg — the top bar must
@@ -176,19 +192,21 @@ export async function SiteNav({
             Wrapper div owns the responsive hiding: the toggles' own root
             classes set display, so a passed-in `hidden` loses the CSS-order
             fight (the pre-existing bug that showed them on phones). */}
-        <div className="hidden lg:flex items-center gap-3">
+        {/* Toggles only when there's genuinely room (2xl); the drawer and
+            footer carry them everywhere else. */}
+        <div className="hidden 2xl:flex items-center gap-3">
           <ThemeToggle className="text-slate-body" />
           <TextSizeToggle className="text-slate-body" />
         </div>
         <Link
           href={signInHref}
-          className="hidden sm:inline-flex text-xs font-semibold text-slate-body hover:text-ink transition-colors"
+          className="hidden sm:inline-flex text-xs font-semibold text-slate-body hover:text-ink transition-colors whitespace-nowrap"
         >
           {signInLabel}
         </Link>
         <Link
           href={primaryCtaHref}
-          className="px-3.5 py-2 text-xs sm:px-5 sm:py-2.5 sm:text-sm bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors whitespace-nowrap"
+          className="btn-lift px-3.5 py-2 text-xs sm:px-5 sm:py-2.5 sm:text-sm bg-primary text-primary-foreground font-bold hover:bg-primary/90 whitespace-nowrap"
         >
           {primaryCtaLabel}
         </Link>
@@ -213,7 +231,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
     <li>
       <Link
         href={href}
-        className="text-xs font-semibold text-slate-body hover:text-ink transition-colors"
+        className="nav-link relative text-xs font-semibold text-slate-body hover:text-ink transition-colors whitespace-nowrap"
       >
         {children}
       </Link>
@@ -230,7 +248,7 @@ export function SiteFooter() {
             <BrandLockup dark height={56} />
             <p className="text-sm text-hero-foreground/55 leading-[1.7] mt-5 max-w-[280px]">
               Dental hiring, done direct. The hiring platform built for
-              multi-location DSOs. One flat monthly fee, unlimited postings.
+              multi-location dental groups. One flat monthly fee, no placement fees.
               Born from ten years inside the business of dentistry.
             </p>
           </div>
@@ -238,6 +256,7 @@ export function SiteFooter() {
           <FooterCol title="Dental Groups">
             <FooterLink href="/pricing">Pricing</FooterLink>
             <FooterLink href="/for-dental-groups">Why DSO Hire</FooterLink>
+            <FooterLink href={DEMO_URL}>Live demo</FooterLink>
             <FooterLink href="/switch">Switch to DSO Hire</FooterLink>
             <FooterLink href="/vs/job-boards">vs Job Boards</FooterLink>
             <FooterLink href="/vs/staffing-agencies">vs Staffing Agencies</FooterLink>
@@ -279,7 +298,11 @@ export function SiteFooter() {
           <div className="text-xs tracking-[0.5px] text-hero-foreground/40">
             © {new Date().getFullYear()} DSO Hire LLC
           </div>
-          <div className="flex gap-6 text-xs text-hero-foreground/40">
+          <div className="flex flex-wrap items-center gap-6 text-xs text-hero-foreground/40">
+            <div className="flex items-center gap-3 text-hero-foreground/60">
+              <ThemeToggle className="text-hero-foreground/60" />
+              <TextSizeToggle className="text-hero-foreground/60" />
+            </div>
             <Link
               href="/legal/privacy"
               className="hover:text-hero-foreground/70 transition-colors"

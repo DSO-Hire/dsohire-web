@@ -28,7 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Tag } from "@/components/brand/tag";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { MotionMount } from "@/components/marketing/motion";
-import { RoiCalculator } from "@/components/marketing/roi-calculator";
+import { RoiCalculator, type RoiInitial } from "@/components/marketing/roi-calculator";
 import { SALES_EMAIL } from "@/lib/contact";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
@@ -44,7 +44,7 @@ interface PricingPageProps {
   // bounced an unauthenticated user here first. We carry it through the
   // tier-card sign-up CTAs so the post-signup redirect returns them to
   // wherever they were trying to go. `period` drives the billing toggle.
-  searchParams: Promise<{ next?: string; period?: string }>;
+  searchParams: Promise<{ next?: string; period?: string } & RoiInitial>;
 }
 
 export default async function PricingPage({ searchParams }: PricingPageProps) {
@@ -70,10 +70,12 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
       {/* #115 FOH-5 — lead with outcomes, not capacity: the visitor's own
           agency math vs our flat fee, before the tier cards. */}
       <RoiCalculator
+        initial={sp}
         tiers={tiers.map((t) => ({
           id: t.id,
           name: t.name,
           annualMonthly: t.annualMonthlyEquivalent,
+          maxActiveJobs: t.maxActiveJobs,
         }))}
       />
       <TierGrid
@@ -361,7 +363,7 @@ function TierCard({
   period: BillingPeriod;
   authedNeedsCheckout: boolean;
 }) {
-  const isFeatured = tier.badge === "Most popular";
+  const isFeatured = tier.badge === "Our pick";
   const isAnnual = period === "annual";
   const headlinePrice = isAnnual ? tier.annualMonthlyEquivalent : tier.monthlyPrice;
   // 2026-05-26 — CTA verbs scale energy with the tier (start → step → power →
@@ -376,7 +378,7 @@ function TierCard({
   };
   const monthlyDescriptor: Record<PricingTier, string> = {
     solo: "For privately-owned 2–5 location groups",
-    growth: "Most chosen for growing groups",
+    growth: "Up to 20 listings for regional groups",
     scale: "Up to 100 listings + per-location analytics",
     enterprise: "Account management included",
   };
@@ -402,7 +404,7 @@ function TierCard({
           four cards stay aligned at the eyebrow row. */}
       {isFeatured && (
         <Tag tone="heritage" className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 bg-heritage text-primary-foreground">
-          Most popular
+          Our pick for multi-region groups
         </Tag>
       )}
 
@@ -510,7 +512,7 @@ interface MatrixGroup {
  *   - CE tracking is universally free for candidates. Annual DSO Hiring Report
  *     is fully public from launch.
  *
- * Soft-label values ("H2 2026", "Phase 6+", "Public", "Candidate-side") render
+ * Soft-label values ("Roadmap", "Phase 6+", "Public", "Candidate-side") render
  * de-emphasized vs. capacity values — see MatrixGroupBlock cell renderer.
  */
 const COMPARE_GROUPS: MatrixGroup[] = [
@@ -582,7 +584,7 @@ const COMPARE_GROUPS: MatrixGroup[] = [
       },
       {
         feature: "Custom approval chains by role/location",
-        values: { solo: false, growth: false, scale: "H2 2026", enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: "Roadmap", enterprise: "Roadmap" },
       },
     ],
   },
@@ -599,11 +601,11 @@ const COMPARE_GROUPS: MatrixGroup[] = [
       },
       {
         feature: "Panel scheduling (multi-interviewer)",
-        values: { solo: false, growth: false, scale: "H2 2026", enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: "Roadmap", enterprise: "Roadmap" },
       },
       {
         feature: "AI scheduling agent (best-slot)",
-        values: { solo: false, growth: false, scale: "H2 2026", enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: "Roadmap", enterprise: "Roadmap" },
       },
     ],
   },
@@ -616,27 +618,27 @@ const COMPARE_GROUPS: MatrixGroup[] = [
       },
       {
         feature: "License expiration alerts (60-day)",
-        values: { solo: false, growth: "H2 2026", scale: "H2 2026", enterprise: "H2 2026" },
+        values: { solo: false, growth: "Roadmap", scale: "Roadmap", enterprise: "Roadmap" },
       },
       {
         feature: "Background check integration (Checkr)",
-        values: { solo: false, growth: "H2 2026", scale: "H2 2026", enterprise: "H2 2026" },
+        values: { solo: false, growth: "Roadmap", scale: "Roadmap", enterprise: "Roadmap" },
       },
       {
         feature: "Drug screen integration",
-        values: { solo: false, growth: "H2 2026", scale: "H2 2026", enterprise: "H2 2026" },
+        values: { solo: false, growth: "Roadmap", scale: "Roadmap", enterprise: "Roadmap" },
       },
       {
         feature: "State board license verification",
-        values: { solo: false, growth: false, scale: false, enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: false, enterprise: "Roadmap" },
       },
       {
         feature: "Malpractice insurance tracking",
-        values: { solo: false, growth: false, scale: false, enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: false, enterprise: "Roadmap" },
       },
       {
         feature: "CE compliance reporting (employer-side)",
-        values: { solo: false, growth: "H2 2026", scale: "H2 2026", enterprise: "H2 2026" },
+        values: { solo: false, growth: "Roadmap", scale: "Roadmap", enterprise: "Roadmap" },
       },
     ],
   },
@@ -653,7 +655,7 @@ const COMPARE_GROUPS: MatrixGroup[] = [
       },
       {
         feature: "Two-way SMS to candidates",
-        values: { solo: "H2 2026", growth: "H2 2026", scale: "H2 2026", enterprise: "H2 2026" },
+        values: { solo: "Roadmap", growth: "Roadmap", scale: "Roadmap", enterprise: "Roadmap" },
       },
       {
         feature: "Offer letter templates + e-signature",
@@ -688,15 +690,15 @@ const COMPARE_GROUPS: MatrixGroup[] = [
       },
       {
         feature: "Indeed / LinkedIn / Facebook cross-post",
-        values: { solo: "H2 2026", growth: "H2 2026", scale: "H2 2026", enterprise: "H2 2026" },
+        values: { solo: "Roadmap", growth: "Roadmap", scale: "Roadmap", enterprise: "Roadmap" },
       },
       {
         feature: "Custom domain (careers.yourdso.com)",
-        values: { solo: false, growth: false, scale: "H2 2026", enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: "Roadmap", enterprise: "Roadmap" },
       },
       {
         feature: "Multi-brand support (parent + sub-brands)",
-        values: { solo: false, growth: false, scale: false, enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: false, enterprise: "Roadmap" },
       },
     ],
   },
@@ -725,11 +727,11 @@ const COMPARE_GROUPS: MatrixGroup[] = [
       },
       {
         feature: "Anonymized salary benchmarks (per role/state)",
-        values: { solo: false, growth: false, scale: "H2 2026", enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: "Roadmap", enterprise: "Roadmap" },
       },
       {
         feature: "Custom report builder + exports",
-        values: { solo: false, growth: false, scale: false, enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: false, enterprise: "Roadmap" },
       },
     ],
   },
@@ -769,15 +771,15 @@ const COMPARE_GROUPS: MatrixGroup[] = [
       },
       {
         feature: "AI Interview Assistant (record + summarize)",
-        values: { solo: false, growth: false, scale: "H2 2026", enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: "Roadmap", enterprise: "Roadmap" },
       },
       {
         feature: "Voice-memo screener answers (novel)",
-        values: { solo: false, growth: false, scale: "H2 2026", enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: "Roadmap", enterprise: "Roadmap" },
       },
       {
         feature: "Agentic sourcing copilot",
-        values: { solo: false, growth: false, scale: false, enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: false, enterprise: "Roadmap" },
       },
     ],
   },
@@ -786,19 +788,19 @@ const COMPARE_GROUPS: MatrixGroup[] = [
     rows: [
       {
         feature: "Zapier / Make webhooks",
-        values: { solo: "H2 2026", growth: "H2 2026", scale: "H2 2026", enterprise: "H2 2026" },
+        values: { solo: "Roadmap", growth: "Roadmap", scale: "Roadmap", enterprise: "Roadmap" },
       },
       {
         feature: "Slack / Teams notifications",
-        values: { solo: false, growth: "H2 2026", scale: "H2 2026", enterprise: "H2 2026" },
+        values: { solo: false, growth: "Roadmap", scale: "Roadmap", enterprise: "Roadmap" },
       },
       {
         feature: "HRIS handoff (Gusto / Rippling / BambooHR / Workday)",
-        values: { solo: false, growth: false, scale: "H2 2026", enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: "Roadmap", enterprise: "Roadmap" },
       },
       {
         feature: "REST API access",
-        values: { solo: false, growth: false, scale: false, enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: false, enterprise: "Roadmap" },
       },
       {
         feature: "Practice management software integration",
@@ -815,7 +817,7 @@ const COMPARE_GROUPS: MatrixGroup[] = [
       },
       {
         feature: "OFCCP / EEOC aggregate exports",
-        values: { solo: false, growth: false, scale: "H2 2026", enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: "Roadmap", enterprise: "Roadmap" },
       },
       {
         feature: "GDPR / CCPA tooling",
@@ -842,15 +844,15 @@ const COMPARE_GROUPS: MatrixGroup[] = [
       },
       {
         feature: "SSO / SAML",
-        values: { solo: false, growth: false, scale: false, enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: false, enterprise: "Roadmap" },
       },
       {
         feature: "SOC 2 Type II",
-        values: { solo: false, growth: false, scale: false, enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: false, enterprise: "Roadmap" },
       },
       {
         feature: "BAA-readiness (HIPAA-aware)",
-        values: { solo: false, growth: false, scale: false, enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: false, enterprise: "Roadmap" },
       },
     ],
   },
@@ -894,11 +896,11 @@ const COMPARE_GROUPS: MatrixGroup[] = [
       },
       {
         feature: "Dedicated CSM",
-        values: { solo: false, growth: false, scale: false, enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: false, enterprise: "Roadmap" },
       },
       {
         feature: "SLA with response-time guarantees",
-        values: { solo: false, growth: false, scale: false, enterprise: "H2 2026" },
+        values: { solo: false, growth: false, scale: false, enterprise: "Roadmap" },
       },
     ],
   },
@@ -919,7 +921,7 @@ function CompareMatrix({
   // at the bottom, keeping its category as a suffix. Mixed rows (live for
   // some tiers, roadmapped for others) stay put — they're real today.
   // COMPARE_GROUPS stays the single source of truth.
-  const ROADMAP_VALUES = new Set(["H2 2026", "Phase 6+"]);
+  const ROADMAP_VALUES = new Set(["Roadmap", "Phase 6+"]);
   const isRoadmapOnly = (row: MatrixRow) =>
     Object.values(row.values).every(
       (v) => v === false || (typeof v === "string" && ROADMAP_VALUES.has(v))
@@ -964,7 +966,7 @@ function CompareMatrix({
           every capacity number is code-enforced. Anything not yet live for
           any tier sits in the final{" "}
           <span className="text-2xs font-semibold">On the roadmap</span>{" "}
-          band, labeled <span className="text-2xs font-semibold">H2 2026</span>{" "}
+          band, labeled <span className="text-2xs font-semibold">Roadmap</span>{" "}
           (active roadmap) or <span className="text-2xs font-semibold">Phase 6+</span>{" "}
           (longer-term). We commit to features publicly so prospects see the
           platform&apos;s shape, and nothing roadmapped masquerades as shipped.
@@ -978,7 +980,7 @@ function CompareMatrix({
             return {
               id: tier.id,
               name: tier.name,
-              featured: tier.badge === "Most popular",
+              featured: tier.badge === "Our pick",
               priceLine: `$${headlinePrice.toLocaleString()}/mo`,
               subLine: isAnnual ? "billed annually" : null,
             };
@@ -1006,7 +1008,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Are there per-listing or placement fees on top of the subscription?",
-    a: "No. The subscription is the entire cost: we never charge per listing, and we never take a cut of placements. Active-listing counts are tier-based (Solo: up to 5; Growth: up to 20; Scale and Enterprise: unlimited).",
+    a: "No. The subscription is the entire cost: we never charge per listing, and we never take a cut of placements. Active-listing counts are tier-based (Solo: up to 5; Growth: up to 20; Scale: up to 100; Enterprise: unlimited). Applications and hires are never capped.",
   },
   {
     q: "What payment methods do you accept?",

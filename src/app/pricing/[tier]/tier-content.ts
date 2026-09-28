@@ -44,7 +44,7 @@ export const TIER_PAGE_CONTENT: Record<PricingTier, TierPageContent> = {
   growth: {
     headline: "The full hiring platform for groups in active expansion.",
     whoItsFor:
-      "Growth is the complete platform for dental groups and DSOs that are hiring continuously. It's our most popular tier because it adds the tools that matter once hiring becomes an ongoing operation: a cross-job application inbox, license-requirement and attestation tracking, funnel reporting, and the AI rejection-reason suggester, with room for up to 20 active listings and 15 admin seats, plus priority support. Everything in Solo is included.",
+      "Growth is the complete platform for dental groups and DSOs that are hiring continuously. It's built for the moment hiring becomes an ongoing operation, adding the tools that matter most: a cross-job application inbox, license-requirement and attestation tracking, funnel reporting, and the AI rejection-reason suggester, with room for up to 20 active listings and 15 admin seats, plus priority support. Everything in Solo is included.",
     bestIf: [
       "You're hiring continuously across multiple locations",
       "Up to 20 open roles at a time (20 active listings)",
@@ -74,7 +74,7 @@ export const TIER_PAGE_CONTENT: Record<PricingTier, TierPageContent> = {
   enterprise: {
     headline: "Governance, security, and account management for the largest groups.",
     whoItsFor:
-      "Enterprise is for the largest, most complex groups (typically 35+ practices) where hiring runs alongside real governance, security, and account-management requirements. On top of everything in Scale, it layers an audit log with indefinite retention, a dedicated customer success manager with an SLA, SSO / SAML and SOC 2, and BAA-readiness for HIPAA workflows. Some of these capabilities are on the H2 2026 roadmap; your CSM maps the rollout to your timeline.",
+      "Enterprise is for the largest, most complex groups (typically 35+ practices) where hiring runs alongside real governance, security, and account-management requirements. On top of everything in Scale, it layers an audit log with indefinite retention, a dedicated customer success manager with an SLA, SSO / SAML and SOC 2, and BAA-readiness for HIPAA workflows. Some of these capabilities are still on our roadmap; your CSM maps the rollout to your timeline.",
     bestIf: [
       "35+ practices and/or multi-region operations",
       "Procurement, security review, or compliance requirements in the buying process",
@@ -82,6 +82,6 @@ export const TIER_PAGE_CONTENT: Record<PricingTier, TierPageContent> = {
       "SSO/SAML, SOC 2, audit logging, and BAA-readiness matter to you",
     ],
     considerLowerIf:
-      "If you don't yet need SSO, SOC 2, or a dedicated CSM, Scale gives you unlimited hiring + analytics today.",
+      "If you don't yet need SSO, SOC 2, or a dedicated CSM, Scale gives you up to 100 active listings, unlimited hiring, and analytics today.",
   },
 };

@@ -155,7 +155,7 @@ export function LensToggle() {
   const lens = resolveLens(pathname);
 
   const baseSegment =
-    "inline-flex items-center gap-1.5 px-3.5 h-9 text-xs font-semibold transition-colors";
+    "inline-flex items-center gap-1.5 px-3.5 h-9 text-xs font-semibold whitespace-nowrap transition-colors";
   const activeSegment = "text-ink font-bold shadow-[inset_0_-2px_0_0_var(--heritage)]";
   const idleSegment = "text-slate-body hover:text-ink hover:bg-cream/60";
 

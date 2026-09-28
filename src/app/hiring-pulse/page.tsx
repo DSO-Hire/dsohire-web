@@ -19,6 +19,7 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { ReportSignup } from "@/components/marketing/report-signup";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { CountUp } from "@/components/marketing/motion";
 import {
@@ -51,6 +52,7 @@ export default async function HiringPulsePage() {
         <WarmingUp />
       )}
       <ClosingCta />
+      <ReportSignup page="hiring-pulse" />
     </SiteShell>
   );
 }

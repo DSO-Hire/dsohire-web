@@ -31,6 +31,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { DEMO_URL } from "@/lib/marketing/demo";
 import { ChevronDown } from "lucide-react";
 import { Eyebrow } from "@/components/brand/eyebrow";
 import { FitWordmark } from "@/components/practice-fit/brand/fit-wordmark";
@@ -267,6 +268,16 @@ export function MobileMenu({
                 <Eyebrow as="span">Text size</Eyebrow>
                 <TextSizeToggle className="text-ink" />
               </div>
+              <a
+                href={DEMO_URL}
+                target="_blank"
+                rel="noopener"
+                onClick={close}
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 border border-heritage/40 bg-heritage/[0.07] text-ink text-xs font-bold hover:border-heritage transition-colors"
+              >
+                <span aria-hidden className="live-dot size-1.5 bg-heritage" />
+                For dental groups: see the live demo, no sign-up
+              </a>
               <Link
                 href={signInHref}
                 onClick={close}

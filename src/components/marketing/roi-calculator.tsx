@@ -19,47 +19,148 @@
  * fee ranges, which the caption labels as such.
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Link2, Check } from "lucide-react";
 
 import { Eyebrow } from "@/components/brand/eyebrow";
+import { LeadHandoff } from "@/components/marketing/lead-handoff";
+import { DEMO_URL } from "@/lib/marketing/demo";
 
 export interface RoiTierInfo {
   id: string;
   name: string;
   /** Annual-billing monthly equivalent (matches the pricing page default). */
   annualMonthly: number;
+  /** Enforced active-listing cap from prices.ts; null = unlimited. */
+  maxActiveJobs?: number | null;
 }
 
 function fmtUsd(n: number): string {
   return `$${Math.round(n).toLocaleString("en-US")}`;
 }
 
-/** Locations → recommended tier, mirroring the pricing page's framing. */
-function recommendTier(locations: number, tiers: RoiTierInfo[]): RoiTierInfo {
-  const id =
-    locations <= 5
-      ? "solo"
-      : locations <= 20
-        ? "growth"
-        : locations <= 100
-          ? "scale"
-          : "enterprise";
-  return tiers.find((t) => t.id === id) ?? tiers[0];
+/** Locations → recommended tier, mirroring the pricing page's framing
+ * (Solo 2–5 locations, Enterprise 35+ practices in prices.ts). Exported for
+ * the /for-dental-groups agency-cost calculator so both agree. */
+export function recommendTierId(locations: number): string {
+  return locations <= 5
+    ? "solo"
+    : locations <= 20
+      ? "growth"
+      : locations <= 34
+        ? "scale"
+        : "enterprise";
 }
 
-export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
-  const [locations, setLocations] = useState(12);
-  const [hiresPerYear, setHiresPerYear] = useState(10);
-  // Channel 1 — agencies / recruiters
-  const [agencyPct, setAgencyPct] = useState(30);
-  const [avgFee, setAvgFee] = useState(25000);
-  // Channel 2 — job boards / per-listing fees (Day 32)
-  const [listings, setListings] = useState(10);
-  const [costPerListing, setCostPerListing] = useState(350);
+const TIER_ORDER = ["solo", "growth", "scale", "enterprise"];
 
-  const tier = recommendTier(locations, tiers);
+/** Location-based pick, bumped up until the tier's enforced listing cap
+ * covers the listings the visitor says they run at once. */
+function recommendTier(
+  locations: number,
+  listings: number,
+  tiers: RoiTierInfo[]
+): RoiTierInfo {
+  let i = TIER_ORDER.indexOf(recommendTierId(locations));
+  while (i < TIER_ORDER.length - 1) {
+    const t = tiers.find((x) => x.id === TIER_ORDER[i]);
+    const cap = t?.maxActiveJobs;
+    if (cap == null || listings <= cap) break;
+    i++;
+  }
+  return tiers.find((t) => t.id === TIER_ORDER[i]) ?? tiers[0];
+}
+
+/* Shareable state (EDC pattern): inputs live in the URL via replaceState,
+   so a COO can paste the link to their CFO and it rebuilds exactly. */
+const PARAMS = {
+  loc: { min: 2, max: 300, def: 12 },
+  hires: { min: 5, max: 600, def: 10 },
+  ag: { min: 0, max: 100, def: 30 },
+  fee: { min: 5000, max: 50000, def: 25000 },
+  lst: { min: 0, max: 150, def: 10 },
+  cpl: { min: 50, max: 1000, def: 350 },
+} as const;
+type ParamKey = keyof typeof PARAMS;
+
+/** Server pages pass their searchParams through; this picks the calculator's
+ * keys so a shared link renders the right numbers on the very first paint. */
+export type RoiInitial = Partial<Record<ParamKey, string | string[] | undefined>>;
+
+function readParam(sp: RoiInitial, k: ParamKey): number {
+  const v = sp[k];
+  const raw = Array.isArray(v) ? v[0] : v;
+  const n = raw == null ? NaN : Number(raw);
+  const { min, max, def } = PARAMS[k];
+  return Number.isFinite(n) ? Math.min(max, Math.max(min, Math.round(n))) : def;
+}
+
+export function RoiCalculator({
+  tiers,
+  id = "calculator",
+  eyebrow = "Run Your Numbers",
+  heading = "What does hiring cost you today?",
+  className = "px-6 sm:px-14 pb-16 max-w-[1240px] mx-auto",
+  initial = {},
+}: {
+  tiers: RoiTierInfo[];
+  initial?: RoiInitial;
+  id?: string;
+  eyebrow?: string;
+  heading?: string;
+  className?: string;
+}) {
+  const [locations, setLocations] = useState(() => readParam(initial, "loc"));
+  const [hiresPerYear, setHiresPerYear] = useState(() => readParam(initial, "hires"));
+  // Channel 1 — agencies / recruiters
+  const [agencyPct, setAgencyPct] = useState(() => readParam(initial, "ag"));
+  const [avgFee, setAvgFee] = useState(() => readParam(initial, "fee"));
+  // Channel 2 — job boards / per-listing fees (Day 32)
+  const [listings, setListings] = useState(() => readParam(initial, "lst"));
+  const [costPerListing, setCostPerListing] = useState(() => readParam(initial, "cpl"));
+  const [copied, setCopied] = useState(false);
+  // URL writes wait for a real interaction, so a plain page view never
+  // rewrites the visitor's address bar.
+  const interacted = useRef(false);
+
+  // Keep the URL in step (debounced; replaceState never adds history).
+  useEffect(() => {
+    if (!interacted.current) return;
+    const t = window.setTimeout(() => {
+      const url = new URL(window.location.href);
+      url.searchParams.set("loc", String(locations));
+      url.searchParams.set("hires", String(hiresPerYear));
+      url.searchParams.set("ag", String(agencyPct));
+      url.searchParams.set("fee", String(avgFee));
+      url.searchParams.set("lst", String(listings));
+      url.searchParams.set("cpl", String(costPerListing));
+      url.hash = id;
+      window.history.replaceState(window.history.state, "", url);
+    }, 350);
+    return () => window.clearTimeout(t);
+  }, [locations, hiresPerYear, agencyPct, avgFee, listings, costPerListing, id]);
+
+  async function share() {
+    const url = window.location.href;
+    try {
+      if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
+        await navigator.share({ title: "Our hiring cost vs DSO Hire", url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2200);
+    } catch {
+      /* user cancelled share sheet */
+    }
+  }
+
+  const tier = recommendTier(locations, listings, tiers);
+  const capNote =
+    tier.maxActiveJobs == null
+      ? "unlimited active listings"
+      : `up to ${tier.maxActiveJobs} active listings`;
   const agencyHires = Math.round((hiresPerYear * agencyPct) / 100);
   const agencySpend = agencyHires * avgFee;
   const boardSpend = listings * costPerListing * 12;
@@ -76,7 +177,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
     v <= 0 ? 0 : Math.max((v / maxVal) * 100, 1.75); // floor keeps tiny segments visible
 
   return (
-    <section className="px-6 sm:px-14 pb-16 max-w-[1240px] mx-auto">
+    <section id={id} className={`scroll-mt-28 ${className}`}>
       <div
         data-reveal
         className="border border-heritage/30 overflow-hidden"
@@ -84,10 +185,15 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
       >
         <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1fr]">
           {/* Inputs */}
-          <div className="p-8 sm:p-10">
-            <Eyebrow className="text-heritage-deep mb-2">Run Your Numbers</Eyebrow>
+          <div
+            className="p-8 sm:p-10"
+            onInput={() => {
+              interacted.current = true;
+            }}
+          >
+            <Eyebrow data-kick className="text-heritage-deep mb-2">{eyebrow}</Eyebrow>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] leading-[1.12] text-ink mb-7 max-w-[440px]">
-              What does hiring cost you today?
+              {heading}
             </h2>
 
             <CalcSlider
@@ -246,7 +352,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
                 <>
                   Your job-board spend <strong className="text-hero-foreground">alone</strong>{" "}
                   more than covers {tier.name}; every avoided placement fee
-                  after that is pure savings. Unlimited postings included.
+                  after that is pure savings. Includes {capNote}.
                 </>
               ) : agencyHires > 0 ? (
                 <>
@@ -264,7 +370,7 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
                       of it before that.
                     </>
                   ) : (
-                    <>. Unlimited hires included.</>
+                    <>. Hires are never capped.</>
                   )}
                 </>
               ) : listings > 0 ? (
@@ -274,8 +380,8 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
                   <strong className="text-hero-foreground">
                     {Math.min(boardCoversPct, 100)}%
                   </strong>{" "}
-                  of {tier.name}, with unlimited postings across all{" "}
-                  {locations} locations instead of a meter running on each one.
+                  of {tier.name}, with {capNote} across all {locations} locations
+                  instead of a meter running on each one.
                 </>
               ) : (
                 <>
@@ -286,13 +392,56 @@ export function RoiCalculator({ tiers }: { tiers: RoiTierInfo[] }) {
               )}
             </p>
 
-            <Link
-              href={`/employer/sign-up?tier=${tier.id}&period=annual`}
-              className="mt-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-ivory text-ink text-sm font-bold hover:bg-ivory-deep transition-colors"
-            >
-              Start With {tier.name}
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+            <div className="mt-auto space-y-6">
+              <LeadHandoff
+                kind="calculator"
+                audience="dso"
+                tone="dark"
+                label="Want this breakdown in your inbox?"
+                cta="Send it"
+                fine="One reply with your numbers and a live walkthrough link. No drip campaign."
+                success="Got it. Our team will follow up with your numbers within one business day."
+                context={{
+                  locations,
+                  hires_per_year: hiresPerYear,
+                  agency_pct: agencyPct,
+                  avg_placement_fee: avgFee,
+                  listings,
+                  cost_per_listing: costPerListing,
+                  spend_today: Math.round(todayTotal),
+                  recommended_tier: tier.name,
+                  dso_hire_annual: Math.round(dsoHireAnnual),
+                  est_annual_difference: Math.round(savings),
+                }}
+              />
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-hero-foreground/15 pt-5">
+                <Link
+                  href={`/employer/sign-up?tier=${tier.id}&period=annual`}
+                  className="btn-lift inline-flex items-center gap-2 text-sm font-bold text-hero-foreground hover:text-heritage-bright transition-colors"
+                >
+                  Start with {tier.name}
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+                <a
+                  href={DEMO_URL}
+                  target="_blank"
+                  rel="noopener"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-hero-foreground/70 hover:text-hero-foreground transition-colors"
+                >
+                  See it live, no sign-up
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </a>
+                <button
+                  type="button"
+                  onClick={share}
+                  className="ml-auto inline-flex items-center gap-1.5 text-xs font-semibold text-hero-foreground/55 hover:text-hero-foreground transition-colors"
+                  aria-live="polite"
+                >
+                  {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+                  {copied ? "Link copied" : "Share these numbers"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
