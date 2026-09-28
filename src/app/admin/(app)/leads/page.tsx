@@ -68,7 +68,7 @@ export default async function AdminLeadsPage({
   const { data: all } = await admin.from("marketing_leads").select("kind");
 
   // Live-demo opens (reported by the demo deployment's /demo route).
-  const since30 = new Date(Date.now() - 30 * 86400_000).toISOString();
+  const since30 = daysAgoIso(30);
   const [{ data: named }, { count: opens30 }] = await Promise.all([
     admin
       .from("demo_visits")
@@ -248,4 +248,9 @@ function FilterChip({
       {label} <span className="tabular opacity-60">{n}</span>
     </Link>
   );
+}
+
+/* Module-level so the render stays pure (react-hooks purity rule). */
+function daysAgoIso(days: number): string {
+  return new Date(Date.now() - days * 86400_000).toISOString();
 }
