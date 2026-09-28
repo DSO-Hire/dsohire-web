@@ -8,8 +8,7 @@
  * delay or lose the ping but never the lead: the row is in /admin/leads
  * either way.
  *
- * Recipients: LEAD_NOTIFY_EMAILS (comma-separated, set in Vercel) when
- * present, else the same inbox the /contact form has always used.
+ * Recipients: see ./notify (LEAD_NOTIFY_EMAILS, else the /contact inbox).
  *
  * "use server" rule (launch-day incident): this module exports ONLY async
  * functions. Types and constants live in ./leads.
@@ -17,6 +16,7 @@
 
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/send";
+import { leadNotifyList } from "./notify";
 import {
   classifyContact,
   sanitizeRecord,
@@ -26,13 +26,6 @@ import {
   type LeadResult,
 } from "./leads";
 
-function notifyList(): string[] {
-  const list = (process.env.LEAD_NOTIFY_EMAILS ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  return list.length ? list : ["cam@dsohire.com"];
-}
 
 function clip(v: string | undefined, max: number): string | null {
   const t = (v ?? "").trim();
@@ -115,7 +108,7 @@ export async function captureLead(input: LeadInput): Promise<LeadResult> {
 
     try {
       await sendEmail({
-        to: notifyList(),
+        to: leadNotifyList(),
         subject: `[DSO Hire lead] ${LEAD_KIND_LABELS[row.kind]}`,
         template: `internal.lead.${row.kind}`,
         text: lines.join("\n"),

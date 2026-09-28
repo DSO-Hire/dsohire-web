@@ -18,7 +18,7 @@ import { useId, useState, useTransition } from "react";
 import { ArrowRight, Check } from "lucide-react";
 import { captureLead } from "@/lib/marketing/lead-actions";
 import { readAttribution } from "@/lib/marketing/attribution";
-import type { LeadKind } from "@/lib/marketing/leads";
+import type { LeadKind, LeadResult } from "@/lib/marketing/leads";
 import { cn } from "@/lib/utils";
 
 export function LeadHandoff({
@@ -32,6 +32,8 @@ export function LeadHandoff({
   success,
   tone = "light",
   className,
+  endpoint,
+  onDone,
 }: {
   kind: LeadKind;
   audience?: "dso" | "candidate";
@@ -46,6 +48,11 @@ export function LeadHandoff({
   success: string;
   tone?: "light" | "dark";
   className?: string;
+  /** POST here instead of the server action (the demo deployment reports
+   *  to PROD's /api/leads, since its own database isn't the lead store). */
+  endpoint?: string;
+  /** Called after a successful save (e.g. to remember "already asked"). */
+  onDone?: () => void;
 }) {
   const id = useId();
   const [value, setValue] = useState("");
@@ -60,7 +67,7 @@ export function LeadHandoff({
     setError(null);
     start(async () => {
       try {
-        const res = await captureLead({
+        const input = {
           kind,
           audience,
           contact: value,
@@ -68,9 +75,18 @@ export function LeadHandoff({
           website: hp,
           sourcePath: window.location.pathname + window.location.search,
           attribution: readAttribution(),
-        });
-        if (res.ok) setDone(true);
-        else setError(res.error);
+        };
+        const res: LeadResult = endpoint
+          ? await fetch(endpoint, {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify(input),
+            }).then((r) => r.json() as Promise<LeadResult>)
+          : await captureLead(input);
+        if (res.ok) {
+          setDone(true);
+          onDone?.();
+        } else setError(res.error);
       } catch {
         setError("Network hiccup. Please try again.");
       }

@@ -34,6 +34,8 @@ import { readMfaTrustCookie } from "@/lib/auth/mfa-trust";
 import { getActiveLocationId } from "@/lib/employer/active-location";
 import { isDemoDeployment, isDemoViewerUser } from "@/lib/demo/mode";
 import { EmployerShell, type Role } from "@/components/employer/employer-shell";
+import { DemoIntent } from "@/components/employer/demo-intent";
+import { DEMO_FOR_COOKIE, sanitizeForLabel } from "@/lib/marketing/demo";
 
 export default async function EmployerAppLayout({
   children,
@@ -152,9 +154,15 @@ export default async function EmployerAppLayout({
 
   // Demo Mode: slim persistent banner for the read-only viewer session.
   const isDemoViewer = isDemoDeployment() && isDemoViewerUser(user);
+  // ?for= personalization (set by /demo): "Prepared for Bridgeway Dental".
+  const demoFor = isDemoViewer
+    ? sanitizeForLabel((await cookies()).get(DEMO_FOR_COOKIE)?.value)
+    : null;
   const demoBanner = isDemoViewer ? (
     <div className="bg-heritage-deep text-cream text-2xs font-semibold tracking-[1.5px] uppercase text-center px-4 py-1.5">
-      Demo mode · live product, read-only · data resets nightly
+      {demoFor ? `Prepared for ${demoFor} · ` : "Demo mode · "}live product, read-only · data resets nightly
+      {/* Blocked-action ask + 2-minute nudge; leads report to prod. */}
+      <DemoIntent forLabel={demoFor} />
     </div>
   ) : null;
 

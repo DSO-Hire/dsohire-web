@@ -66,6 +66,28 @@ export default async function AdminLeadsPage({
   const rows = (data ?? []) as LeadRow[];
 
   const { data: all } = await admin.from("marketing_leads").select("kind");
+
+  // Live-demo opens (reported by the demo deployment's /demo route).
+  const since30 = new Date(Date.now() - 30 * 86400_000).toISOString();
+  const [{ data: named }, { count: opens30 }] = await Promise.all([
+    admin
+      .from("demo_visits")
+      .select("id, for_label, visits, created_at, last_seen_at")
+      .not("for_key", "is", null)
+      .order("last_seen_at", { ascending: false })
+      .limit(50),
+    admin
+      .from("demo_visits")
+      .select("id", { count: "exact", head: true })
+      .gte("last_seen_at", since30),
+  ]);
+  const namedVisits = (named ?? []) as Array<{
+    id: string;
+    for_label: string;
+    visits: number;
+    created_at: string;
+    last_seen_at: string;
+  }>;
   const counts = new Map<string, number>();
   for (const r of (all ?? []) as { kind: string }[]) {
     counts.set(r.kind, (counts.get(r.kind) ?? 0) + 1);
@@ -86,6 +108,44 @@ export default async function AdminLeadsPage({
           depends on the inbox.
         </p>
       </header>
+
+      <section className="mb-8 border border-[var(--rule)] bg-card">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--rule)] px-5 py-3">
+          <div>
+            <div className="text-2xs font-bold uppercase tracking-[1.5px] text-heritage-deep">Live demo opens</div>
+            <div className="text-xs text-slate-meta mt-0.5">
+              Send prospects <code className="text-ink">demo.dsohire.com/demo?for=Their+Group</code> to see
+              them here (and get an email when they open it).
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-extrabold tracking-[-0.02em] text-ink tabular">{opens30 ?? 0}</div>
+            <div className="text-2xs text-slate-meta">opens, last 30 days</div>
+          </div>
+        </div>
+        {namedVisits.length === 0 ? (
+          <div className="px-5 py-4 text-xs text-slate-meta">No named prospects have opened the demo yet.</div>
+        ) : (
+          <ul className="divide-y divide-[var(--rule)]">
+            {namedVisits.map((v) => (
+              <li key={v.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-2.5">
+                <span className="text-sm font-bold text-ink">{v.for_label}</span>
+                <span className="text-xs text-slate-meta tabular">
+                  {v.visits} {v.visits === 1 ? "open" : "opens"} · last{" "}
+                  {new Date(v.last_seen_at).toLocaleString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    timeZone: "America/Chicago",
+                  })}{" "}
+                  CT
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <nav className="mb-6 flex flex-wrap gap-2" aria-label="Filter by type">
         <FilterChip href="/admin/leads" active={!kind} label="All" n={all?.length ?? 0} />
