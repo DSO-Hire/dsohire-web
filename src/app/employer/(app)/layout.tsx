@@ -159,11 +159,15 @@ export default async function EmployerAppLayout({
     ? sanitizeForLabel((await cookies()).get(DEMO_FOR_COOKIE)?.value)
     : null;
   const demoBanner = isDemoViewer ? (
-    <div className="bg-heritage-deep text-cream text-2xs font-semibold tracking-[1.5px] uppercase text-center px-4 py-1.5">
-      {demoFor ? `Prepared for ${demoFor} · ` : "Demo mode · "}live product, read-only · data resets nightly
-      {/* Blocked-action ask + 2-minute nudge; leads report to prod. */}
+    <>
+      <div className="bg-heritage-deep text-cream text-2xs font-semibold tracking-[1.5px] uppercase text-center px-4 py-1.5">
+        {demoFor ? `Prepared for ${demoFor} · ` : "Demo mode · "}live product, read-only · data resets nightly
+      </div>
+      {/* Blocked-action ask + 2-minute nudge; leads report to prod. A
+          sibling of the banner (fixed-position), so it doesn't inherit
+          the banner's uppercase/tracking. */}
       <DemoIntent forLabel={demoFor} />
-    </div>
+    </>
   ) : null;
 
   return (
