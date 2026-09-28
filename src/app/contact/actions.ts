@@ -9,6 +9,7 @@
 
 import { Resend } from "resend";
 import { INFO_EMAIL as SUPPORT_EMAIL } from "@/lib/contact";
+import { captureLead } from "@/lib/marketing/lead-actions";
 
 export interface ContactFormState {
   ok: boolean;
@@ -55,6 +56,28 @@ export async function submitContact(
     return { ok: false, error: "Message is too long (5000 char max)." };
   }
 
+  // Durable first (2026-09-28): the email below only ever reached
+  // cam@dsohire.com, which GoDaddy can silently drop. The lead row is the
+  // record of truth; /admin/leads shows it even if the email never lands.
+  const topic = String(formData.get("topic") ?? "").trim();
+  const size = String(formData.get("size") ?? "").trim();
+  const saved = await captureLead({
+    kind: "contact",
+    contact: email,
+    name,
+    company,
+    audience: topic === "candidate" ? "candidate" : topic ? "dso" : undefined,
+    context: {
+      ...(topic ? { topic } : {}),
+      ...(size ? { practices: size } : {}),
+      ...(subject ? { subject } : {}),
+      message,
+    },
+    sourcePath: "/contact",
+    attribution: parseAttribution(formData.get("attribution")),
+    skipNotify: true,
+  });
+
   const subjectLine =
     subject || `New contact form submission from ${name}`;
 
@@ -62,6 +85,8 @@ export async function submitContact(
     `Name: ${name}`,
     `Email: ${email}`,
     company ? `Company: ${company}` : null,
+    topic ? `Topic: ${topic}` : null,
+    size ? `Practices: ${size}` : null,
     "",
     "Message:",
     message,
@@ -84,9 +109,23 @@ export async function submitContact(
     };
   } catch (err) {
     console.error("[contact] resend.emails.send failed", err);
+    // Saved to marketing_leads, so the message is not lost.
+    if (saved.ok) {
+      return { ok: true, message: "Thanks! We'll reply within one business day." };
+    }
     return {
       ok: false,
       error: `Something went wrong sending your message. Email ${SUPPORT_EMAIL} directly.`,
     };
+  }
+}
+
+function parseAttribution(raw: FormDataEntryValue | null) {
+  if (typeof raw !== "string" || !raw) return undefined;
+  try {
+    const v = JSON.parse(raw);
+    return v && typeof v === "object" ? v : undefined;
+  } catch {
+    return undefined;
   }
 }

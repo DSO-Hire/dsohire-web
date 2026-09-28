@@ -29,6 +29,7 @@
  */
 
 import { useEffect, useRef } from "react";
+import { captureFirstTouch } from "@/lib/marketing/attribution";
 
 const EASE_OUT_QUINT = (t: number) => 1 - Math.pow(1 - t, 5);
 
@@ -45,6 +46,10 @@ function prefersReducedMotion(): boolean {
 
 export function MotionMount() {
   useEffect(() => {
+    // First-touch attribution for lead captures (landing, referrer, utm_*).
+    // MotionMount runs once on every marketing page, so this is the one hook.
+    captureFirstTouch();
+
     // Cancel the CSS auto-reveal safety net — this page HAS the observer,
     // so below-fold elements keep their scroll-triggered entrances.
     document.documentElement.classList.add("mk-armed");

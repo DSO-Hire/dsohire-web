@@ -7,14 +7,31 @@
  * Includes a hidden honeypot field (`website`) to catch bots.
  */
 
-import { useActionState } from "react";
+import { useActionState, useRef, useState } from "react";
+import Link from "next/link";
 import { Send } from "lucide-react";
 import { submitContact, type ContactFormState } from "./actions";
+import { readAttribution } from "@/lib/marketing/attribution";
+
+/* Chips first (EDC two-step pattern): one tap tells us who's writing, so
+   the reply can skip "how can we help?" and the message box stays short. */
+const TOPICS = [
+  { v: "evaluating", l: "Evaluating DSO Hire for our group" },
+  { v: "customer", l: "We're already a customer" },
+  { v: "candidate", l: "I'm a job seeker" },
+  { v: "other", l: "Partnership, press, other" },
+] as const;
+const SIZES = ["2–5", "6–20", "21–34", "35+"] as const;
 
 const initialState: ContactFormState = { ok: false };
 
 export function ContactForm() {
   const [state, formAction, pending] = useActionState(submitContact, initialState);
+  const [topic, setTopic] = useState<string>("");
+  const [size, setSize] = useState<string>("");
+  // Read first-touch attribution at submit time (no effect, no re-render).
+  const attributionRef = useRef<HTMLInputElement>(null);
+  const isGroup = topic === "evaluating" || topic === "customer";
 
   if (state.ok) {
     return (
@@ -28,7 +45,15 @@ export function ContactForm() {
   }
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form
+      action={formAction}
+      onSubmit={() => {
+        if (attributionRef.current) {
+          attributionRef.current.value = JSON.stringify(readAttribution());
+        }
+      }}
+      className="space-y-5"
+    >
       {/* Honeypot — real users won't see/fill this. Bots will. */}
       <div className="hidden" aria-hidden="true">
         <label>
@@ -36,6 +61,25 @@ export function ContactForm() {
           <input type="text" name="website" tabIndex={-1} autoComplete="off" />
         </label>
       </div>
+
+      <input type="hidden" name="topic" value={topic} />
+      <input type="hidden" name="size" value={isGroup ? size : ""} />
+      <input ref={attributionRef} type="hidden" name="attribution" defaultValue="" />
+
+      <ChipGroup
+        label="What brings you here?"
+        options={TOPICS.map((t) => ({ value: t.v, label: t.l }))}
+        value={topic}
+        onChange={setTopic}
+      />
+      {isGroup && (
+        <ChipGroup
+          label="How many practices?"
+          options={SIZES.map((v) => ({ value: v, label: v }))}
+          value={size}
+          onChange={setSize}
+        />
+      )}
 
       <Field label="Name" name="name" required />
       <Field label="Email" name="email" type="email" required />
@@ -55,7 +99,13 @@ export function ContactForm() {
           required
           rows={6}
           maxLength={5000}
-          placeholder="What's on your mind?"
+          placeholder={
+            topic === "evaluating"
+              ? "Roles you're hiring for, how you hire today, anything you want to see."
+              : topic === "candidate"
+                ? "Your role and what you're looking for. For job questions, the Help Center is fastest."
+                : "What's on your mind?"
+          }
           className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm leading-relaxed placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors resize-vertical"
         />
       </div>
@@ -77,12 +127,12 @@ export function ContactForm() {
 
       <p className="text-xs text-slate-meta leading-relaxed">
         We&apos;ll only use your email to reply. Read our{" "}
-        <a
+        <Link
           href="/legal/privacy"
           className="text-heritage underline underline-offset-2 hover:text-heritage-deep"
         >
           privacy policy
-        </a>
+        </Link>
         .
       </p>
     </form>
@@ -125,5 +175,47 @@ function Field({
         className="w-full px-4 py-3 bg-cream border border-[var(--rule-strong)] text-ink text-sm placeholder:text-slate-meta focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
       />
     </div>
+  );
+}
+
+function ChipGroup({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: { value: string; label: string }[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <fieldset>
+      <legend className="block text-2xs font-bold tracking-[2px] uppercase text-slate-body mb-2.5">
+        {label}
+      </legend>
+      <div role="radiogroup" aria-label={label} className="flex flex-wrap gap-2">
+        {options.map((o) => {
+          const on = value === o.value;
+          return (
+            <button
+              key={o.value}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              onClick={() => onChange(on ? "" : o.value)}
+              className={
+                "btn-lift px-3.5 py-2 text-xs font-semibold border transition-colors " +
+                (on
+                  ? "bg-ink text-ivory border-ink"
+                  : "bg-card text-slate-body border-[var(--rule-strong)] hover:border-heritage hover:text-ink")
+              }
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+    </fieldset>
   );
 }
