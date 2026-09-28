@@ -111,7 +111,7 @@ export function MobileMenu({
         role="dialog"
         aria-modal="true"
         aria-label="Site navigation"
-        className="fixed inset-0 z-[60] md:hidden"
+        className="fixed inset-0 z-[60] lg:hidden"
       >
           {/* Backdrop — tap to close. <button> rather than <div> so it's
               keyboard-reachable and screen-readers know it's interactive. */}
@@ -305,7 +305,7 @@ export function MobileMenu({
         aria-expanded={open}
         aria-controls="mobile-menu-drawer"
         onClick={() => setOpen(true)}
-        className="md:hidden flex flex-col gap-[5px] w-9 h-9 items-center justify-center -mr-1"
+        className="lg:hidden flex flex-col gap-[5px] w-9 h-9 items-center justify-center -mr-1"
       >
         <span aria-hidden className="block w-5 h-[2px] bg-ink" />
         <span aria-hidden className="block w-5 h-[2px] bg-ink" />

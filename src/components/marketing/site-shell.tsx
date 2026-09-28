@@ -144,7 +144,7 @@ export async function SiteNav({
       <Link href="/" className="flex items-center shrink-0" aria-label="DSO Hire, home">
         <BrandLockup height={42} draw />
       </Link>
-      <ul className="nav-links hidden md:flex items-center gap-5 lg:gap-7 list-none">
+      <ul className="nav-links hidden lg:flex items-center gap-5 xl:gap-7 list-none">
         {/* Dual-lens segmented control — "For DSOs | Job Candidates".
             Client island (needs usePathname for active-lens state); the
             right segment is also the hover trigger for the role dropdown. */}
@@ -174,7 +174,7 @@ export async function SiteNav({
             take; it earns a permanent slot. About + Contact moved to the
             footer and the mobile drawer to make room (nav decrowd,
             2026-09-28). */}
-        <li className="hidden lg:block">
+        <li className="hidden xl:block">
           <a
             href={DEMO_URL}
             target="_blank"
