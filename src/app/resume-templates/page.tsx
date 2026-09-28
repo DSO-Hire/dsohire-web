@@ -20,12 +20,12 @@ import { candidateCtaHref } from "@/lib/marketing/candidate-cta";
 export const metadata: Metadata = {
   title: "Free Dental Resume Templates (ATS-Friendly) | DSO Hire",
   description:
-    "Build a free, ATS-safe dental resume in minutes. Six clean templates designed for hygienists, assistants, front desk, dentists, and DSO leaders. Download as a PDF, no sign-up tricks.",
+    "Build a free, ATS-safe dental resume in minutes. Six clean templates designed for hygienists, assistants, front desk, dentists, and DSO leaders. Free with a free DSO Hire account: one quick sign-up, then download as a PDF.",
   alternates: { canonical: "https://dsohire.com/resume-templates" },
   openGraph: {
     title: "Free Dental Resume Templates (ATS-Friendly)",
     description:
-      "Six clean, ATS-safe resume templates built for dental professionals. Free to build and download.",
+      "Six clean, ATS-safe resume templates built for dental professionals. Free to build and download with a free account.",
     url: "https://dsohire.com/resume-templates",
     type: "website",
   },
@@ -126,8 +126,8 @@ export default async function ResumeTemplatesLanding() {
           <p className="mx-auto mt-5 max-w-[640px] text-[16px] leading-relaxed text-slate-body">
             Six clean, ATS-safe templates built for hygienists, assistants,
             front desk, dentists, and DSO leaders. Fill it once, switch styles
-            with one click, and download a polished PDF. No design skills, no
-            catch.
+            with one click, and download a polished PDF. Free forever with a
+            free DSO Hire account: one quick sign-up, no card.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link

@@ -18,6 +18,8 @@ import { ArrowRight, MapPin, Search, List, Map as MapIcon } from "lucide-react";
 import { Eyebrow } from "@/components/brand/eyebrow";
 import { Tag } from "@/components/brand/tag";
 import { SiteShell } from "@/components/marketing/site-shell";
+import { LeadHandoff } from "@/components/marketing/lead-handoff";
+import { Button } from "@/components/ui/button";
 import { JobsMap, type JobsMapLocation } from "@/components/jobs-map";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JobsStateFilter } from "./jobs-state-filter";
@@ -653,6 +655,48 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
     carryFunctionParam(params, activeSurface === "corporate");
     return buildHref("/jobs", params);
   };
+  // Empty-state inputs. "Filters active" = anything that narrows the board
+  // (surface tab and sort are navigation, not filters). "Board empty" =
+  // zero roles on either surface with nothing narrowing it, i.e. there is
+  // genuinely nothing posted yet.
+  const filtersActive = Boolean(
+    sp.q ||
+      selectedStates.length > 0 ||
+      sp.employment ||
+      sp.category ||
+      postedFilterValue ||
+      minCompValue ||
+      activeFunctionSlug ||
+      radiusActive
+  );
+  const boardEmpty = allJobs.length === 0 && !filtersActive;
+  const clearFiltersHref = buildHref(
+    "/jobs",
+    activeSurface === "corporate" ? [["surface", "corporate"]] : []
+  );
+  // Flat, human-readable snapshot of the active filters, saved with a
+  // job-alert signup so the alert can match what they were looking for.
+  const jobAlertContext: Record<string, string> = {
+    surface: activeSurface,
+    ...(sp.q ? { query: sp.q } : {}),
+    ...(selectedStates.length ? { states: selectedStates.join(", ") } : {}),
+    ...(sp.category
+      ? { role: ROLE_LABELS[sp.category] ?? sp.category }
+      : {}),
+    ...(sp.employment
+      ? { employment: EMP_LABELS[sp.employment] ?? sp.employment }
+      : {}),
+    ...(postedFilterValue ? { posted: postedFilterValue } : {}),
+    ...(minCompValue ? { min_pay: minCompValue } : {}),
+    ...(activeFunctionSlug ? { corporate_function: activeFunctionSlug } : {}),
+    ...(nearParsed && withinMilesParsed !== null
+      ? {
+          near: `${nearParsed.city}, ${nearParsed.state}`,
+          within_miles: String(withinMilesParsed),
+        }
+      : {}),
+  };
+
   // Sort travels with the list view but is meaningless on the map (which
   // groups by location), so we deliberately drop it from mapViewHref.
   const listViewParams =
@@ -800,6 +844,11 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           </div>
         )}
 
+        {/* Filters only earn their space when there's a board to narrow.
+            On an empty board they pushed the job-alert capture below the
+            fold on phones (2026-09-28). */}
+        {!boardEmpty && (
+          <>
         {/* Search bar */}
         <form
           method="get"
@@ -1027,13 +1076,17 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             </span>
           )}
         </form>
+          </>
+        )}
       </section>
 
       {/* Results */}
       <section className="px-6 sm:px-14 pb-24 max-w-[1240px] mx-auto">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
           <Eyebrow>
-            {jobs.length === 0
+            {boardEmpty
+              ? "Early access"
+              : jobs.length === 0
               ? "No jobs found"
               : jobs.length === 1
                 ? "1 open role"
@@ -1046,7 +1099,7 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
             )}
           </Eyebrow>
 
-          <div className="flex items-center gap-3">
+          <div className={boardEmpty ? "hidden" : "flex items-center gap-3"}>
             <SaveSearchButton
               filters={savedSearchFilters}
               viewerIsCandidate={viewerIsCandidate}
@@ -1131,32 +1184,45 @@ export default async function PublicJobsPage({ searchParams }: PageProps) {
           </div>
         )}
 
-        {/* MAP VIEW */}
-        {showMap ? (
+        {/* EMPTY BOARD: zero roles anywhere and no filters narrowing it.
+            Honest early-access block with a job-alert capture instead of
+            a dead end (applies to both list and map views). */}
+        {boardEmpty ? (
+          <EmptyBoardEarlyAccess />
+        ) : /* MAP VIEW */ showMap ? (
           <JobsMap
             locations={mapLocations}
             mapboxToken={mapboxToken}
             heatmapEnabled={sp.heatmap === "1"}
           />
         ) : /* LIST VIEW */ jobs.length === 0 ? (
-          <div className="border border-[var(--rule)] bg-cream p-12 text-center max-w-[640px] mx-auto">
-            <h3 className="text-[18px] font-extrabold tracking-[-0.4px] text-ink mb-2">
-              {activeSurfaceConfig.emptyHeading}
-            </h3>
-            <p className="text-sm text-slate-body leading-relaxed mb-4">
-              {activeSurfaceConfig.emptyBody}
-            </p>
-            <p className="text-xs text-slate-meta leading-relaxed">
-              Or{" "}
-              <Link
-                href="/candidate/sign-up"
-                className="text-heritage underline underline-offset-2 hover:text-heritage-deep font-semibold"
-              >
-                create a free candidate account
-              </Link>{" "}
-              so you&apos;re ready to apply the moment the right role opens.
-            </p>
-          </div>
+          filtersActive ? (
+            <NoFilterMatches
+              heading={activeSurfaceConfig.emptyHeading}
+              body={activeSurfaceConfig.emptyBody}
+              clearHref={clearFiltersHref}
+              alertContext={jobAlertContext}
+            />
+          ) : (
+            <div className="border border-[var(--rule)] bg-cream p-12 text-center max-w-[640px] mx-auto">
+              <h3 className="text-lg font-extrabold tracking-[-0.4px] text-ink mb-2">
+                {activeSurfaceConfig.emptyHeading}
+              </h3>
+              <p className="text-sm text-slate-body leading-relaxed mb-4">
+                {activeSurfaceConfig.emptyBody}
+              </p>
+              <p className="text-xs text-slate-meta leading-relaxed">
+                Or{" "}
+                <Link
+                  href="/candidate/sign-up"
+                  className="text-heritage underline underline-offset-2 hover:text-heritage-deep font-semibold"
+                >
+                  create a free candidate account
+                </Link>{" "}
+                so you&apos;re ready to apply the moment the right role opens.
+              </p>
+            </div>
+          )
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-px bg-[var(--rule)] border border-[var(--rule)]">
             {jobs.map((job) => {
@@ -1261,6 +1327,104 @@ function JobCard({
         </div>
       </div>
     </Link>
+  );
+}
+
+/** Board-level empty state: nothing posted yet, no filters narrowing it. */
+function EmptyBoardEarlyAccess() {
+  return (
+    <div className="border border-[var(--rule)] bg-cream max-w-[880px] mx-auto">
+      <div className="border-l-4 border-heritage p-8 sm:p-12">
+        <Eyebrow className="text-heritage-deep mb-3">Newly launched</Eyebrow>
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] leading-tight text-ink mb-3">
+          New dental roles are being added.
+        </h2>
+        <p className="text-base text-slate-body leading-relaxed max-w-[600px] mb-8">
+          DSO Hire just opened its doors, and dental groups are onboarding now.
+          Leave your email or cell and we&apos;ll tell you when roles open.
+          Every posting here comes straight from the group that&apos;s hiring.
+        </p>
+        <div className="max-w-[560px]">
+          <LeadHandoff
+            kind="job_alert"
+            audience="candidate"
+            context={{ trigger: "empty_board" }}
+            label="Email or cell for job alerts"
+            placeholder="you@email.com or cell"
+            cta="Notify me"
+            fine="One message when roles open. No spam, unsubscribe anytime."
+            success="You're on the list. We'll send one message when roles open, and nothing else."
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-[var(--rule)] border-t border-[var(--rule)]">
+        <Link
+          href="/practicefit"
+          className="group flex items-center justify-between gap-4 bg-card px-8 py-6 hover:bg-cream transition-colors"
+        >
+          <span>
+            <span className="block text-sm font-bold text-ink">
+              Take the PracticeFit assessment while you wait
+            </span>
+            <span className="block text-xs text-slate-meta mt-1">
+              Five minutes. Your fit score is ready when roles post.
+            </span>
+          </span>
+          <ArrowRight className="h-4 w-4 shrink-0 text-heritage transition-transform group-hover:translate-x-0.5" />
+        </Link>
+        <Link
+          href="/resume-templates"
+          className="group flex items-center justify-between gap-4 bg-card px-8 py-6 hover:bg-cream transition-colors"
+        >
+          <span>
+            <span className="block text-sm font-bold text-ink">
+              Get your resume ready
+            </span>
+            <span className="block text-xs text-slate-meta mt-1">
+              Free dental resume templates by role.
+            </span>
+          </span>
+          <ArrowRight className="h-4 w-4 shrink-0 text-heritage transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/** Filtered-to-zero state: clear filters, or get alerted for this search. */
+function NoFilterMatches({
+  heading,
+  body,
+  clearHref,
+  alertContext,
+}: {
+  heading: string;
+  body: string;
+  clearHref: string;
+  alertContext: Record<string, string>;
+}) {
+  return (
+    <div className="border border-[var(--rule)] bg-cream p-8 sm:p-12 max-w-[720px] mx-auto">
+      <h3 className="text-lg font-extrabold tracking-[-0.4px] text-ink mb-2">
+        {heading}
+      </h3>
+      <p className="text-sm text-slate-body leading-relaxed mb-5">{body}</p>
+      <Button asChild variant="outline" size="sm">
+        <Link href={clearHref}>Clear filters</Link>
+      </Button>
+      <div className="mt-8 pt-8 border-t border-[var(--rule)]">
+        <LeadHandoff
+          kind="job_alert"
+          audience="candidate"
+          context={{ trigger: "no_filter_matches", ...alertContext }}
+          label="Get an alert when a role like this opens"
+          placeholder="you@email.com or cell"
+          cta="Notify me"
+          fine="We'll only message you about roles that match this search. No spam."
+          success="Saved. We'll send one message when a role matching this search opens."
+        />
+      </div>
+    </div>
   );
 }
 

@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import { Eyebrow } from "@/components/brand/eyebrow";
 import { SiteShell } from "@/components/marketing/site-shell";
+import { Button } from "@/components/ui/button";
+import { MobileApplyBar } from "./mobile-apply-bar";
 import {
   RenderedJobDescription,
   htmlToPlainText,
@@ -321,6 +323,18 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
     }
   }
 
+  // Apply paths. Guest apply is offered to signed-out visitors who haven't
+  // applied (the guest route redirects any signed-in user to the account
+  // route, so it only works when there is no session). When available it
+  // leads: fewer steps, no account wall.
+  const accountApplyHref = `/jobs/${id}/apply`;
+  const guestApplyHref = `/jobs/${id}/apply/guest`;
+  const guestApplyAvailable =
+    !existingApplicationId && !candidateAuthed && !viewer;
+  const jobExpiresAt = (job.expires_at as string | null) ?? null;
+  const jobExpired = jobExpiresAt !== null && isPastTimestamp(jobExpiresAt);
+  const showMobileApplyBar = !existingApplicationId && !jobExpired;
+
   // JobPosting JSON-LD for Google for Jobs. For private-affiliation
   // jobs, hiringOrganization.name flips to the displayed name (practice
   // name single-loc, "Multiple locations" multi-loc). Q5 locked: no
@@ -465,29 +479,32 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
               description for long postings. When the candidate has
               already applied, the Apply CTA swaps to "View my
               application" linking to the candidate-side detail. */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div
+            id="job-apply-top"
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+          >
             {existingApplicationId ? (
-              <Link
-                href={`/candidate/applications/${existingApplicationId}`}
-                className="inline-flex items-center justify-center px-8 py-3.5 bg-heritage text-primary-foreground text-sm font-bold hover:bg-heritage-deep transition-colors"
-              >
-                View my application
-              </Link>
+              <Button asChild variant="heritage" size="lg">
+                <Link href={`/candidate/applications/${existingApplicationId}`}>
+                  View my application
+                </Link>
+              </Button>
+            ) : guestApplyAvailable ? (
+              <>
+                <Button asChild variant="primary" size="lg">
+                  <Link href={guestApplyHref}>
+                    Quick apply, no account
+                    <ArrowRight aria-hidden />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="lg">
+                  <Link href={accountApplyHref}>Apply with a DSO Hire profile</Link>
+                </Button>
+              </>
             ) : (
-              <Link
-                href={`/jobs/${job.id as string}/apply`}
-                className="inline-flex items-center justify-center px-8 py-3.5 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
-              >
-                Apply for this role
-              </Link>
-            )}
-            {!existingApplicationId && !candidateAuthed && (
-              <Link
-                href={`/jobs/${job.id as string}/apply/guest`}
-                className="inline-flex items-center justify-center px-6 py-3.5 border border-[var(--rule-strong)] bg-card text-ink text-sm font-semibold hover:bg-cream transition-colors"
-              >
-                Apply as guest
-              </Link>
+              <Button asChild variant="primary" size="lg">
+                <Link href={accountApplyHref}>Apply for this role</Link>
+              </Button>
             )}
             <SaveJobButton
               jobId={job.id as string}
@@ -881,21 +898,34 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
             {/* Apply CTA + Save button — repeated bottom for long
                 postings. Matches the top bar's button shapes. */}
             <section className="mt-12 pt-8 border-t border-[var(--rule)]">
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4">
+              <div
+                id="job-apply-bottom"
+                className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4"
+              >
                 {existingApplicationId ? (
-                  <Link
-                    href={`/candidate/applications/${existingApplicationId}`}
-                    className="inline-flex items-center justify-center px-9 py-4 bg-heritage text-primary-foreground text-sm font-bold hover:bg-heritage-deep transition-colors"
-                  >
-                    View my application
-                  </Link>
+                  <Button asChild variant="heritage" size="xl">
+                    <Link href={`/candidate/applications/${existingApplicationId}`}>
+                      View my application
+                    </Link>
+                  </Button>
+                ) : guestApplyAvailable ? (
+                  <>
+                    <Button asChild variant="primary" size="xl">
+                      <Link href={guestApplyHref}>
+                        Quick apply, no account
+                        <ArrowRight aria-hidden />
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" size="xl">
+                      <Link href={accountApplyHref}>
+                        Apply with a DSO Hire profile
+                      </Link>
+                    </Button>
+                  </>
                 ) : (
-                  <Link
-                    href={`/jobs/${job.id as string}/apply`}
-                    className="inline-flex items-center justify-center px-9 py-4 bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
-                  >
-                    Apply for this role
-                  </Link>
+                  <Button asChild variant="primary" size="xl">
+                    <Link href={accountApplyHref}>Apply for this role</Link>
+                  </Button>
                 )}
                 <SaveJobButton
                   jobId={job.id as string}
@@ -907,7 +937,9 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
               <p className="text-xs text-slate-meta leading-relaxed max-w-[420px]">
                 {existingApplicationId
                   ? "You've already applied to this role. Track its status from My Applications."
-                  : `Free for candidates. We'll route your application directly to ${displayedEmployerName} — no recruiter middleman, no fees.`}
+                  : guestApplyAvailable
+                    ? `Free for candidates. Apply as a guest in a few fields, or use a DSO Hire profile to track every application. Either way it goes straight to ${displayedEmployerName}: no recruiter middleman, no fees.`
+                    : `Free for candidates. We'll route your application directly to ${displayedEmployerName}: no recruiter middleman, no fees.`}
               </p>
             </section>
           </div>
@@ -1009,6 +1041,15 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
           </aside>
         </div>
       </article>
+
+      {showMobileApplyBar && (
+        <MobileApplyBar
+          href={guestApplyAvailable ? guestApplyHref : accountApplyHref}
+          label={guestApplyAvailable ? "Quick apply, no account" : "Apply for this role"}
+          jobTitle={job.title as string}
+          watchIds={["job-apply-top", "job-apply-bottom"]}
+        />
+      )}
 
       {/* JSON-LD JobPosting for Google for Jobs. E1.22 — internal-only jobs
           are reachable by direct link but are NOT public postings, so we
@@ -1271,4 +1312,9 @@ function timeAgo(date: Date): string {
   const hours = Math.floor(seconds / 3600);
   if (hours > 0) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
   return "Just now";
+}
+
+/** True when an ISO timestamp is in the past (module-level so render stays pure). */
+function isPastTimestamp(iso: string): boolean {
+  return new Date(iso).getTime() < Date.now();
 }
