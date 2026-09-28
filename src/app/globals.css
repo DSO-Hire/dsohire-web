@@ -1057,34 +1057,6 @@ html, body {
   100% { box-shadow: 0 0 0 0 rgba(141, 184, 163, 0); }
 }
 
-/* Chapter-transition wipe — the D-mark draws on over an ivory veil
-   (760ms one-shot; timings in sync with WIPE_* in use-player.ts), so
-   chapter changes read as the brand signing the scene instead of a hard
-   cut. Sequence: veil covers by ~120ms → chapter swaps BEHIND it at
-   ~180ms → arch draws 140-480ms, crossbar lands by ~670ms → veil
-   releases 590-760ms, just after the mark completes. Same draw language
-   as the rail logo / BrandLoader. */
-@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
-  .bo-veil {
-    animation: bo-veil 760ms ease forwards;
-  }
-  .bo-veil-arch {
-    stroke-dasharray: 120;
-    stroke-dashoffset: 120;
-    animation: rail-draw 340ms var(--ease-settle) 140ms forwards;
-  }
-  .bo-veil-bar {
-    stroke-dasharray: 120;
-    stroke-dashoffset: 120;
-    animation: rail-draw 200ms var(--ease-settle) 470ms forwards;
-  }
-}
-@keyframes bo-veil {
-  0% { opacity: 0; }
-  16% { opacity: 1; }
-  78% { opacity: 1; }
-  100% { opacity: 0; }
-}
 
 .film-scroll {
   scrollbar-width: thin;
@@ -1671,4 +1643,279 @@ html {
 .nav-link:hover::after,
 .nav-link:focus-visible::after {
   transform: scaleX(1);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Back-office showcase v2 (2026-09-28): "One hire, start to finish".
+   Components: src/components/marketing/back-office/. Every pre-state
+   below only exists while a scene is choreographing; SSR and reduced
+   motion render settled states (FINAL step), so nothing here can hide
+   content from crawlers or motion-sensitive visitors.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Scripted pointer + click ripple */
+.bx-cursor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 50;
+  pointer-events: none;
+  margin: -2px 0 0 -3px;
+  filter: drop-shadow(0 6px 10px rgba(10, 20, 40, 0.35));
+  will-change: transform;
+}
+.bx-cursor svg {
+  transition: transform 0.18s var(--spring);
+  transform-origin: 20% 10%;
+}
+.bx-cursor.is-down svg {
+  transform: scale(0.86);
+}
+.bx-cursor.is-click svg {
+  animation: bx-press 0.34s var(--spring);
+}
+@keyframes bx-press {
+  40% { transform: scale(0.8); }
+}
+.bx-ripple {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 45;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  pointer-events: none;
+  border: 2px solid var(--heritage);
+  opacity: 0;
+}
+.bx-ripple.is-on {
+  animation: bx-ripple 0.6s var(--ease-settle);
+}
+@keyframes bx-ripple {
+  0% { opacity: 0.7; scale: 0.3; }
+  100% { opacity: 0; scale: 1.5; }
+}
+
+/* Choreographed reveal (<On>) */
+.bx-on {
+  transition:
+    opacity 0.42s ease,
+    transform 0.6s var(--spring),
+    filter 0.42s ease;
+  transition-delay: var(--d, 0ms);
+}
+.bx-on[data-on="false"] {
+  opacity: 0;
+  transform: translateY(8px) scale(0.985);
+  filter: blur(3px);
+}
+.bx-on.bx-from-left[data-on="false"] { transform: translateX(-14px); }
+.bx-on.bx-from-right[data-on="false"] { transform: translateX(14px); }
+
+/* Faux buttons */
+.bx-btn {
+  transition: transform 0.25s var(--spring), background-color 0.2s ease, color 0.2s ease, opacity 0.3s ease;
+}
+.bx-btn.is-pressed {
+  transform: scale(0.96);
+}
+.bx-ai-btn {
+  background: linear-gradient(115deg, var(--hero) 0%, #2f5d4f 100%);
+  position: relative;
+  overflow: hidden;
+}
+.bx-ai-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.28) 50%, transparent 70%);
+  transform: translateX(-120%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bx-ai-btn::after { animation: bx-sheen 2.8s ease-in-out infinite 1s; }
+}
+@keyframes bx-sheen {
+  0%, 60% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+
+/* Toasts float up from the corner */
+.bx-toast {
+  transition: opacity 0.35s ease, transform 0.65s var(--spring);
+}
+.bx-toast[data-on="false"] {
+  opacity: 0;
+  transform: translateY(18px) scale(0.97);
+  pointer-events: none;
+}
+
+/* One-shot light sweep across a dark panel */
+.bx-sweep {
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 20%, rgba(141, 184, 163, 0.22) 50%, transparent 80%);
+  transform: translateX(-110%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bx-sweep.is-on { animation: bx-sweep 1.2s var(--ease-settle); }
+}
+@keyframes bx-sweep {
+  to { transform: translateX(110%); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bx-spin { animation: bx-spin 0.9s linear infinite; }
+  .bx-shimmer > span {
+    background: linear-gradient(90deg, rgba(20,35,63,0.06) 0%, rgba(77,122,96,0.22) 50%, rgba(20,35,63,0.06) 100%);
+    background-size: 200% 100%;
+    animation: bx-shimmer 1s linear infinite;
+  }
+}
+@keyframes bx-spin { to { transform: rotate(360deg); } }
+@keyframes bx-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+
+/* Streaming draft: words land one by one; grounded facts get a highlight
+   that sweeps in once the draft completes. */
+.bx-word {
+  display: inline-block;
+  animation: bx-word 0.32s var(--ease-settle) both;
+  animation-delay: calc(var(--i, 0) * 34ms);
+}
+@keyframes bx-word {
+  from { opacity: 0; transform: translateY(4px); filter: blur(2px); }
+}
+.bx-grounded {
+  background-image: linear-gradient(transparent 62%, rgba(77, 122, 96, 0.28) 62%);
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  transition: background-size 0.6s var(--ease-settle);
+}
+.bx-stream.is-done .bx-grounded {
+  background-size: 100% 100%;
+}
+.bx-caret {
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  background: var(--heritage);
+  vertical-align: -2px;
+  animation: bo-blink 0.9s step-end infinite;
+}
+
+/* Double-blind reveal flip */
+.bx-flip .bx-face {
+  backface-visibility: hidden;
+  transition: transform 0.8s var(--spring);
+  transform-style: preserve-3d;
+}
+.bx-flip .bx-back {
+  transform: rotateY(180deg);
+}
+.bx-flip[data-flipped="true"] .bx-face:not(.bx-back) {
+  transform: rotateY(-180deg);
+}
+.bx-flip[data-flipped="true"] .bx-back {
+  transform: rotateY(0deg);
+}
+
+/* Text swaps (crumbs, captions, status) roll in from below */
+@media (prefers-reduced-motion: no-preference) {
+  .bx-swap { animation: bx-swap 0.45s var(--spring) both; }
+}
+@keyframes bx-swap {
+  from { opacity: 0; transform: translateY(8px); filter: blur(2px); }
+}
+
+/* PracticeFit dial */
+.bx-dial {
+  transition: stroke-dashoffset 1.3s var(--ease-settle);
+}
+
+/* Kanban drag: lift, land, counts, chips */
+.bx-lifted {
+  transform: rotate(-2.5deg) scale(1.04);
+  box-shadow: 0 22px 40px -14px rgba(20, 35, 63, 0.45), 0 0 0 2px rgba(77, 122, 96, 0.55);
+  transition: transform 0.3s var(--spring), box-shadow 0.3s ease;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bx-landed { animation: bx-land 0.7s var(--spring); }
+  .bx-drop { animation: bx-drop-in 0.35s var(--ease-settle); }
+  .bx-count.is-tick { animation: bx-tick 0.5s var(--spring); }
+  .bx-chip-in { animation: bx-swap 0.5s var(--spring) both; }
+  .bx-pop { animation: bx-pop 0.5s var(--spring) both; }
+  .bx-stamp { animation: bx-stamp 0.7s var(--spring) both 0.1s; }
+  .bx-live { animation: live-pulse 2s var(--ease-settle) infinite; }
+  .bx-node-on { animation: bx-node 2s ease-in-out infinite; }
+}
+@keyframes bx-land {
+  0% { box-shadow: 0 0 0 3px rgba(77, 122, 96, 0.6); transform: scale(1.03); }
+  100% { box-shadow: 0 0 0 0 rgba(77, 122, 96, 0); transform: none; }
+}
+@keyframes bx-drop-in { from { opacity: 0; transform: scaleY(0.6); } }
+@keyframes bx-tick {
+  40% { transform: translateY(-3px) scale(1.18); background: var(--heritage); color: var(--ivory); border-color: var(--heritage); }
+}
+@keyframes bx-pop { from { transform: scale(0.3); opacity: 0; } }
+@keyframes bx-stamp {
+  0% { transform: scale(1.8) rotate(-8deg); opacity: 0; }
+  60% { transform: scale(0.94) rotate(0); opacity: 1; }
+}
+@keyframes bx-node {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(141, 184, 163, 0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(141, 184, 163, 0); }
+}
+
+/* Sidebar marker glides between sections */
+.bx-navmark {
+  top: 0;
+  transition: transform 0.55s var(--spring);
+}
+
+/* Frame: height morphs to each scene; scenes dissolve out and settle in */
+.bx-viewport {
+  transition: height 0.6s var(--ease-settle);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bx-scene:not([hidden]) { animation: bx-scene-in 0.55s var(--ease-settle) both; }
+}
+@keyframes bx-scene-in {
+  from { opacity: 0; transform: translateY(10px); }
+}
+.bx-scene.bx-exit {
+  opacity: 0;
+  transform: translateY(-8px);
+  filter: blur(3px);
+  transition: opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease;
+}
+
+/* Frame entrance: rises out of a slight recline once, then sits flat.
+   Not parallax: it plays one time as the reveal fires. */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  html.mk-armed [data-reveal].bx-tilt {
+    transform: perspective(1800px) rotateX(9deg) translateY(36px) scale(0.965);
+    transform-origin: 50% 0%;
+    transition:
+      opacity 0.7s var(--ease-settle),
+      transform 1.1s var(--ease-settle);
+  }
+  html.mk-armed [data-reveal].bx-tilt.mk-in {
+    transform: none;
+  }
+}
+
+/* Collapsible payoff row: 0fr → 1fr grows the frame open on the hire. */
+.bx-collapse {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.7s var(--ease-settle);
+}
+.bx-collapse[data-open="false"] {
+  grid-template-rows: 0fr;
+}
+
+/* Showcase scenes: any bare `grid` (no explicit columns) gets a shrinkable
+   single track, so an implicit `auto` column can never size to its content
+   and push past the frame on phones. */
+.bx-scene .grid:not([class*="grid-cols"]) {
+  grid-template-columns: minmax(0, 1fr);
 }

@@ -44,9 +44,11 @@ export interface Player {
   barRefs: React.MutableRefObject<Array<HTMLElement | null>>;
 }
 
-/** Wipe choreography (ms) — keep in sync with the bo-veil CSS timings. */
-const WIPE_COMMIT_MS = 180; // chapter swap, hidden behind the veil
-const WIPE_TOTAL_MS = 780; // veil unmount (CSS animation is 760ms)
+/** Scene-change choreography (ms), v2 2026-09-28: the outgoing scene
+ *  dissolves (.bx-exit, 200ms), the swap commits mid-fade, and the new
+ *  scene's beats take over. Replaces the v1 D-mark veil (a full-frame
+ *  cover read as a hard cut between five unrelated slides). */
+const WIPE_COMMIT_MS = 170;
 
 export function usePlayer(durations: ReadonlyArray<number>): Player {
   const count = durations.length;
@@ -110,9 +112,13 @@ export function usePlayer(durations: ReadonlyArray<number>): Player {
       wipeTimers.current.forEach(clearTimeout);
       wipeTimers.current = [];
       setWipeKey(Date.now());
+      // Swap + clear the exit flag in ONE task so React batches them: the
+      // incoming scene never renders with the outgoing scene's exit class.
       wipeTimers.current.push(
-        window.setTimeout(() => commitGo(i), WIPE_COMMIT_MS),
-        window.setTimeout(() => setWipeKey(null), WIPE_TOTAL_MS)
+        window.setTimeout(() => {
+          commitGo(i);
+          setWipeKey(null);
+        }, WIPE_COMMIT_MS)
       );
     },
     [commitGo]
@@ -272,4 +278,36 @@ export function animateCount(
   };
   raf = requestAnimationFrame(step);
   return () => cancelAnimationFrame(raf);
+}
+
+/** Settled step for SSR / reduced motion / inactive scenes. */
+export const FINAL = 1000;
+
+/**
+ * useBeats — a scene's scripted timeline. `build` receives `at(ms, step,
+ * fn?)`: at `ms` after activation, advance the scene to `step` (null =
+ * leave it) and run `fn` (cursor moves, count-ups).
+ *
+ * The step is stored WITH the nonce it belongs to, and derived as 0 when
+ * the nonce moved on. So the render that activates a scene already shows
+ * its opening state (no one-frame flash of the ending), with no setState
+ * in the effect body.
+ */
+export function useBeats(
+  active: boolean,
+  enhanced: boolean,
+  nonce: number,
+  build: (at: (ms: number, step: number | null, fn?: () => void) => void) => void
+): number {
+  const [state, setState] = useState({ nonce: -1, step: 0 });
+  useCue(active && enhanced, nonce, (cue) => {
+    build((ms, step, fn) =>
+      cue(ms, () => {
+        if (step !== null) setState({ nonce, step });
+        fn?.();
+      })
+    );
+  });
+  if (!enhanced) return FINAL;
+  return state.nonce === nonce ? state.step : 0;
 }
