@@ -31,6 +31,7 @@ import {
 import { DataTable } from "@/components/research/data-table";
 import { KeyFindings } from "@/components/research/key-findings";
 import { PullQuote } from "@/components/research/pull-quote";
+import { RelatedReports } from "@/components/research/related-reports";
 import {
   Accent,
   Prose,
@@ -40,6 +41,7 @@ import {
 } from "@/components/research/report-shell";
 import { researchRobots } from "@/lib/research/config";
 import {
+  HIRING_SHORTAGE_2026,
   researchPath,
   STAFFING_COSTS_2026 as REPORT,
   type ResearchSource,
@@ -205,15 +207,15 @@ export default function StaffingAgencyCostsReport() {
           </p>
           <p>
             Wage baselines are BLS Occupational Employment and Wage Statistics, May 2025
-            national estimates, the latest release at the time of writing.<Cite n={11} /> We
+            national estimates, the latest release at the time of writing.<Cite n={11} />{" "}We
             use BLS wages, which measure employed dentists, rather than ADA Health Policy
             Institute owner net income ($215,320 for general dentists in 2025), which
-            measures mostly practice owners.<Cite n={15} /> The office manager row uses
+            measures mostly practice owners.<Cite n={15} />{" "}The office manager row uses
             BLS first-line supervisors of office and administrative support in offices of
             dentists as a proxy, because BLS has no office manager category.
           </p>
           <p>
-            Any line labeled <strong>DSO Hire calculation</strong> is our arithmetic on cited
+            Any line labeled <strong>DSO Hire calculation</strong>{" "}is our arithmetic on cited
             inputs, with the formula shown. No agency quoted those dollar amounts. Source
             types are listed with every source so you can weigh a vendor&rsquo;s description
             of its own prices differently from a vendor&rsquo;s description of its
@@ -253,7 +255,7 @@ export default function StaffingAgencyCostsReport() {
             <>
               <strong>Permanent placement is priced as a share of first-year salary.</strong>{" "}
               The one agency with a dental division that publishes a rate card charges 20 to
-              30 percent of first-year base salary.<Cite n={1} /> An uncited vendor guide puts
+              30 percent of first-year base salary.<Cite n={1} />{" "}An uncited vendor guide puts
               it at 15 to 25 percent.<Cite n={5} />
             </>,
             <>
@@ -262,19 +264,19 @@ export default function StaffingAgencyCostsReport() {
               <Cite n={[1, 11]} />
             </>,
             <>
-              <strong>Dentist-only recruiters sometimes charge flat fees.</strong> Caris
+              <strong>Dentist-only recruiters sometimes charge flat fees.</strong>{" "}Caris
               Partners publishes $5,000 to $15,000 per dentist or specialist hire.
-              <Cite n={6} /> Others advertise flat or below-average pricing without a number.
+              <Cite n={6} />{" "}Others advertise flat or below-average pricing without a number.
               <Cite n={[7, 8]} />
             </>,
             <>
-              <strong>The standard guarantee is 90 days.</strong> Two dental recruiters publish
-              it.<Cite n={[7, 8]} /> One firm sells five years, as a pro-rated credit.
+              <strong>The standard guarantee is 90 days.</strong>{" "}Two dental recruiters publish
+              it.<Cite n={[7, 8]} />{" "}One firm sells five years, as a pro-rated credit.
               <Cite n={1} />
             </>,
             <>
               <strong>Temp marketplaces publish fees of 12 to 25 percent of pay</strong>, or a
-              flat fee per shift.<Cite n={[16, 17, 18, 20]} /> The one traditional agency rate
+              flat fee per shift.<Cite n={[16, 17, 18, 20]} />{" "}The one traditional agency rate
               card shows a 50 to 85 percent markup.<Cite n={1} />
             </>,
             <>
@@ -283,14 +285,14 @@ export default function StaffingAgencyCostsReport() {
               subscription or per-shift fee instead.<Cite n={[17, 19, 20, 24, 26, 27]} />
             </>,
             <>
-              <strong>Job boards cost hundreds, not thousands, per month.</strong> DentalPost
+              <strong>Job boards cost hundreds, not thousands, per month.</strong>{" "}DentalPost
               is $259 a month<Cite n={31} />; LinkedIn&rsquo;s own example is $300 or less
               for 30 days<Cite n={32} />; Indeed prices sponsored jobs by auction.
               <Cite n={[33, 34]} />
             </>,
             <>
-              <strong>Vacancies are long and costly.</strong> One in five practices report
-              hygienist positions open more than six months.<Cite n={35} /> An open assistant
+              <strong>Vacancies are long and costly.</strong>{" "}One in five practices report
+              hygienist positions open more than six months.<Cite n={35} />{" "}An open assistant
               role puts more than $21,000 of revenue at risk on average.<Cite n={36} />
             </>,
           ]}
@@ -307,29 +309,29 @@ export default function StaffingAgencyCostsReport() {
           <p>
             Permanent placement is usually contingent: you pay only when someone you hire
             starts. Raybrex puts it plainly: &ldquo;There is never a fee unless we find you a
-            quality dentist that you want to hire.&rdquo;<Cite n={9} /> What you pay when
+            quality dentist that you want to hire.&rdquo;<Cite n={9} />{" "}What you pay when
             that happens is much harder to find.
           </p>
           <p>
             The clearest public number comes from Frontline Source Group, a general staffing
             firm with a dental division. Its rate card lists direct hire at 20 to 30 percent
-            of annual salary, with final pricing set by contract at kickoff.<Cite n={1} /> Its
+            of annual salary, with final pricing set by contract at kickoff.<Cite n={1} />{" "}Its
             dental pages describe the same model, &ldquo;a contingent fee of 20 to 30 percent
             of the placed hygienist&rsquo;s first-year base salary.&rdquo;<Cite n={[2, 3]} />
           </p>
           <p>
             Other published figures are weaker. A 2026 vendor guide gives 15 to 25 percent of
-            first-year salary but cites no source for it.<Cite n={5} /> Henry Schein Dental
+            first-year salary but cites no source for it.<Cite n={5} />{" "}Henry Schein Dental
             Recruitment Services says only that its fees are &ldquo;less than the industry
-            average.&rdquo;<Cite n={7} /> The Doc Hunters advertise a flat rate &ldquo;among
-            the lowest in the nation&rdquo; without naming it.<Cite n={8} /> Hygiene Staffing
+            average.&rdquo;<Cite n={7} />{" "}The Doc Hunters advertise a flat rate &ldquo;among
+            the lowest in the nation&rdquo; without naming it.<Cite n={8} />{" "}Hygiene Staffing
             bills permanent and temporary placements separately and does not publish either.
             <Cite n={10} />
           </p>
           <p>
             Dentist searches are where the two pricing models split. Caris Partners publishes
             a flat $5,000 to $15,000 &ldquo;once the dentist or specialist is hired.&rdquo;
-            <Cite n={6} /> A percentage model on the same hire costs far more, as the next
+            <Cite n={6} />{" "}A percentage model on the same hire costs far more, as the next
             section shows.
           </p>
         </Prose>
@@ -366,8 +368,8 @@ export default function StaffingAgencyCostsReport() {
             Example, dental hygienist: $98,100 × 20% = $19,620; $98,100 × 30% = $29,430. Wages
             from BLS OEWS<Cite n={11} />, confirmed by the BLS Occupational Outlook Handbook
             for hygienists, assistants and dentists<Cite n={[12, 13, 14]} />; fee range from
-            Frontline&rsquo;s rate card<Cite n={1} /> and an uncited vendor guide.
-            <Cite n={5} /> Your salaries, and the fee you negotiate, will differ.
+            Frontline&rsquo;s rate card<Cite n={1} />{" "}and an uncited vendor guide.
+            <Cite n={5} />{" "}Your salaries, and the fee you negotiate, will differ.
           </p>
         </Callout>
 
@@ -380,8 +382,8 @@ export default function StaffingAgencyCostsReport() {
           ]}
           note={
             <>
-              Wages: BLS OEWS May 2025 national medians.<Cite n={11} /> Fee range: Frontline
-              Source Group rate card.<Cite n={1} /> Flat fee: Caris Partners.<Cite n={6} />{" "}
+              Wages: BLS OEWS May 2025 national medians.<Cite n={11} />{" "}Fee range: Frontline
+              Source Group rate card.<Cite n={1} />{" "}Flat fee: Caris Partners.<Cite n={6} />{" "}
               Office manager uses first-line office supervisors in offices of dentists as a
               proxy. Specialist dentists are omitted: BLS counts are small and specialist
               searches are often flat-fee or retained.
@@ -445,8 +447,8 @@ export default function StaffingAgencyCostsReport() {
           ])}
           footnote={
             <>
-              Wages: BLS OEWS May 2025.<Cite n={11} /> 15–25%: uncited vendor guide.
-              <Cite n={5} /> 20–30%: Frontline Source Group rate card.<Cite n={1} /> Receptionist
+              Wages: BLS OEWS May 2025.<Cite n={11} />{" "}15–25%: uncited vendor guide.
+              <Cite n={5} />{" "}20–30%: Frontline Source Group rate card.<Cite n={1} />{" "}Receptionist
               and office manager rows use offices of dentists (NAICS 621200) wages.
             </>
           }
@@ -464,15 +466,15 @@ export default function StaffingAgencyCostsReport() {
             A guarantee is what protects the fee if the hire leaves early. Ninety days is the
             only length published by more than one dental recruiter. Henry Schein offers
             &ldquo;a free replacement if you are not satisfied within the first ninety
-            days,&rdquo;<Cite n={7} /> and The Doc Hunters say every dentist they place
-            &ldquo;comes with a 90 day guarantee.&rdquo;<Cite n={8} /> A 2026 vendor guide,
+            days,&rdquo;<Cite n={7} />{" "}and The Doc Hunters say every dentist they place
+            &ldquo;comes with a 90 day guarantee.&rdquo;<Cite n={8} />{" "}A 2026 vendor guide,
             again without a source, says most reputable agencies offer a partial refund or
             free replacement.<Cite n={5} />
           </p>
           <p>
             Frontline sells something much longer: a five-year warranty, which it frames
             against the industry&rsquo;s 90 days. Its FAQ says failed placements are replaced
-            &ldquo;at no additional search fee,&rdquo;<Cite n={4} /> while its pricing page
+            &ldquo;at no additional search fee,&rdquo;<Cite n={4} />{" "}while its pricing page
             describes the remedy as a pro-rated credit over 1,825 days, based on how long
             the hire stayed and governed by the client agreement.<Cite n={1} />
           </p>
@@ -527,8 +529,8 @@ export default function StaffingAgencyCostsReport() {
             Competitors&rsquo; descriptions of each other run in the same direction but are
             marketing, not price lists. Teero says published service fees among its rivals
             run &ldquo;15% to 25% among the companies that publish a rate.&rdquo;
-            <Cite n={17} /> TempStars says traditional agencies add an $80 to $150 or more
-            placement fee per shift, plus a $15 to $60 hourly markup.<Cite n={22} /> The
+            <Cite n={17} />{" "}TempStars says traditional agencies add an $80 to $150 or more
+            placement fee per shift, plus a $15 to $60 hourly markup.<Cite n={22} />{" "}The
             uncited vendor guide gives 30 to 60 percent.<Cite n={5} />
           </p>
         </Prose>
@@ -604,7 +606,7 @@ export default function StaffingAgencyCostsReport() {
         <Prose>
           <p>
             To compare these on equal terms, we priced one 8-hour hygienist shift at the BLS
-            median hourly wage of $47.16.<Cite n={11} /> Real temp pay is often higher: one
+            median hourly wage of $47.16.<Cite n={11} />{" "}Real temp pay is often higher: one
             Madison, Wisconsin agency advertises hygienist temp pay starting at $62 an hour
             and assistant pay from $31.<Cite n={30} />
           </p>
@@ -620,7 +622,7 @@ export default function StaffingAgencyCostsReport() {
           ]}
           note={
             <>
-              Pay: BLS May 2025 median hourly wage for hygienists.<Cite n={11} /> Fees: TempStars
+              Pay: BLS May 2025 median hourly wage for hygienists.<Cite n={11} />{" "}Fees: TempStars
               <Cite n={20} />, Teero<Cite n={17} />, GoTu<Cite n={16} />, onDiem for ADA
               members<Cite n={18} />, Frontline rate card markup<Cite n={1} />. Totals exclude
               employer payroll taxes where the platform adds them (Teero; GoTu W-2 regions,
@@ -675,7 +677,7 @@ export default function StaffingAgencyCostsReport() {
 
         <Callout tone="calc">
           <p>
-            <strong>Shift cost = 8 hours × $47.16 + the platform&rsquo;s fee</strong> (its
+            <strong>Shift cost = 8 hours × $47.16 + the platform&rsquo;s fee</strong>{" "}(its
             percentage of pay, or its flat per-shift fee).
           </p>
           <p>
@@ -700,20 +702,20 @@ export default function StaffingAgencyCostsReport() {
           </p>
           <ul>
             <li>
-              <strong>DentalPost:</strong> the Job Posting Subscription is $259 a month, which
+              <strong>DentalPost:</strong>{" "}the Job Posting Subscription is $259 a month, which
               its page says covers one active job post at a time. Resume search is a $149 a
               month add-on.<Cite n={31} />
             </li>
             <li>
-              <strong>LinkedIn:</strong> you set a daily budget and pay for views. Its own
+              <strong>LinkedIn:</strong>{" "}you set a daily budget and pay for views. Its own
               example: &ldquo;If you set a $10 daily budget and run a job post for 30 days,
               your total cost will be $300 or less.&rdquo; One free job post can be open at a
               time.<Cite n={32} />
             </li>
             <li>
-              <strong>Indeed:</strong> many jobs post free. Sponsored jobs are priced by
+              <strong>Indeed:</strong>{" "}many jobs post free. Sponsored jobs are priced by
               auction, and the minimum &ldquo;will depend on several factors&rdquo; and
-              appears at checkout.<Cite n={33} /> Qualifying jobs are automatically billed per
+              appears at checkout.<Cite n={33} />{" "}Qualifying jobs are automatically billed per
               started application (PPSA) and cannot switch back to pay per click.
               <Cite n={34} />
             </li>
@@ -730,10 +732,10 @@ export default function StaffingAgencyCostsReport() {
           note={
             <>
               Agency fee: 20% and 30% of the BLS May 2025 hygienist median, $98,100.
-              <Cite n={[1, 11]} /> DentalPost: one month, one active post.<Cite n={31} />{" "}
+              <Cite n={[1, 11]} />{" "}DentalPost: one month, one active post.<Cite n={31} />{" "}
               LinkedIn: its own $10 a day for 30 days example, &ldquo;$300 or less.&rdquo;
-              <Cite n={32} /> Indeed is auction priced with no fixed public figure, so it is not
-              charted.<Cite n={[33, 34]} /> A board does not guarantee a hire; an agency fee
+              <Cite n={32} />{" "}Indeed is auction priced with no fixed public figure, so it is not
+              charted.<Cite n={[33, 34]} />{" "}A board does not guarantee a hire; an agency fee
               buys one.
             </>
           }
@@ -776,7 +778,7 @@ export default function StaffingAgencyCostsReport() {
             hygienists called it &ldquo;very&rdquo; or &ldquo;extremely challenging,&rdquo; a
             pattern that has held for more than two years. Only two in five recruiting
             dentists filled the hygiene position, compared with around two-thirds of those
-            recruiting dental assistants.<Cite n={35} /> BLS projects hygienist employment to
+            recruiting dental assistants.<Cite n={35} />{" "}BLS projects hygienist employment to
             grow 8 percent from 2025 to 2035.<Cite n={12} />
           </p>
         </Prose>
@@ -799,7 +801,7 @@ export default function StaffingAgencyCostsReport() {
             Foundation and Global Skills X-Change, based on a December 2023 survey with more
             than 560 responses. It puts the average revenue at risk from a vacant dental
             assistant position at more than $21,000, nearly $110,000 if the role stays open a
-            full year, and $30,000 to almost $60,000 in extra labor cost.<Cite n={36} /> A
+            full year, and $30,000 to almost $60,000 in extra labor cost.<Cite n={36} />{" "}A
             separate DANB post puts the average cost of dental assistant turnover at $10,000,
             about $1,000 of it on hiring expenses.<Cite n={37} />
           </p>
@@ -811,7 +813,7 @@ export default function StaffingAgencyCostsReport() {
           note={
             <>
               DANB and DALE Foundation research, survey of December 2023, more than 560
-              responses.<Cite n={[36, 37]} /> DANB is a certification body for dental
+              responses.<Cite n={[36, 37]} />{" "}DANB is a certification body for dental
               assistants. Figures are averages, not quotes for your practice.
             </>
           }
@@ -842,8 +844,8 @@ export default function StaffingAgencyCostsReport() {
           <p>
             General workforce figures are wider and older. Gallup estimated in 2019 that
             replacing an employee costs one-half to two times their annual salary, without
-            detailing its method on the page.<Cite n={38} /> SHRM reported in 2022 that the
-            average cost per hire was nearly $4,700.<Cite n={39} /> You will also see
+            detailing its method on the page.<Cite n={38} />{" "}SHRM reported in 2022 that the
+            average cost per hire was nearly $4,700.<Cite n={39} />{" "}You will also see
             &ldquo;a bad hire costs 30 percent of first-year earnings,&rdquo; credited to the
             U.S. Department of Labor. We could not trace it to any Labor Department source,
             so we do not use it.
@@ -860,35 +862,35 @@ export default function StaffingAgencyCostsReport() {
         <Prose>
           <ul>
             <li>
-              <strong>Price fees by role, not by headline percentage.</strong> At 20 to 30
+              <strong>Price fees by role, not by headline percentage.</strong>{" "}At 20 to 30
               percent, an assistant hire runs about $9,600 to $14,400 and a general dentist
-              about $34,000 to $51,000 (DSO Hire calculation).<Cite n={[1, 11]} /> Ten hires
+              about $34,000 to $51,000 (DSO Hire calculation).<Cite n={[1, 11]} />{" "}Ten hires
               a year at different roles can produce very different invoices.
             </li>
             <li>
-              <strong>Get the rate card and the guarantee in writing.</strong> Frontline sets
+              <strong>Get the rate card and the guarantee in writing.</strong>{" "}Frontline sets
               final pricing by contract, and its own pages describe the warranty remedy two
-              ways.<Cite n={[1, 4]} /> Ask for the length, the remedy, and how it is
+              ways.<Cite n={[1, 4]} />{" "}Ask for the length, the remedy, and how it is
               pro-rated.
             </li>
             <li>
-              <strong>Check temp-to-perm terms before you book shifts.</strong> Several
+              <strong>Check temp-to-perm terms before you book shifts.</strong>{" "}Several
               platforms publish $0 conversion fees<Cite n={[17, 19, 20]} />; others do not
               publish them at all.<Cite n={28} />
             </li>
             <li>
-              <strong>Count payroll costs on W-2 shifts.</strong> Teero adds W-2 payroll
+              <strong>Count payroll costs on W-2 shifts.</strong>{" "}Teero adds W-2 payroll
               costs to its 12 percent, and GoTu adds 20 percent of pay where shifts run as
               W-2.<Cite n={[16, 17]} />
             </li>
             <li>
-              <strong>Use agencies where they earn the fee.</strong> A hard dentist or
+              <strong>Use agencies where they earn the fee.</strong>{" "}A hard dentist or
               specialist search, a market you do not know, or a shift you need filled
               tomorrow. For routine roles your team can source, board and platform costs are
               a fraction of a placement fee, but the screening work moves to you.
             </li>
             <li>
-              <strong>Weigh the vacancy, not just the fee.</strong> With one in five practices
+              <strong>Weigh the vacancy, not just the fee.</strong>{" "}With one in five practices
               reporting hygienist roles open more than six months<Cite n={35} />, a slow cheap
               search can cost more than a fast expensive one.<Cite n={36} />
             </li>
@@ -903,6 +905,8 @@ export default function StaffingAgencyCostsReport() {
           </p>
         </Prose>
       </ReportSection>
+
+      <RelatedReports reports={[HIRING_SHORTAGE_2026]} />
 
       <ReportFaq items={FAQ} />
     </ReportShell>
