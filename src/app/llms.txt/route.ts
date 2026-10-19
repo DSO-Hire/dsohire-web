@@ -61,10 +61,18 @@ ${PRICE_LINES}
 - [How to reduce time-to-hire at a dental practice](${SITE}/guides/reduce-time-to-hire-dental-practice): The self-inflicted delays (response speed, screening order, decision bottlenecks) and how to fix them.
 - [Screening dental candidates for culture fit](${SITE}/guides/dental-culture-fit-screening): Making fit measurable with office profiles, structured questions, and two-sided fit scoring.
 
+## Research
+
+- [What dental staffing agencies actually charge (2026)](${SITE}/research/dental-staffing-agency-costs-2026): Placement fees (published dental rate card: 20 to 30 percent of first-year salary), fee per role at BLS median wages, guarantee periods, temp app fees, job board costs. 39 cited sources.
+- [The dental hiring shortage, by the numbers (2026)](${SITE}/research/dental-hiring-shortage-2026): ADA HPI recruiting difficulty and fill rates, BLS 2025 to 2035 projections, HRSA shortage data, DSO affiliation trends, wages vs inflation. 24 cited sources.
+
 ## Comparisons
 
 - [DSO Hire vs. job boards](${SITE}/vs/job-boards): Full hiring system vs. per-listing job boards.
 - [DSO Hire vs. staffing agencies](${SITE}/vs/staffing-agencies): Flat subscription vs. placement fees; permanent hiring vs. temp coverage.
+- [DSO Hire vs. DentalPost](${SITE}/vs/dentalpost): Published pricing, multi-location model, and fit scoring compared, sourced from each company's pages.
+- [DSO Hire vs. Cloud Dentistry](${SITE}/vs/cloud-dentistry): Permanent hiring platform vs. temp and permanent staffing marketplace, sourced.
+- [Hiring software for dental groups: the 2026 landscape](${SITE}/vs/dental-hiring-software): Dental job boards, staffing marketplaces, general job boards, ATSs and agencies by business model.
 `;
 
 export function GET() {

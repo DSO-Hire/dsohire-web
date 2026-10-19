@@ -65,6 +65,14 @@ const ROUTES: SitemapRoute[] = [
   { path: "/switch", priority: 0.7, changeFrequency: "monthly" },
   { path: "/vs/job-boards", priority: 0.7, changeFrequency: "monthly" },
   { path: "/vs/staffing-agencies", priority: 0.7, changeFrequency: "monthly" },
+  // Sourced, named comparisons (research gate; published 2026-10-19).
+  { path: "/vs/dentalpost", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/vs/cloud-dentistry", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/vs/dental-hiring-software", priority: 0.7, changeFrequency: "monthly" },
+  // DSO Hire Research.
+  { path: "/research", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/research/dental-staffing-agency-costs-2026", priority: 0.8, changeFrequency: "monthly" },
+  { path: "/research/dental-hiring-shortage-2026", priority: 0.8, changeFrequency: "monthly" },
 
   // Pillar hiring guides (launch SEO spec, Phase 3).
   { path: "/guides", priority: 0.6, changeFrequency: "monthly" },

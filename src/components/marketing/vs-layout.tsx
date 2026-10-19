@@ -3,7 +3,10 @@
  *
  * NAMING RULE (locked Day 19): competitors stay GENERIC on public copy —
  * "per-listing job boards," "staffing agencies" — never named, never
- * slandered. These pages compare CATEGORY MECHANICS factually and are
+ * slandered. EXCEPTION (Cam, 2026-10-19): the sourced comparison pages
+ * (/vs/dentalpost, /vs/cloud-dentistry, /vs/dental-hiring-software) and the
+ * /research reports may name competitors, quoting only their own published
+ * pages with dates. Everywhere else the rule stands. These pages compare CATEGORY MECHANICS factually and are
  * honest about where the other category genuinely wins (that honesty is
  * the conversion device).
  *

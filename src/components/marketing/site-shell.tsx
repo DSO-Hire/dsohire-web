@@ -260,6 +260,8 @@ export function SiteFooter() {
             <FooterLink href="/switch">Switch to DSO Hire</FooterLink>
             <FooterLink href="/vs/job-boards">vs Job Boards</FooterLink>
             <FooterLink href="/vs/staffing-agencies">vs Staffing Agencies</FooterLink>
+            <FooterLink href="/vs/dental-hiring-software">Compare hiring software</FooterLink>
+            <FooterLink href="/research">Research</FooterLink>
             <FooterLink href="/employer/sign-in">Sign in</FooterLink>
           </FooterCol>
 

@@ -26,7 +26,7 @@
 
 import type { Metadata } from "next";
 
-export const RESEARCH_PUBLISHED = false;
+export const RESEARCH_PUBLISHED = true; // published 2026-10-19, Cam approved
 
 /**
  * Robots metadata for a research page. Draft: explicit noindex/nofollow.
