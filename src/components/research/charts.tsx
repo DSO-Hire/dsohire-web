@@ -381,16 +381,23 @@ export function ColumnChart({
             ))}
             <div className="absolute inset-0 flex">
               {categories.map((c, ci) => (
-                <div key={c} className="h-full flex items-end justify-center gap-0.5 px-[6%]" style={{ flex: "1 1 0%", minWidth: 0 }}>
+                <div
+                  key={c}
+                  className="h-full px-1.5"
+                  /* fixed padding: a % padding here resolves against the whole plot width and left the bars 0px wide */
+                  style={{
+                    flex: "1 1 0%",
+                    minWidth: 0,
+                    display: "grid",
+                    gridTemplateColumns: `repeat(${series.length}, minmax(0, 1fr))`,
+                    alignItems: "end",
+                    columnGap: "2px",
+                  }}
+                >
                   {series.map((s) => {
                     const v = s.values[ci];
                     return (
-                      <div
-                        key={s.label}
-                        className="relative h-full flex items-end"
-                        /* explicit basis: the utility classes alone let the bar collapse to 0 width */
-                        style={{ flex: "1 1 0%", minWidth: 0, maxWidth: series.length === 1 ? "3.5rem" : undefined }}
-                      >
+                      <div key={s.label} className="relative h-full" style={{ display: "flex", alignItems: "flex-end" }}>
                         {v != null && (
                           <span
                             className={cn("relative block", TONE_BG[s.tone])}
