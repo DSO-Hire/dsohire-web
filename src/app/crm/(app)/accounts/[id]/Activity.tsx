@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { logOutreach } from "../actions";
 import { OUTREACH_KINDS } from "../lib";
+import ComposeSection from "./ComposeSection";
 import { Hidden } from "../ui";
 import { FEED_FILTERS, buildFeed, fmtWhen } from "./timeline";
 import type { SectionProps } from "./types";
 
-export default function Activity({ a, contacts, opps, events, demo, today, me, admin, sp }: SectionProps) {
+export default function Activity({ a, contacts, opps, events, demo, demoLink, today, me, admin, sp }: SectionProps) {
   const myName = admin.full_name?.split(/\s+/)[0] ?? "You";
   const items = buildFeed({ events, contacts, opps, demo, me, myName });
   const active = new Set(
@@ -24,6 +25,8 @@ export default function Activity({ a, contacts, opps, events, demo, today, me, a
   };
 
   return (
+    <>
+    <ComposeSection a={a} contacts={contacts} events={events} demoLink={demoLink} sp={sp} />
     <div className="dcardx">
       <div className="ch">
         <h3>Activity</h3>
@@ -111,5 +114,6 @@ export default function Activity({ a, contacts, opps, events, demo, today, me, a
       )}
       {items.length >= 200 ? <div className="sl-note">Showing the newest 200 events.</div> : null}
     </div>
+    </>
   );
 }

@@ -1,0 +1,47 @@
+/* Proposals card on the opportunity record (2026-10-19). */
+.crm-root #dx-proposals .tbl {
+  width: 100%;
+}
+.crm-root #dx-proposals .tbl td {
+  vertical-align: middle;
+}
+.crm-root .qp-new {
+  padding: 12px 18px 4px;
+  border-top: 1px solid var(--dk-rule-soft);
+}
+.crm-root .qp-new > summary {
+  list-style: none;
+  display: inline-flex;
+}
+.crm-root .qp-new > summary::-webkit-details-marker {
+  display: none;
+}
+.crm-root .qp-new[open] > summary {
+  margin-bottom: 4px;
+}
+.crm-root .qp-new .dform {
+  padding: 8px 0 12px;
+}
+.crm-root .qp-new input[readonly] {
+  background: var(--dk-tint);
+  color: var(--dk-slate);
+}
+.crm-root .qp-formfoot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.crm-root .qp-acts {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: flex-end;
+}
+.crm-root .qp-acts .iconbtn {
+  text-decoration: none;
+}
+.crm-root .qp-err {
+  font-size: 0.6875rem;
+  color: var(--dk-crit);
+}

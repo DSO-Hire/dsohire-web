@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { crmPageGate } from "@/lib/crm/auth";
 import ActionError from "../ActionError";
+import SavedViews from "../_views/SavedViews";
 import AutoSubmit from "../AutoSubmit";
 import EmptyState from "../EmptyState";
 import { photoClass, photoStyle } from "../avatars";
@@ -267,6 +268,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
           </Link>
         ))}
       </nav>
+      <SavedViews surface="tasks" current={sp} />
 
       <div className="dcardx" id="dx-tasklist">
         <form id="tk-filters" method="get" action="/crm/tasks" className="dform dx-taskfilters">

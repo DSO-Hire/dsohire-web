@@ -1,0 +1,287 @@
+/* Printable proposal (2026-10-19). Screen: a paper sheet inside the CRM
+   shell with a small toolbar. Print: only the sheet, letter size. Every
+   shell-hiding rule is scoped with :has(.qp-doc), so this stylesheet
+   staying loaded after client navigation never changes another page. */
+
+.crm-root .qp-page {
+  --qp-ink: #14233f;
+  --qp-heritage: #4d7a60;
+  --qp-paper: #f7f4ed;
+  --qp-rule: #e4ded1;
+  --qp-slate: #4a6278;
+}
+
+.crm-root .qp-screen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  max-width: 8.5in;
+  margin: 0 auto 14px;
+}
+.crm-root .qp-screen .qp-hint {
+  font-size: 0.6875rem;
+  color: var(--qp-slate);
+  margin-left: auto;
+}
+
+.crm-root .qp-doc {
+  font-family: var(--font-manrope), var(--font-sans), system-ui, sans-serif;
+  color: var(--qp-ink);
+  background: #fff;
+  border: 1px solid var(--qp-rule);
+  border-radius: 0;
+  max-width: 8.5in;
+  margin: 0 auto;
+  padding: 0.6in 0.65in;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+/* The lockup's token classes follow the app theme; the document is always
+   light paper, so pin the brand colors. */
+.crm-root .qp-doc .stroke-ink {
+  stroke: var(--qp-ink);
+}
+.crm-root .qp-doc .fill-ink {
+  fill: var(--qp-ink);
+}
+.crm-root .qp-doc .stroke-heritage {
+  stroke: var(--qp-heritage);
+}
+.crm-root .qp-doc .fill-heritage {
+  fill: var(--qp-heritage);
+}
+.crm-root .qp-doc .stroke-border-2 {
+  stroke: var(--qp-rule);
+}
+.crm-root .qp-doc a {
+  color: var(--qp-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.crm-root .qp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--qp-ink);
+}
+.crm-root .qp-headr {
+  text-align: right;
+}
+.crm-root .qp-eyebrow {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--qp-heritage);
+}
+.crm-root .qp-num {
+  font-size: 1.125rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.crm-root .qp-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 20px 0 14px;
+}
+.crm-root .qp-meta {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 12px;
+  margin: 0 0 16px;
+  padding: 10px 0;
+  border-top: 1px solid var(--qp-rule);
+  border-bottom: 1px solid var(--qp-rule);
+}
+.crm-root .qp-meta dt {
+  font-size: 0.5938rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--qp-slate);
+}
+.crm-root .qp-meta dd {
+  margin: 2px 0 0;
+  font-weight: 700;
+}
+.crm-root .qp-meta .qp-sub {
+  display: block;
+  font-weight: 500;
+  color: var(--qp-slate);
+}
+.crm-root .qp-intro {
+  margin: 0 0 16px;
+  white-space: pre-line;
+}
+
+.crm-root .qp-plan {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  background: var(--qp-paper);
+  border-left: 4px solid var(--qp-heritage);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.crm-root .qp-planname {
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.crm-root .qp-tagline,
+.crm-root .qp-loc {
+  color: var(--qp-slate);
+}
+.crm-root .qp-planr {
+  text-align: right;
+}
+.crm-root .qp-price {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.crm-root .qp-price span {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--qp-slate);
+  margin-left: 4px;
+}
+.crm-root .qp-billing {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: var(--qp-slate);
+  font-variant-numeric: tabular-nums;
+}
+
+.crm-root .qp-doc h2 {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin: 0 0 6px;
+}
+.crm-root .qp-included {
+  margin-bottom: 14px;
+}
+.crm-root .qp-included ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  columns: 2;
+  column-gap: 24px;
+}
+.crm-root .qp-included li {
+  break-inside: avoid;
+  padding: 3px 0 3px 16px;
+  position: relative;
+}
+.crm-root .qp-included li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.75em;
+  width: 7px;
+  height: 7px;
+  background: var(--qp-heritage);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.crm-root .qp-every {
+  margin: 8px 0 0;
+  color: var(--qp-slate);
+}
+.crm-root .qp-value {
+  display: grid;
+  gap: 2px;
+  padding: 10px 0;
+  margin-bottom: 14px;
+  border-top: 1px solid var(--qp-rule);
+  border-bottom: 1px solid var(--qp-rule);
+  font-weight: 700;
+}
+.crm-root .qp-notes,
+.crm-root .qp-next {
+  margin-bottom: 14px;
+}
+.crm-root .qp-notes p,
+.crm-root .qp-next p {
+  margin: 0;
+  white-space: pre-line;
+}
+.crm-root .qp-foot {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 2px solid var(--qp-ink);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 700px) {
+  .crm-root .qp-doc {
+    padding: 24px 18px;
+  }
+  .crm-root .qp-meta {
+    grid-template-columns: 1fr;
+  }
+  .crm-root .qp-plan {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .crm-root .qp-planr {
+    text-align: left;
+  }
+  .crm-root .qp-included ul {
+    columns: 1;
+  }
+}
+
+@media print {
+  @page {
+    size: letter;
+    margin: 0.5in 0.6in;
+  }
+  html:has(.qp-doc),
+  body:has(.qp-doc),
+  .crm-root:has(.qp-doc) {
+    background: #fff !important;
+  }
+  .crm-app:has(.qp-doc) {
+    display: block;
+    min-height: 0;
+  }
+  .crm-app:has(.qp-doc) .crm-side,
+  .crm-app:has(.qp-doc) .crm-topbar,
+  .crm-app:has(.qp-doc) .ws-skip,
+  .crm-app:has(.qp-doc) .ck-overlay,
+  .crm-app:has(.qp-doc) .ws-help-overlay,
+  .crm-app:has(.qp-doc) .qp-screen,
+  .crm-app:has(.qp-doc) .action-err,
+  .crm-app:has(.qp-doc) button {
+    display: none !important;
+  }
+  .crm-app:has(.qp-doc) .crm-content {
+    padding: 0;
+    max-width: none;
+    animation: none;
+  }
+  .crm-root .qp-doc {
+    border: 0;
+    max-width: none;
+    padding: 0;
+  }
+  .crm-root .qp-doc a {
+    text-decoration: none;
+  }
+}

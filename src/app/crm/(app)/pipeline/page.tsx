@@ -11,6 +11,7 @@ import FilterBar, { pipelineHref, type PipelineParams } from "./FilterBar";
 import PipelineBoard from "./PipelineBoard";
 import PipelineTable from "./PipelineTable";
 import ViewMemory from "./ViewMemory";
+import SavedViews from "../_views/SavedViews";
 import { applyFilters, loadPipeline } from "./_lib/load";
 import "../opportunities/opportunities.css";
 import "./pipeline.css";
@@ -180,6 +181,7 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
       </div>
 
       <FilterBar params={params} admins={admins} />
+      <SavedViews surface="pipeline" current={pipelineHref(params, {}).split("?")[1] ?? ""} />
 
       <div className="kpis dx-kpis">
         <div className="kpi">

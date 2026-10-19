@@ -26,9 +26,11 @@ import NextStep from "./_parts/NextStep";
 import OppHeader from "./_parts/OppHeader";
 import OppTasks from "./_parts/OppTasks";
 import PrimaryContact from "./_parts/PrimaryContact";
+import Proposals from "./_parts/Proposals";
 import Timeline from "./_parts/Timeline";
-import type { AccountRow, ContactRow, EventRow, OppRow, TaskRow } from "./_parts/types";
+import type { AccountRow, ContactRow, EventRow, OppRow, QuoteRow, TaskRow } from "./_parts/types";
 import "../opportunities.css";
+import "./_parts/proposals.css";
 
 export default async function OpportunityRecord({
   params,
@@ -51,7 +53,7 @@ export default async function OpportunityRecord({
   const opp = oppData as OppRow | null;
   if (!opp) notFound();
 
-  const [accountRes, contactsRes, tasksRes, eventsRes, siblingsRes, settingsRes] = await Promise.all([
+  const [accountRes, contactsRes, tasksRes, eventsRes, siblingsRes, settingsRes, quotesRes] = await Promise.all([
     supabase
       .from("crm_accounts")
       .select("id, name, hq_state, locations, status, website, last_touch_at, current_tool")
@@ -76,12 +78,19 @@ export default async function OpportunityRecord({
       .limit(tlLimit),
     supabase.from("crm_opportunities").select("id, name").eq("account_id", opp.account_id),
     supabase.from("crm_workspace_settings").select("stage_weights").eq("id", true).maybeSingle(),
+    supabase
+      .from("crm_quotes")
+      .select("id, number, plan_tier, billing, monthly_price, locations, contact_id, valid_until, status, sent_at, created_at")
+      .eq("opportunity_id", id)
+      .order("created_at", { ascending: false })
+      .limit(50),
   ]);
 
   const account = (accountRes.data ?? null) as AccountRow;
   const contacts = (contactsRes.data ?? []) as ContactRow[];
   const tasks = (tasksRes.data ?? []) as TaskRow[];
   const events = (eventsRes.data ?? []) as EventRow[];
+  const quotes = (quotesRes.data ?? []) as QuoteRow[];
   const weights = parseStageWeights(settingsRes.data?.stage_weights);
   const otherOpps = new Map(
     ((siblingsRes.data ?? []) as { id: string; name: string }[]).filter((o) => o.id !== id).map((o) => [o.id, o.name]),
@@ -182,6 +191,13 @@ export default async function OpportunityRecord({
       <div className="dgrid">
         <div>
           <OppTasks opp={opp} tasks={tasks} admins={admins} people={contacts} nowMs={nowMs} />
+          <Proposals
+            opp={opp}
+            account={account}
+            contacts={contacts}
+            quotes={quotes}
+            loadError={quotesRes.error?.message ?? null}
+          />
         </div>
 
         <div>

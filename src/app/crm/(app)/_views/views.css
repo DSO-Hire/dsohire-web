@@ -1,0 +1,135 @@
+/* Saved views bar (2026-10-19). Chips echo .fchip2 in crm.css, with small
+   inline tools that show on hover or focus. */
+.sv-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+.sv-bar .sv-l {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--dk-slate);
+  margin-right: 4px;
+}
+.sv-bar .sv-note {
+  font-size: 0.6875rem;
+  color: var(--dk-slate);
+}
+.sv-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--dk-rule);
+  border-radius: 999px;
+  background: var(--dk-card);
+  font-size: 0.7188rem;
+  font-weight: 600;
+  color: var(--dk-slate);
+}
+.sv-chip:hover,
+.sv-chip:focus-within {
+  border-color: var(--dk-navy);
+}
+.sv-chip.on {
+  background: var(--dk-navy);
+  border-color: var(--dk-navy);
+  color: #fff;
+}
+.sv-chip .sv-go {
+  padding: 3px 4px 3px 11px;
+  color: inherit;
+  text-decoration: none;
+}
+.sv-chip .sv-tools {
+  display: inline-flex;
+  align-items: center;
+  padding-right: 6px;
+}
+.sv-chip .sv-t {
+  border: 0;
+  background: none;
+  color: inherit;
+  opacity: 0;
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 2px 3px;
+  cursor: pointer;
+}
+.sv-chip .sv-x {
+  opacity: 0.55;
+  font-size: 0.875rem;
+}
+.sv-chip:hover .sv-t,
+.sv-chip:focus-within .sv-t {
+  opacity: 0.8;
+}
+.sv-chip .sv-t:hover,
+.sv-chip .sv-t:focus-visible {
+  opacity: 1;
+}
+.sv-chip .sv-t:focus-visible {
+  outline: 2px solid var(--dk-mint);
+}
+.sv-chip .sv-t:disabled {
+  cursor: progress;
+}
+.sv-save {
+  display: inline-block;
+  position: relative;
+}
+.sv-save > summary {
+  list-style: none;
+}
+.sv-save > summary::-webkit-details-marker {
+  display: none;
+}
+.sv-savebtn {
+  border: 1px dashed var(--dk-rule);
+  border-radius: 999px;
+  padding: 3px 11px;
+  font-size: 0.7188rem;
+  font-weight: 600;
+  color: var(--dk-green-deep);
+  cursor: pointer;
+}
+.sv-savebtn:hover {
+  border-color: var(--dk-green);
+}
+.sv-form {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+}
+.sv-form input {
+  border: 1px solid var(--dk-rule);
+  border-radius: 0;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-family: var(--font-sans);
+  background: var(--dk-card);
+  color: var(--dk-navy);
+  width: 12rem;
+}
+.sv-form input:focus {
+  outline: 2px solid var(--dk-green);
+  border-color: var(--dk-green);
+}
+.sv-err {
+  font-size: 0.6875rem;
+  color: var(--dk-crit);
+}
+@media (hover: none) {
+  .sv-chip .sv-t {
+    opacity: 0.7;
+  }
+}
+@media print {
+  .sv-bar {
+    display: none;
+  }
+}

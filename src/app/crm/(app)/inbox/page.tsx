@@ -2,6 +2,7 @@ import Link from "next/link";
 import { crmPageGate } from "@/lib/crm/auth";
 import { UUID_RE } from "@/lib/crm/events";
 import ActionError from "../ActionError";
+import SavedViews from "../_views/SavedViews";
 import AutoSubmit from "../AutoSubmit";
 import EmptyState from "../EmptyState";
 import { photoClass, photoStyle } from "../avatars";
@@ -98,6 +99,7 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
           Demo opens
         </Link>
       </nav>
+      <SavedViews surface="inbox" current={sp} />
       {tab === "demos" ? <DemoOpens session={gate} sp={sp} /> : <Leads session={gate} sp={sp} />}
     </>
   );

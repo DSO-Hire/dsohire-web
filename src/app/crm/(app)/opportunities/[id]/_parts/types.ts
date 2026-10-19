@@ -76,3 +76,17 @@ export type EventRow = {
   opportunity_id: string | null;
   contact_id: string | null;
 };
+
+export type QuoteRow = {
+  id: string;
+  number: number;
+  plan_tier: string;
+  billing: string;
+  monthly_price: number | string;
+  locations: number | null;
+  contact_id: string | null;
+  valid_until: string;
+  status: string;
+  sent_at: string | null;
+  created_at: string;
+};

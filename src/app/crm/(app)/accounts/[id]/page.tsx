@@ -210,6 +210,9 @@ export default async function AccountProfile({
           </span>
           {a.next_step ? <span className="ac-hero-next">{a.next_step}</span> : null}
           <span className="mini2">ON FILE SINCE {fmtDate(a.created_at).toUpperCase()}</span>
+          <Link className="dbtn dbtn-green dbtn-sm" href={`/crm/accounts/${a.id}?tab=activity&compose=1#compose`}>
+            Compose email
+          </Link>
         </div>
       </div>
 

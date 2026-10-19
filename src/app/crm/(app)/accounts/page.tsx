@@ -36,6 +36,7 @@ import {
   type DemoVisit,
   type OppLite,
 } from "./lib";
+import SavedViews from "../_views/SavedViews";
 import SelectAll from "./SelectAll";
 import { FitPill, StatusPill, Warmth } from "./ui";
 import "./accounts.css";
@@ -339,6 +340,7 @@ export default async function AccountsPage({
             ))}
           </div>
         ) : null}
+        {!archivedView ? <SavedViews surface="accounts" current={returnQs} /> : null}
         <form className="sl-filters" id="ac-filters" method="get" action="/crm/accounts">
           <AutoSubmit formId="ac-filters" />
           {archivedView ? <input type="hidden" name="archived" value="1" /> : null}

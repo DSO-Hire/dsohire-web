@@ -1,0 +1,146 @@
+/* Settings: email templates + signature cards (2026-10-19).
+   Square corners, rem type, Manrope via the CRM tokens. */
+
+.crm-root .tpl-card {
+  max-width: 48rem;
+}
+.crm-root .tpl-legend {
+  padding: 0.75rem 1.125rem;
+  border-bottom: 1px solid var(--dk-rule-soft);
+}
+.crm-root .tpl-legend-l,
+.crm-root .tpl-meta {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--dk-slate);
+}
+.crm-root .tpl-legend dl {
+  margin: 0.375rem 0 0;
+  display: grid;
+  gap: 0.25rem;
+}
+.crm-root .tpl-legend dl > div {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+}
+.crm-root .tpl-legend dt code {
+  font-size: 0.75rem;
+  color: var(--dk-navy);
+  font-weight: 700;
+}
+.crm-root .tpl-legend dd {
+  margin: 0;
+  color: var(--dk-slate);
+}
+.crm-root .tpl-row,
+.crm-root .tpl-archived {
+  border-bottom: 1px solid var(--dk-rule-soft);
+}
+.crm-root .tpl-row > summary,
+.crm-root .tpl-archived > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1.125rem;
+  cursor: pointer;
+  list-style: none;
+}
+.crm-root .tpl-row > summary::-webkit-details-marker,
+.crm-root .tpl-archived > summary::-webkit-details-marker {
+  display: none;
+}
+.crm-root .tpl-row > summary::before,
+.crm-root .tpl-archived > summary::before {
+  content: "▸";
+  font-size: 0.6875rem;
+  color: var(--dk-slate);
+}
+.crm-root .tpl-row[open] > summary::before,
+.crm-root .tpl-archived[open] > summary::before {
+  content: "▾";
+}
+.crm-root .tpl-archived > summary {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--dk-slate);
+}
+.crm-root .tpl-archived .tpl-row:last-child {
+  border-bottom: none;
+}
+.crm-root .tpl-name {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--dk-navy);
+}
+.crm-root .tpl-meta {
+  margin-left: auto;
+}
+.crm-root .tpl-arch .tpl-name {
+  color: var(--dk-slate);
+}
+.crm-root .tpl-form {
+  padding-top: 0.25rem;
+  background: var(--dk-paper);
+  border-top: 1px solid var(--dk-rule-soft);
+}
+.crm-root .tpl-form textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+.crm-root .tpl-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+.crm-root .tpl-help {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.6875rem;
+  color: var(--dk-slate);
+  line-height: 1.4;
+}
+.crm-root .tpl-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+  font-size: 0.7812rem;
+}
+.crm-root .tpl-foot .ok {
+  color: var(--dk-good);
+  font-weight: 700;
+}
+.crm-root .tpl-foot .err {
+  color: var(--dk-crit);
+  font-weight: 600;
+}
+.crm-root .tpl-add {
+  padding: 0.75rem 1.125rem 1rem;
+}
+.crm-root .tpl-add .tpl-form {
+  padding-left: 0;
+  padding-right: 0;
+  background: none;
+  border-top: none;
+}
+.crm-root .tpl-add-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  color: var(--dk-navy);
+}
+@media (max-width: 40rem) {
+  .crm-root .tpl-legend dl > div,
+  .crm-root .tpl-2 {
+    grid-template-columns: 1fr;
+  }
+  .crm-root .tpl-meta {
+    margin-left: 0;
+  }
+}

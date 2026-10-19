@@ -2,7 +2,10 @@ import Link from "next/link";
 import { crmPageGate } from "@/lib/crm/auth";
 import { ShortcutTable } from "../CrmKeys";
 import { DEFAULT_STAGE_WEIGHTS, fmtDate, parseStageWeights, TEMPLATE_STAGES } from "../format";
+import type { TemplateRec } from "../accounts/[id]/compose-lib";
 import PrefsCard, { type InitialPrefs, type ServerPrefs } from "./PrefsCard";
+import SignatureCard from "./SignatureCard";
+import TemplatesCard from "./TemplatesCard";
 import WeightsCard from "./WeightsCard";
 
 export const metadata = { title: "Settings" };
@@ -14,14 +17,21 @@ export default async function Settings() {
   const gate = await crmPageGate("/crm/settings");
   if (typeof gate === "string") return null;
   const { supabase, me } = gate;
-  const [prefsRes, settingsRes] = await Promise.all([
+  const [prefsRes, settingsRes, tplRes, sigRes] = await Promise.all([
     supabase
       .from("crm_user_prefs")
       .select("density, motion, today_scope, quiet_after_days")
       .eq("user_id", me)
       .maybeSingle(),
     supabase.from("crm_workspace_settings").select("stage_weights, updated_at").maybeSingle(),
+    supabase
+      .from("crm_email_templates")
+      .select("id, key, name, channel, subject, body, next_step_days, next_step, sort, archived_at")
+      .order("sort")
+      .order("name"),
+    supabase.from("crm_workspace_settings").select("email_signature, mailing_address").eq("id", true).maybeSingle(),
   ]);
+  const sig = (sigRes.data ?? null) as { email_signature?: string | null; mailing_address?: string | null } | null;
 
   const p = (prefsRes.data ?? {}) as { [K in keyof ServerPrefs]?: ServerPrefs[K] | null };
   const initial: InitialPrefs = {
@@ -42,12 +52,20 @@ export default async function Settings() {
     <>
       <div className="page-head">
         <h1>Settings</h1>
-        <span className="sub2">Your preferences, plus the pipeline weights the whole workspace uses.</span>
+        <span className="sub2">Your preferences, plus the pipeline weights, email templates and signature the whole workspace uses.</span>
       </div>
 
       <PrefsCard initial={initial} synced={!prefsRes.error} />
 
       <WeightsCard stages={stages} initial={weights} lastChanged={lastChanged} available={!settingsRes.error} />
+
+      <TemplatesCard templates={(tplRes.data ?? []) as TemplateRec[]} available={!tplRes.error} />
+
+      <SignatureCard
+        signature={sig?.email_signature ?? ""}
+        mailingAddress={sig?.mailing_address ?? ""}
+        available={!sigRes.error && !!sig}
+      />
 
       <section className="dcardx ws-set" aria-labelledby="ws-keys-h">
         <div className="ch">

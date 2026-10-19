@@ -31,8 +31,12 @@ import {
   tierFromStripePriceId,
   isPricingTier,
   isSeatPackPriceId,
+  periodFromStripePriceId,
+  type BillingPeriod,
   type PricingTier,
 } from "@/lib/stripe/prices";
+import { syncCrmFromSubscription, syncCrmOnCancel } from "@/lib/crm/stripe-sync";
+import { mrrFromPrice } from "@/lib/crm/match";
 import { autoPauseOverflowForDowngrade } from "@/lib/billing/caps";
 import { recordEvent, EVENT_TYPE_GOAL } from "@/lib/analytics/record-event";
 
@@ -226,6 +230,25 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription): Pro
     })
     .eq("stripe_subscription_id", subscription.id);
   if (error) throw new TransientWebhookError(error.message);
+
+  // Sales CRM: mark the linked account churned. after() + swallow, same as
+  // the upsert path: never affects the webhook's response.
+  after(async () => {
+    try {
+      let dsoId: string | null = subscription.metadata?.dso_id ?? null;
+      if (!dsoId) {
+        const { data } = await admin
+          .from("subscriptions")
+          .select("dso_id")
+          .eq("stripe_subscription_id", subscription.id)
+          .maybeSingle();
+        dsoId = (data?.dso_id as string | undefined) ?? null;
+      }
+      if (dsoId) await syncCrmOnCancel(admin, { dsoId });
+    } catch (e) {
+      console.error(`[stripe-webhook] CRM churn sync failed for sub ${subscription.id}`, e);
+    }
+  });
 }
 
 async function handleInvoiceEvent(
@@ -417,6 +440,38 @@ async function upsertSubscription(params: UpsertParams): Promise<void> {
       );
     }
   }
+
+  // Sales CRM: close the deal / keep the won plan in step / mark churned.
+  // Runs in after() so it never delays the 200, and swallows every error so
+  // a CRM problem can never fail or retry a payment event.
+  const billing: BillingPeriod | null =
+    (priceId ? periodFromStripePriceId(priceId) : null) ??
+    (planItem?.price?.recurring?.interval === "year"
+      ? "annual"
+      : planItem?.price?.recurring?.interval === "month"
+        ? "monthly"
+        : null);
+  const mrr = mrrFromPrice({
+    unitAmountCents: planItem?.price?.unit_amount ?? null,
+    quantity: planItem?.quantity ?? 1,
+    interval: planItem?.price?.recurring?.interval ?? null,
+    intervalCount: planItem?.price?.recurring?.interval_count ?? 1,
+  });
+  const subStatus = subscription.status;
+  after(async () => {
+    try {
+      await syncCrmFromSubscription(admin, {
+        dsoId,
+        tier,
+        billing,
+        status: subStatus,
+        mrr,
+        stripeSubscriptionId: subscription.id,
+      });
+    } catch (e) {
+      console.error(`[stripe-webhook] CRM sync failed for dso ${dsoId}`, e);
+    }
+  });
 }
 
 /* ───────────────────────────────────────────────────────────────

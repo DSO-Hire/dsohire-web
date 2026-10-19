@@ -22,6 +22,7 @@ import {
   updateAccount,
 } from "../actions";
 import CopyLink from "../CopyLink";
+import DsoLinkCard from "./DsoLinkCard";
 import { BALL_OPTS, FIT_LABELS, PRIORITY_OPTS, WARMTH_LABELS, hrefOf } from "../lib";
 import { Area, DateIn, Hidden, KV, NumIn, Sel, Txt } from "../ui";
 import { buildFeed, fmtWhen, lastSeen } from "./timeline";
@@ -148,6 +149,8 @@ export default function Overview({
               </details>
             ) : null}
           </div>
+
+          <DsoLinkCard a={a} />
 
           <div className="dcardx">
             <div className="ch">
