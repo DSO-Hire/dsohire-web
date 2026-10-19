@@ -18,8 +18,7 @@ import {
   isBillingPeriod,
   type TierConfig,
   type PricingTier,
-  type BillingPeriod,
-} from "@/lib/stripe/prices";
+  type BillingPeriod, seatPacksConfigured } from "@/lib/stripe/prices";
 import { BillingPeriodToggle } from "./billing-period-toggle";
 import { PlanFinder } from "./plan-finder";
 import { CompareMatrixAccordion } from "./compare-matrix-accordion";
@@ -89,7 +88,7 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
       />
       {/* #115 Model 03 (Day 32) — 3-tap honest tier recommender, parked
           between the cards and the full matrix to catch comparison paralysis. */}
-      <PlanFinder />
+      <PlanFinder seatPacks={seatPacksConfigured()} />
       <CompareMatrix tiers={tiers} period={period} />
       <FAQ />
       <FinalCta nextParam={nextParam} />

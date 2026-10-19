@@ -42,7 +42,7 @@ const WHYS: Record<(typeof TIER_NAMES)[number], string> = {
     "At your footprint, caps shouldn't exist. Enterprise is unlimited everything; talk to us and we'll map it to your org.",
 };
 
-export function PlanFinder() {
+export function PlanFinder({ seatPacks = false }: { seatPacks?: boolean }) {
   const [answers, setAnswers] = useState<Array<number | null>>([null, null, null]);
   const [step, setStep] = useState(0);
 
@@ -122,7 +122,7 @@ export function PlanFinder() {
               {TIER_NAMES[rec]}
             </div>
             <p className="text-xs text-hero-foreground/65 leading-[1.65] max-w-[440px] mx-auto mb-5">
-              {WHYS[TIER_NAMES[rec]]}
+              {seatPacks ? WHYS[TIER_NAMES[rec]] : WHYS[TIER_NAMES[rec]].replace(", with +3-seat packs if you outgrow them", "")}
             </p>
             <a
               href="#tiers"

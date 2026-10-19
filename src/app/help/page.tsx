@@ -24,6 +24,7 @@ import { ArrowRight, Mail, ShieldCheck, UserRound, Users } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
 import {
   HELP_CONTENT,
+  isHelpEntryLive,
   type HelpEntry,
 } from "@/lib/help/help-content";
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
@@ -50,6 +51,7 @@ function categorize(): CategorizedEntries {
   const employer: Array<[string, HelpEntry]> = [];
   const candidate: Array<[string, HelpEntry]> = [];
   for (const [key, entry] of Object.entries(HELP_CONTENT)) {
+    if (!isHelpEntryLive(key)) continue;
     if (entry.lens === "employer" || entry.lens === "both") {
       employer.push([key, entry]);
     }
@@ -68,7 +70,7 @@ export default function HelpCenterPage() {
   // Flatten for the client-side search — keep both lenses together so a
   // single search box covers both audiences. The lens chip on each result
   // disambiguates.
-  const searchEntries = Object.entries(HELP_CONTENT).map(([key, e]) => ({
+  const searchEntries = Object.entries(HELP_CONTENT).filter(([key]) => isHelpEntryLive(key)).map(([key, e]) => ({
     key,
     slug: entryKeyToSlug(key),
     title: e.title,

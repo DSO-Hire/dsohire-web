@@ -21,6 +21,8 @@
  * Keep them stable — they're referenced from component call sites.
  */
 
+import { seatPacksConfigured } from "@/lib/stripe/prices";
+
 export type HelpLens = "employer" | "candidate" | "both";
 
 /** Default affordance for a given entry. Call sites may override. */
@@ -1090,4 +1092,14 @@ export type HelpKey = keyof typeof HELP_CONTENT;
 /** Lookup by key. Returns undefined for an unknown key (callers no-op). */
 export function getHelp(key: string): HelpEntry | undefined {
   return HELP_CONTENT[key];
+}
+
+
+/* Help entries whose feature is switched off by configuration stay off
+   every public surface, so search engines and AI answers never quote a
+   price for something customers can't buy yet (seat packs are env-gated
+   on their Stripe price IDs). */
+export function isHelpEntryLive(key: string): boolean {
+  if (key === "billing.seat_packs") return seatPacksConfigured();
+  return true;
 }

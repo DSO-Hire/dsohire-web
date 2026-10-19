@@ -14,7 +14,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Mail, ShieldCheck } from "lucide-react";
 import { SiteShell } from "@/components/marketing/site-shell";
-import { HELP_CONTENT } from "@/lib/help/help-content";
+import { HELP_CONTENT, isHelpEntryLive } from "@/lib/help/help-content";
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 
 interface PageProps {
@@ -36,13 +36,13 @@ function findEntry(slug: string) {
     // raw slug if it's exactly a key.
   ];
   for (const c of candidates) {
-    if (HELP_CONTENT[c]) return { key: c, entry: HELP_CONTENT[c] };
+    if (HELP_CONTENT[c] && isHelpEntryLive(c)) return { key: c, entry: HELP_CONTENT[c] };
   }
   return null;
 }
 
 export async function generateStaticParams() {
-  return Object.keys(HELP_CONTENT).map((key) => ({
+  return Object.keys(HELP_CONTENT).filter(isHelpEntryLive).map((key) => ({
     key: key.replace(/\./g, "-"),
   }));
 }
