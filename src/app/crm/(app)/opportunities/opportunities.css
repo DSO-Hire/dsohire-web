@@ -1,0 +1,787 @@
+/*
+ * Deals area: deal record command center. Global in the App Router, so
+ * every class carries the dx- prefix and reuses the crm.css tokens.
+ */
+
+/* ---------- shared bits ---------- */
+.crm-root .dx-muted {
+  color: var(--dk-slate);
+  opacity: 0.85;
+}
+.crm-root .dx-help {
+  font-size: 0.6875rem;
+  color: var(--dk-slate);
+  margin: 0;
+}
+.crm-root .dx-note {
+  font-size: 0.75rem;
+  color: var(--dk-warn);
+  background: var(--dk-warn-bg);
+  border-radius: 0;
+  padding: 8px 12px;
+  margin: 8px 18px 0;
+}
+.crm-root .dx-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--dk-good);
+}
+.crm-root .dx-dot.warn {
+  background: var(--dk-warn);
+}
+.crm-root .dx-dot.crit {
+  background: var(--dk-crit);
+}
+.crm-root .pill.dx-low {
+  background: var(--dk-tint);
+  color: var(--dk-slate);
+  opacity: 0.8;
+}
+.crm-root .dx-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.crm-root .dx-formgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px;
+}
+.crm-root .dx-fs {
+  border: 1px solid var(--dk-rule-soft);
+  border-radius: 0;
+  padding: 10px 12px 12px;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+.crm-root .dx-fs legend {
+  font-family: var(--font-mono);
+  font-size: 0.5938rem;
+  letter-spacing: 0.14em;
+  color: var(--dk-navy);
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0 4px;
+}
+.crm-root .dx-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--dk-slate);
+  white-space: nowrap;
+}
+.crm-root .dx-check input {
+  accent-color: var(--dk-green);
+}
+.crm-root :is(.dx-edit, .dx-more, .dx-rowmenu, .dx-earlier, .dx-done, .dx-lostzone, .dx-moveto, .dx-newdeal) > summary {
+  cursor: pointer;
+  list-style: none;
+}
+.crm-root :is(.dx-edit, .dx-more, .dx-rowmenu, .dx-earlier, .dx-done, .dx-lostzone, .dx-moveto, .dx-newdeal) > summary::-webkit-details-marker {
+  display: none;
+}
+.crm-root .dx-edit > summary {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--dk-green-deep);
+  padding: 8px 18px;
+}
+.crm-root .dx-edit > summary:hover {
+  text-decoration: underline;
+}
+.crm-root .dx-edit[open] > summary {
+  color: var(--dk-navy);
+}
+.crm-root :is(.dx-edit, .dx-more, .dx-rowmenu, .dx-earlier, .dx-done, .dx-lostzone, .dx-moveto, .dx-newdeal) > summary:focus-visible {
+  outline: 3px solid var(--dk-mint);
+  outline-offset: 2px;
+  border-radius: 0;
+}
+
+/* popover menus built on <details> (no JS needed) */
+.crm-root .dx-more,
+.crm-root .dx-rowmenu {
+  position: relative;
+  display: inline-block;
+}
+.crm-root .dx-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  width: min(340px, 86vw);
+  background: var(--dk-card);
+  border: 1px solid var(--dk-rule);
+  border-radius: 0;
+  box-shadow: 0 16px 40px rgba(15, 27, 49, 0.16);
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: 0.7812rem;
+}
+.crm-root .dx-menu .dform + .dform {
+  border-top: 1px solid var(--dk-rule-soft);
+}
+.crm-root .dx-menu .dx-help {
+  padding: 0 18px 12px;
+}
+.crm-root .dx-danger {
+  color: var(--dk-crit);
+  border-color: var(--dk-crit-bg);
+}
+
+/* ---------- header ---------- */
+.crm-root .dx-head .dx-owners {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.crm-root .dx-ownlab {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.12em;
+  color: var(--dk-slate);
+}
+.crm-root .ownchip.dx-ownchip-alt {
+  background: var(--dk-green-deep);
+}
+.crm-root .dx-sellerline a {
+  color: var(--dk-navy);
+  text-decoration: underline;
+  text-decoration-color: var(--dk-rule);
+  text-underline-offset: 3px;
+}
+.crm-root .dx-headbtns {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+.crm-root .dx-lostbanner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  background: var(--dk-tint);
+  border: 1px solid var(--dk-rule);
+  border-left: 3px solid var(--dk-crit);
+  border-radius: 0;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 0.8125rem;
+  color: var(--dk-slate);
+}
+.crm-root .dx-lostbanner b {
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  color: var(--dk-crit);
+}
+.crm-root .dx-flowmeta {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.1em;
+  color: var(--dk-slate);
+}
+
+/* ---------- economics ---------- */
+.crm-root .dx-econwrap {
+  margin-bottom: 14px;
+}
+.crm-root .econ.dx-econ6 {
+  grid-template-columns: repeat(6, 1fr);
+  margin-bottom: 4px;
+}
+.crm-root .dx-econ6 .etile {
+  min-width: 0;
+}
+.crm-root .dx-econ6 .etile .ev {
+  font-size: 1.3125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.crm-root .dx-econ6 .etile .ev.dx-muted-ev {
+  color: var(--dk-slate);
+  opacity: 0.75;
+}
+.crm-root .etile.dx-feetile {
+  background: linear-gradient(150deg, var(--dk-green-deep), var(--dk-green));
+}
+.crm-root .etile.dx-feetile .el {
+  color: #fff;
+}
+.crm-root .etile.dx-feetile .es {
+  color: var(--dk-mint-tint);
+}
+.crm-root .dx-src {
+  font-weight: 700;
+  color: var(--dk-navy);
+}
+.crm-root .dx-probbar {
+  height: 4px;
+  background: var(--dk-tint);
+  border-radius: 999px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.crm-root .dx-probbar span {
+  display: block;
+  height: 100%;
+  background: #4d7a60;
+  border-radius: 999px;
+}
+.crm-root .dx-econwrap > .dx-edit {
+  background: var(--dk-card);
+  border: 1px solid var(--dk-rule);
+  border-radius: 0;
+  margin-top: 8px;
+}
+.crm-root .dx-econwrap > .dx-edit:not([open]) {
+  background: transparent;
+  border-color: transparent;
+}
+.crm-root .dx-econwrap > .dx-edit:not([open]) > summary {
+  padding: 4px 2px;
+}
+
+/* ---------- key dates ---------- */
+.crm-root .dx-dates {
+  margin-bottom: 14px;
+}
+.crm-root .dx-daterail {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) auto;
+  gap: 8px;
+  align-items: stretch;
+}
+.crm-root .dx-datechip {
+  background: var(--dk-card);
+  border: 1px solid var(--dk-rule);
+  border-radius: 0;
+  padding: 9px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.crm-root .dx-datechip .pill {
+  align-self: flex-start;
+}
+.crm-root .dx-datechip.unset {
+  background: transparent;
+  border-style: dashed;
+}
+.crm-root .dx-dlab {
+  font-family: var(--font-mono);
+  font-size: 0.5312rem;
+  letter-spacing: 0.14em;
+  color: var(--dk-slate);
+  font-weight: 600;
+}
+.crm-root .dx-dval {
+  font-weight: 700;
+  color: var(--dk-navy);
+  font-size: 0.8125rem;
+}
+.crm-root .dx-datechip.unset .dx-dval {
+  color: var(--dk-slate);
+  font-weight: 500;
+}
+.crm-root .dx-dateedit {
+  align-self: center;
+}
+.crm-root .dx-dateedit[open] {
+  grid-column: 1 / -1;
+  background: var(--dk-card);
+  border: 1px solid var(--dk-rule);
+  border-radius: 0;
+}
+
+/* ---------- next step ---------- */
+.crm-root .dx-next {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: var(--dk-card);
+  border: 1px solid var(--dk-rule);
+  border-left: 4px solid var(--dk-green);
+  border-radius: 0;
+  padding: 11px 16px;
+  margin-bottom: 16px;
+}
+.crm-root .dx-next.empty {
+  border-left-color: var(--dk-warn);
+}
+.crm-root .dx-nextlab {
+  font-family: var(--font-mono);
+  font-size: 0.5938rem;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+  color: var(--dk-green-deep);
+}
+.crm-root .dx-next.empty .dx-nextlab {
+  color: var(--dk-warn);
+}
+.crm-root .dx-nexttext {
+  font-weight: 600;
+  color: var(--dk-ink);
+  font-size: 0.875rem;
+}
+.crm-root .dx-next .dx-note {
+  margin: 0;
+}
+.crm-root .dx-nextedit {
+  margin-left: auto;
+}
+.crm-root .dx-nextedit > summary {
+  padding: 4px 6px;
+}
+.crm-root .dx-nextedit[open] {
+  flex-basis: 100%;
+}
+.crm-root .dx-nextform {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 1;
+  flex-wrap: wrap;
+}
+.crm-root .dx-nextform input:not([type="checkbox"]) {
+  border: 1px solid var(--dk-rule);
+  border-radius: 0;
+  padding: 7px 10px;
+  font-size: 0.8125rem;
+  font-family: var(--font-sans);
+  background: var(--dk-card);
+  color: #14233f;
+}
+.crm-root .dx-nextform input[name="next_step"] {
+  flex: 1;
+  min-width: 220px;
+}
+.crm-root .dx-nextform input:focus {
+  outline: 2px solid var(--dk-green);
+  border-color: var(--dk-green);
+}
+
+/* ---------- health ---------- */
+.crm-root .dx-reasons {
+  list-style: none;
+  margin: 0;
+  padding: 6px 0;
+}
+.crm-root .dx-reasons li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 18px;
+  font-size: 0.7812rem;
+}
+.crm-root .dx-reasons a {
+  color: var(--dk-navy);
+  font-weight: 600;
+}
+.crm-root .dx-reasons a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- buyer outreach ---------- */
+.crm-root .dx-funnel {
+  display: grid;
+  gap: 4px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--dk-rule-soft);
+}
+.crm-root .dx-fbar {
+  display: grid;
+  grid-template-columns: 74px 1fr 30px;
+  gap: 10px;
+  align-items: center;
+  font-size: 0.7188rem;
+}
+.crm-root .dx-flabel {
+  font-family: var(--font-mono);
+  font-size: 0.5938rem;
+  letter-spacing: 0.08em;
+  color: var(--dk-slate);
+  text-transform: uppercase;
+}
+.crm-root .dx-ftrack {
+  height: 8px;
+  background: var(--dk-tint);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.crm-root .dx-ftrack span {
+  display: block;
+  height: 100%;
+  background: #4d7a60;
+  border-radius: 999px;
+}
+.crm-root .dx-fbar b {
+  text-align: right;
+  color: var(--dk-navy);
+  font-family: var(--font-mono);
+}
+.crm-root .dx-fpassed .dx-flabel {
+  color: var(--dk-crit);
+}
+.crm-root .dx-matrix th,
+.crm-root .dx-matrix td {
+  padding-left: 10px;
+  padding-right: 10px;
+  white-space: nowrap;
+}
+.crm-root .dx-matrix th:first-child,
+.crm-root .dx-matrix td:first-child {
+  padding-left: 18px;
+}
+.crm-root .dx-matrix .dx-stagecell {
+  text-align: center;
+  min-width: 46px;
+}
+.crm-root .dx-matrix .dx-dotscell {
+  display: none;
+}
+.crm-root .dx-firm {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.crm-root .dx-logodot {
+  width: 9px;
+  height: 9px;
+  border-radius: 0;
+  flex: none;
+}
+.crm-root .dx-mdot {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+}
+.crm-root .dx-mdot.on .dx-mglyph {
+  color: var(--dk-green-deep);
+  font-size: 0.75rem;
+}
+.crm-root .dx-mdot.next {
+  color: var(--dk-navy);
+  font-size: 0.8125rem;
+}
+.crm-root .dx-mdate {
+  font-family: var(--font-mono);
+  font-size: 0.5312rem;
+  color: var(--dk-slate);
+}
+.crm-root .dx-touch.warn {
+  color: var(--dk-warn);
+  font-weight: 600;
+}
+.crm-root .dx-passedrow td {
+  opacity: 0.6;
+}
+.crm-root .dx-passedrow td:last-child {
+  opacity: 1;
+}
+.crm-root .dx-rowacts {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  align-items: center;
+}
+.crm-root .dx-rowmenu .dx-menu {
+  white-space: normal;
+}
+.crm-root .dx-dotstrip {
+  display: inline-flex;
+  gap: 3px;
+}
+.crm-root .dx-dotstrip span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--dk-rule);
+}
+.crm-root .dx-dotstrip span.on {
+  background: var(--dk-green-deep);
+  border-color: var(--dk-green-deep);
+}
+.crm-root .dx-dotstrip span.next {
+  border-color: var(--dk-navy);
+}
+.crm-root .dx-buyerfoot {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 10px 18px;
+  font-size: 0.75rem;
+  border-top: 1px solid var(--dk-rule-soft);
+  color: var(--dk-slate);
+}
+.crm-root .dx-buyerfoot a {
+  color: var(--dk-green-deep);
+  font-weight: 600;
+}
+.crm-root .dx-buyerfoot:empty {
+  display: none;
+}
+.crm-root .dx-attach {
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  border-top: 1px solid var(--dk-rule-soft);
+}
+
+/* ---------- offers ---------- */
+.crm-root .dx-offers th,
+.crm-root .dx-offers td {
+  padding: 8px 12px;
+  vertical-align: top;
+  min-width: 170px;
+}
+.crm-root .dx-offers .dx-rowlab {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--dk-tint);
+  min-width: 150px;
+  max-width: 170px;
+  font-family: var(--font-mono);
+  font-size: 0.5938rem;
+  letter-spacing: 0.1em;
+  color: var(--dk-slate);
+  text-transform: uppercase;
+  font-weight: 600;
+  white-space: normal;
+}
+.crm-root .dx-offers td.dx-best {
+  background: var(--dk-mint-tint);
+}
+.crm-root .dx-bestmark {
+  display: inline-flex;
+  gap: 5px;
+  align-items: baseline;
+  font-weight: 600;
+  color: var(--dk-green-deep);
+}
+.crm-root .dx-bestmark > span[aria-hidden] {
+  font-size: 0.5625rem;
+}
+.crm-root .dx-bestpct {
+  color: var(--dk-green-deep);
+  font-weight: 600;
+}
+.crm-root .dx-offeracts {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.crm-root .dx-offers .dx-edit > summary {
+  padding: 6px 0 0;
+}
+.crm-root .dx-offers .dx-edit[open] {
+  min-width: 380px;
+}
+.crm-root .dx-earlier {
+  border-top: 1px solid var(--dk-rule-soft);
+}
+.crm-root .dx-earlier > summary {
+  padding: 10px 18px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--dk-slate);
+}
+.crm-root .dx-earlier ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 18px 12px;
+  display: grid;
+  gap: 6px;
+  font-size: 0.75rem;
+}
+.crm-root .dx-earlier li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.crm-root .dx-addoffer {
+  border-top: 1px solid var(--dk-rule-soft);
+}
+
+/* ---------- tasks ---------- */
+.crm-root .dx-tasklinks {
+  display: flex;
+  gap: 14px;
+  padding: 8px 18px;
+  font-size: 0.7188rem;
+  border-bottom: 1px solid var(--dk-rule-soft);
+}
+.crm-root .dx-tasklinks a {
+  color: var(--dk-green-deep);
+  font-weight: 600;
+}
+.crm-root .dx-taskrow {
+  flex-wrap: wrap;
+}
+.crm-root .dx-tasktitle {
+  min-width: 0;
+  flex: 1 1 160px;
+}
+.crm-root .dx-taskrow .who2 {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.crm-root .dx-wait {
+  font-family: var(--font-mono);
+  font-size: 0.5938rem;
+  color: var(--dk-slate);
+}
+.crm-root .dx-wait.warn {
+  color: var(--dk-warn);
+  font-weight: 600;
+}
+.crm-root .dx-done > summary {
+  padding: 10px 18px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--dk-slate);
+  border-top: 1px solid var(--dk-rule-soft);
+}
+.crm-root .dx-quickadd {
+  border-top: 1px solid var(--dk-rule-soft);
+}
+.crm-root .dx-qarow {
+  display: grid;
+  grid-template-columns: 1fr 120px auto;
+  gap: 10px;
+  align-items: end;
+}
+.crm-root .dx-quickadd .dx-edit > summary {
+  padding: 0;
+}
+.crm-root .dx-quickadd .dx-edit[open] {
+  display: grid;
+  gap: 10px;
+}
+
+/* ---------- timeline ---------- */
+.crm-root .dx-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 10px 18px;
+}
+.crm-root .dx-tlmore {
+  padding: 10px 18px 14px;
+  font-size: 0.75rem;
+}
+.crm-root .dx-tlmore a {
+  color: var(--dk-green-deep);
+  font-weight: 600;
+}
+
+/* ---------- skeletons ---------- */
+.crm-root .dx-skel {
+  background: linear-gradient(90deg, var(--dk-tint) 0%, var(--dk-rule-soft) 50%, var(--dk-tint) 100%);
+  background-size: 200% 100%;
+  animation: dx-shimmer 1.4s ease-in-out infinite;
+  border-radius: 0;
+}
+@keyframes dx-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+.crm-root[data-motion="reduced"] .dx-skel {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .crm-root .dx-skel {
+    animation: none;
+  }
+}
+.crm-root .dx-skelrow {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 1100px) {
+  .crm-root .econ.dx-econ6 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .crm-root .dx-daterail {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .crm-root .dx-dateedit {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 640px) {
+  .crm-root .econ.dx-econ6 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .crm-root .dx-daterail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .crm-root .dx-matrix .dx-stagecell {
+    display: none;
+  }
+  .crm-root .dx-matrix .dx-dotscell {
+    display: table-cell;
+  }
+  .crm-root .dx-qarow {
+    grid-template-columns: 1fr;
+  }
+  .crm-root .dx-headbtns {
+    margin-left: 0;
+  }
+  .crm-root .dx-menu {
+    right: auto;
+    left: 0;
+  }
+  .crm-root .dx-menu.dx-menu-r {
+    right: 0;
+    left: auto;
+  }
+  .crm-root :is(.dx-page, .dx-menu) .dform .frow2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* live economics math under the edit form */
+.crm-root .dx-live {
+  border-left: 3px solid var(--dk-green, #4d7a60);
+  background: var(--dk-mint-tint, #e7efea);
+  border-radius: 0;
+  padding: 8px 12px;
+  margin: 8px 0;
+  font-size: 0.7812rem;
+  color: var(--dk-ink, #0f1b31);
+  font-weight: 500;
+}
+.crm-root .dx-ebitda-link {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: baseline;
+  padding: 10px 2px 0;
+  font-size: 0.75rem;
+  color: var(--dk-slate, #4a6278);
+}
+.crm-root .dx-ebitda-link a {
+  font-size: 0.8438rem;
+  font-weight: 700;
+  color: var(--dk-green-deep, #2f5d4f);
+  text-decoration: none;
+}

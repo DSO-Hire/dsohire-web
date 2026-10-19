@@ -1,0 +1,63 @@
+/*
+ * Inbox additions (2026-10-19). The lead rows, filters, chips, and bulk bar
+ * reuse the sl- classes from ../accounts/accounts.css (the EDC sellers +
+ * inbox styles). Only inbox-specific bits live here, prefixed ib-.
+ */
+
+.crm-root .ib-agerow {
+  margin-top: 6px;
+}
+
+/* a lead opened from search: tinted and outlined so the eye lands on it */
+.crm-root .sl-lead.ib-focus {
+  background: color-mix(in srgb, var(--dk-green) 9%, transparent);
+  box-shadow: inset 3px 0 0 var(--dk-green);
+  scroll-margin-top: 96px;
+}
+
+.crm-root .ib-selall {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.crm-root .ib-kv {
+  padding: 4px 0;
+}
+.crm-root .ib-wrap {
+  overflow-wrap: anywhere;
+}
+.crm-root .ib-full {
+  width: 100%;
+}
+.crm-root .ib-last {
+  border-bottom: none;
+}
+
+/* demo opens table */
+.crm-root .ib-demotbl th.r,
+.crm-root .ib-demotbl td.r {
+  text-align: right;
+}
+.crm-root .ib-demotbl td {
+  vertical-align: middle;
+}
+.crm-root .ib-acct {
+  font-weight: 700;
+  color: var(--dk-navy);
+}
+.crm-root .ib-acct:hover {
+  text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .crm-root .sl-lead.ib-focus {
+    animation: ib-flash 1.6s ease-out 1;
+  }
+}
+@keyframes ib-flash {
+  from {
+    background: color-mix(in srgb, var(--dk-green) 22%, transparent);
+  }
+}

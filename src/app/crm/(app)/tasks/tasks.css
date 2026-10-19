@@ -1,0 +1,42 @@
+/*
+ * Tasks page additions (2026-10-19). Rows, buckets, tabs, filters, and the
+ * bulk bar reuse the dx- classes from ../pipeline/pipeline.css and
+ * ../opportunities/opportunities.css (the EDC tasks view). Only page-only
+ * bits live here, prefixed tk-.
+ */
+
+.crm-root .tk-add {
+  margin-bottom: 14px;
+}
+.crm-root .tk-add .dform {
+  padding: 14px 18px;
+}
+
+.crm-root .tk-inline {
+  display: inline-flex;
+}
+
+.crm-root .tk-notes {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.75rem;
+  color: var(--dk-slate);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 46ch;
+}
+.crm-root .task-row.donez .tk-notes {
+  text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  .crm-root .dx-trow .who2 {
+    margin-left: 0;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .crm-root .tk-notes {
+    max-width: 100%;
+  }
+}

@@ -32,7 +32,7 @@ export default async function AdminSignInPage({
     data: { user },
   } = await supabase.auth.getUser();
   if (user && isSuperadminEmail(user.email)) {
-    const dest = next && /^\/admin(\/|$)/.test(next) ? next : "/admin";
+    const dest = next && /^\/(admin|crm)(\/|$)/.test(next) ? next : "/admin";
     redirect(dest);
   }
 

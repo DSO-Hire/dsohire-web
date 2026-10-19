@@ -10,7 +10,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Gauge, Search, Building2, BarChart3, MessageSquare, ShieldCheck, Users, Inbox } from "lucide-react";
+import { LayoutDashboard, Gauge, Search, Building2, BarChart3, MessageSquare, ShieldCheck, Users, Inbox, Handshake } from "lucide-react";
 import { ANALYTICS_PRODUCT_NAME } from "@/lib/analytics/product";
 
 interface NavItem {
@@ -31,6 +31,7 @@ const NAV: NavItem[] = [
   { label: "Accounts", href: "/admin/accounts", match: "/admin/accounts", Icon: Users },
   { label: "DSOs", href: "/admin/dsos", match: "/admin/dsos", Icon: Building2 },
   { label: "Leads", href: "/admin/leads", match: "/admin/leads", founderOnly: true, Icon: Inbox },
+  { label: "Sales CRM", href: "/crm", match: "/crm", founderOnly: true, Icon: Handshake },
   {
     label: ANALYTICS_PRODUCT_NAME,
     href: "/admin/analytics",

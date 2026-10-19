@@ -19,7 +19,7 @@ import { isSuperadminEmail } from "@/lib/admin/gate";
 import { getMfaState } from "@/lib/auth/mfa";
 import { readMfaTrustCookie } from "@/lib/auth/mfa-trust";
 
-const NEXT_ALLOWLIST = /^\/admin(\/|$)/;
+const NEXT_ALLOWLIST = /^\/(admin|crm)(\/|$)/;
 
 export interface AdminSignInState {
   ok: boolean;
