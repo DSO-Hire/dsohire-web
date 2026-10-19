@@ -71,6 +71,7 @@ export function organizationGraphJsonLd(): JsonLdObject {
         sameAs: [
           "https://www.linkedin.com/company/dsohire",
           "https://www.crunchbase.com/organization/dso-hire",
+          "https://www.youtube.com/@DSOHire",
         ],
       },
       {
