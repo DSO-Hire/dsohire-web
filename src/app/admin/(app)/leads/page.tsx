@@ -16,6 +16,7 @@ import {
 } from "@/lib/supabase/server";
 import { isSuperadminEmail } from "@/lib/admin/gate";
 import { LEAD_KINDS, LEAD_KIND_LABELS, type LeadKind } from "@/lib/marketing/leads";
+import { LinkBuilder } from "./link-builder";
 
 export const metadata: Metadata = {
   title: "Leads · Admin",
@@ -108,6 +109,8 @@ export default async function AdminLeadsPage({
           depends on the inbox.
         </p>
       </header>
+
+      <LinkBuilder />
 
       <section className="mb-8 border border-[var(--rule)] bg-card">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--rule)] px-5 py-3">
