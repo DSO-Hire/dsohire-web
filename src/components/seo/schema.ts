@@ -68,7 +68,10 @@ export function organizationGraphJsonLd(): JsonLdObject {
             availableLanguage: "English",
           },
         ],
-        sameAs: ["https://www.linkedin.com/company/dsohire"],
+        sameAs: [
+          "https://www.linkedin.com/company/dsohire",
+          "https://www.crunchbase.com/organization/dso-hire",
+        ],
       },
       {
         "@type": "WebSite",
