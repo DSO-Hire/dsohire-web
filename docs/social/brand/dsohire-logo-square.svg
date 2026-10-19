@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="1024" height="1024">
+  <title>DSO Hire — monogram</title>
+  <desc>DSO Hire compact monogram — D-form mark with implied-H heritage crossbar on a navy ground.</desc>
+  <rect x="0" y="0" width="40" height="40" fill="#14233F"/>
+  <!-- D-form mark, scaled + centered into the 40x40 navy tile.
+       Base lockup mark spans (5..40, 5..39) in 124x44 viewBox; here we
+       proportionally scale and center. -->
+  <path d="M 7 7 L 24 7 Q 33 7 33 16 L 33 24 Q 33 33 24 33 L 7 33"
+    fill="none" stroke="#F7F4ED" stroke-width="3"
+    stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Heritage horizontal crossbar — implied H -->
+  <line x1="10" y1="20" x2="22" y2="20"
+    stroke="#4D7A60" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

@@ -313,3 +313,113 @@ export function StackedBarChart({
     </div>
   );
 }
+
+/* ── Column chart (time series) ───────────────────────────────── */
+
+export interface ColumnSeries {
+  label: string;
+  tone: ChartTone;
+  /** One value per category; null leaves a gap (no data for that period). */
+  values: readonly (number | null)[];
+}
+
+/**
+ * Vertical columns for a short time series (quarters, years). Up to a few
+ * series per category, each column directly labeled with its value.
+ * Zero-based linear y axis. Below `minWidth` the plot scrolls sideways
+ * inside its own focusable region rather than squeezing the labels.
+ */
+export function ColumnChart({
+  categories,
+  series,
+  max,
+  ticks,
+  formatTick,
+  formatValue,
+  ariaLabel,
+  minWidth = "28rem",
+}: {
+  categories: readonly string[];
+  series: readonly ColumnSeries[];
+  max: number;
+  ticks: readonly number[];
+  formatTick: (n: number) => string;
+  formatValue: (n: number) => string;
+  ariaLabel: string;
+  minWidth?: string;
+}) {
+  return (
+    <div
+      role="region"
+      aria-label="Chart (scrolls sideways on small screens)"
+      tabIndex={0}
+      className="overflow-x-auto focus-visible:outline-2 focus-visible:outline-heritage"
+    >
+      <div role="img" aria-label={ariaLabel} style={{ minWidth }}>
+        <div className="grid grid-cols-[2.25rem_minmax(0,1fr)] gap-x-2">
+          {/* y-axis labels */}
+          <div aria-hidden className="relative mt-6 h-52">
+            {ticks.map((t) => (
+              <span
+                key={t}
+                className="absolute right-0 translate-y-1/2 text-2xs text-slate-meta tabular whitespace-nowrap"
+                style={{ bottom: pct(t, max) }}
+              >
+                {formatTick(t)}
+              </span>
+            ))}
+          </div>
+          {/* plot */}
+          <div className="relative mt-6 h-52 border-b border-[var(--rule-strong)]">
+            {ticks.map((t) => (
+              <span
+                key={t}
+                aria-hidden
+                className="absolute inset-x-0 h-px bg-[var(--rule)]"
+                style={{ bottom: pct(t, max) }}
+              />
+            ))}
+            <div className="absolute inset-0 flex">
+              {categories.map((c, ci) => (
+                <div key={c} className="flex-1 min-w-0 h-full flex items-end justify-center gap-0.5 px-[6%]">
+                  {series.map((s) => {
+                    const v = s.values[ci];
+                    return (
+                      <div key={s.label} className="relative flex-1 min-w-0 h-full flex items-end">
+                        {v != null && (
+                          <span
+                            className={cn("relative block w-full", TONE_BG[s.tone])}
+                            style={{ height: pct(v, max) }}
+                          >
+                            <span
+                              aria-hidden
+                              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 text-2xs font-bold text-ink tabular whitespace-nowrap"
+                            >
+                              {formatValue(v)}
+                            </span>
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* x-axis labels */}
+          <div aria-hidden />
+          <div aria-hidden className="flex pt-2">
+            {categories.map((c) => (
+              <span
+                key={c}
+                className="flex-1 min-w-0 text-center text-2xs text-slate-meta tabular leading-tight"
+              >
+                {c}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

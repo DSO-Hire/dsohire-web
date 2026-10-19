@@ -16,6 +16,12 @@
  *   4. src/app/guides/[slug]/page.tsx INTERNAL_LINK_LABELS, if guides
  *      should cross-link to reports.
  *   5. Ping IndexNow for the new URLs (src/lib/seo/indexnow.ts).
+ *   6. The named, sourced comparison pages also ride this gate (they call
+ *      researchRobots()): /vs/dentalpost, /vs/cloud-dentistry, and
+ *      /vs/dental-hiring-software. On approval add them to sitemap.ts and
+ *      llms.txt, and decide on cross-links from /vs/job-boards,
+ *      /vs/staffing-agencies, /pricing, and the footer. Re-check every
+ *      competitor price against its source first (facts dated 2026-10-19).
  */
 
 import type { Metadata } from "next";

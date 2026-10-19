@@ -47,7 +47,25 @@ export const STAFFING_COSTS_2026: ResearchReportMeta = {
   topic: "Hiring costs",
 };
 
-export const RESEARCH_REPORTS: readonly ResearchReportMeta[] = [STAFFING_COSTS_2026];
+export const HIRING_SHORTAGE_2026: ResearchReportMeta = {
+  slug: "dental-hiring-shortage-2026",
+  title: "The dental hiring shortage, by the numbers (2026)",
+  shortTitle: "The dental hiring shortage, by the numbers",
+  description:
+    "How hard dental hygienists and assistants are to hire in 2026, how long roles stay open, what federal projections say, and what it means for multi-location groups. ADA, BLS and HRSA data, every number cited.",
+  datePublished: "2026-10-19",
+  dateModified: "2026-10-19",
+  dateLabel: "October 2026",
+  readMinutes: 14,
+  author: AUTHOR_CAM,
+  topic: "Hiring market",
+};
+
+/** Newest first: /research sorts by datePublished, and ties keep this order. */
+export const RESEARCH_REPORTS: readonly ResearchReportMeta[] = [
+  HIRING_SHORTAGE_2026,
+  STAFFING_COSTS_2026,
+];
 
 export function researchPath(slug: string): string {
   return `/research/${slug}`;
