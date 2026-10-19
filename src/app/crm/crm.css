@@ -168,8 +168,9 @@
   position: sticky;
   top: 0;
   z-index: 30;
-  background: rgba(247, 244, 237, 0.92);
-  backdrop-filter: blur(10px);
+  /* solid, no backdrop-filter: a filter would make the bar the containing
+     block for the fixed palette, help and bell overlays inside it */
+  background: var(--dk-paper);
   border-bottom: 1px solid var(--dk-rule);
   padding: 12px 28px;
   display: flex;

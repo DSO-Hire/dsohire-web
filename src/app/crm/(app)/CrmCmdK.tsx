@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, useTransition } from "react";
+import { createPortal } from "react-dom";
 import { quickCreate, quickLogNote } from "./_workspace/actions";
 import { trapTab } from "./_workspace/focus";
 import { HELP_EVENT, PALETTE_EVENT, type PaletteMode } from "./_workspace/shortcuts";
@@ -70,7 +71,15 @@ function pushRecent(r: Recent) {
   }
 }
 
+/* The topbar's backdrop-filter makes it the containing block for fixed
+   children, so the overlay renders into .crm-root (keeps the .crm-root
+   scoped styles) instead of inside the bar. Null during SSR. */
+const noopSubscribe = () => () => {};
+const getPortalRoot = () => document.querySelector<HTMLElement>(".crm-root");
+const getServerPortalRoot = () => null;
+
 export default function CrmCmdK() {
+  const portalRoot = useSyncExternalStore(noopSubscribe, getPortalRoot, getServerPortalRoot);
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<PaletteMode>("search");
   const [query, setQuery] = useState("");
@@ -400,6 +409,7 @@ export default function CrmCmdK() {
         <span className="ws-searchbtn-l">Search</span>
         <kbd className="ws-searchbtn-k">⌘K</kbd>
       </button>
+      {portalRoot ? createPortal(
       <div
         className={`ck-overlay ws-ck${open ? " open" : ""}`}
         onMouseDown={(e) => {
@@ -585,7 +595,9 @@ export default function CrmCmdK() {
             <span>ESC CLOSE</span>
           </div>
         </div>
-      </div>
+      </div>,
+        portalRoot,
+      ) : null}
     </>
   );
 }
