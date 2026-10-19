@@ -15,43 +15,12 @@
 
 import { NextResponse } from "next/server";
 import { redirect } from "next/navigation";
-import { cookies, headers } from "next/headers";
-import { DEMO_FOR_COOKIE, PROD_ORIGIN, sanitizeForLabel } from "@/lib/marketing/demo";
+import { cookies } from "next/headers";
+import { DEMO_FOR_COOKIE, sanitizeForLabel } from "@/lib/marketing/demo";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isDemoDeployment } from "@/lib/demo/mode";
 import { demoEmail, DEMO_VIEWER_LOCAL } from "@/lib/demo-seed/auth";
 import { DEMO_PASSWORD } from "@/lib/demo-seed/constants";
-
-/**
- * Report this open to PROD (demo_visits + "Bridgeway just opened the demo"
- * email for ?for= links). Capped at 1.5s and never throws: a slow or failed
- * report must not delay a prospect's first look.
- */
-async function reportVisit(forLabel: string | null) {
-  try {
-    const h = await headers();
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 1500);
-    await fetch(`${PROD_ORIGIN}/api/demo-visits`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        ...(process.env.DEMO_EVENTS_SECRET
-          ? { "x-demo-events-secret": process.env.DEMO_EVENTS_SECRET }
-          : {}),
-      },
-      body: JSON.stringify({
-        for: forLabel,
-        referrer: h.get("referer"),
-        userAgent: h.get("user-agent"),
-      }),
-      signal: ctrl.signal,
-    });
-    clearTimeout(t);
-  } catch (err) {
-    console.error("[demo] visit report failed", (err as Error).message);
-  }
-}
 
 export async function GET(request: Request) {
   if (!isDemoDeployment()) {
@@ -72,7 +41,8 @@ export async function GET(request: Request) {
       maxAge: 60 * 60 * 24 * 30,
     });
   }
-  await reportVisit(forLabel ?? jar.get(DEMO_FOR_COOKIE)?.value ?? null);
+  /* The open is NOT counted here: scanners and link previews load this URL
+     too. It is counted by /demo/engaged once a real person interacts. */
 
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signInWithPassword({

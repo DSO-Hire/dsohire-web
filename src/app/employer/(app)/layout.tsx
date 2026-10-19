@@ -35,6 +35,7 @@ import { getActiveLocationId } from "@/lib/employer/active-location";
 import { isDemoDeployment, isDemoViewerUser } from "@/lib/demo/mode";
 import { EmployerShell, type Role } from "@/components/employer/employer-shell";
 import { DemoIntent } from "@/components/employer/demo-intent";
+import { DemoEngagement } from "@/components/employer/demo-engagement";
 import { DEMO_FOR_COOKIE, sanitizeForLabel } from "@/lib/marketing/demo";
 
 export default async function EmployerAppLayout({
@@ -167,6 +168,7 @@ export default async function EmployerAppLayout({
           sibling of the banner (fixed-position), so it doesn't inherit
           the banner's uppercase/tracking. */}
       <DemoIntent forLabel={demoFor} />
+      <DemoEngagement />
     </>
   ) : null;
 
