@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   title: "Free Dental Resume Templates (ATS-Friendly) | DSO Hire",
   description:
     "Build a free, ATS-safe dental resume in minutes. Six clean templates designed for hygienists, assistants, front desk, dentists, and DSO leaders. Free with a free DSO Hire account: one quick sign-up, then download as a PDF.",
-  alternates: { canonical: "https://dsohire.com/resume-templates" },
+  alternates: { canonical: "/resume-templates" },
   openGraph: {
     title: "Free Dental Resume Templates (ATS-Friendly)",
     description:

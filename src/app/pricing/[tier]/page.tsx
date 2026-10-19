@@ -38,6 +38,7 @@ export async function generateMetadata({
   return {
     title: `${t.name} plan · DSO Hire`,
     description: `${t.description}. ${TIER_PAGE_CONTENT[tier].headline}`,
+    alternates: { canonical: `/pricing/${tier}` },
   };
 }
 

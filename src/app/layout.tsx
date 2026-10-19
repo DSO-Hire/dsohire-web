@@ -3,6 +3,7 @@ import { Manrope } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { isIndexingAllowed } from "@/lib/launch/gate";
+import { OrgJsonLd } from "@/components/seo/org-jsonld";
 
 // Geist (the Next.js template default) was removed 2026-07-06 — it was
 // dead weight: globals.css `@theme inline` already forces the font-sans
@@ -99,6 +100,11 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-ivory text-ink font-sans">
+        {/* Organization + WebSite JSON-LD, sitewide (one block per page).
+            Canonicals are per-page (alternates.canonical in each page's
+            metadata), never set here: a layout canonical would point every
+            page at /. */}
+        <OrgJsonLd />
         {children}
       </body>
     </html>

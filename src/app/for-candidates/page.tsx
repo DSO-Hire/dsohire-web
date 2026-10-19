@@ -60,6 +60,7 @@ import { candidateCtaResolver } from "@/lib/marketing/candidate-cta";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/for-candidates" },
   title:
     "Dental Jobs at Multi-Location DSOs: Hygienist, Dentist, Assistant & Front Desk Roles",
   description:

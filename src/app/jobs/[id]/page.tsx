@@ -116,6 +116,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${job.title as string} · DSO Hire`,
     description: plainDescription,
+    alternates: { canonical: `/jobs/${id}` },
     openGraph: {
       title: job.title as string,
       description: plainDescription,

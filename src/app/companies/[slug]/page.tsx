@@ -90,6 +90,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${dso.name as string} · DSO Hire`,
     description,
+    alternates: { canonical: `/companies/${slug}` },
     openGraph: {
       title: dso.name as string,
       description,

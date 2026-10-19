@@ -24,6 +24,7 @@ import { candidateCtaHref } from "@/lib/marketing/candidate-cta";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/practicefit" },
   title: "PracticeFit™ & DSOFit™ · The Dental Fit Score",
   description:
     "PracticeFit is the proprietary two-sided fit model built only for dentistry: a five-minute assessment scores every candidate against every opening on schedule, pace, culture, PMS fluency, commute, and more. DSOFit does the same for corporate DSO roles. A score, never a gate: it informs decisions, it never makes them.",

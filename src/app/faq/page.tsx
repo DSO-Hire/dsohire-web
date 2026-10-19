@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   title: "FAQ · Frequently Asked Questions",
   description:
     "Answers about DSO Hire: pricing and plans, posting jobs, applying, PracticeFit & DSOFit scoring, candidate privacy, data, and support. The dental-only hiring platform for multi-location groups and dental professionals.",
-  alternates: { canonical: "https://dsohire.com/faq" },
+  alternates: { canonical: "/faq" },
   openGraph: {
     title: "DSO Hire · Frequently Asked Questions",
     description:

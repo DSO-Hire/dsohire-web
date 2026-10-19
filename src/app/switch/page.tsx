@@ -14,6 +14,7 @@ import { SiteShell } from "@/components/marketing/site-shell";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/switch" },
   title: "Switch to DSO Hire: Free White-Glove Migration",
   description:
     "Moving from another ATS or job board? We migrate your open jobs, templates, screening setup, and team for you, free, typically within days. Run both systems in parallel until you're confident.",

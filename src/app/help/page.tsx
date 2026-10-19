@@ -30,6 +30,7 @@ import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/contact";
 import { HelpSearchClient } from "./help-search-client";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/help" },
   title: "Help center · DSO Hire",
   description:
     "How to post jobs, manage candidates, customize emails, bulk-add locations, and more. Searchable help docs for DSO Hire's dental hiring platform.",

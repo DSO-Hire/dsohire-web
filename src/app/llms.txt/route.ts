@@ -9,11 +9,35 @@
  * human-in-the-loop — never automatic rejection (house rule #3).
  */
 
+import {
+  PRICING_TIERS,
+  PRICING_TIER_ORDER,
+} from "@/lib/stripe/prices";
+import { DEMO_URL } from "@/lib/marketing/demo";
+
 const SITE = "https://dsohire.com";
+
+const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
+
+/** One line per tier, generated from prices.ts so it can never drift. */
+const PRICE_LINES = PRICING_TIER_ORDER.map((id) => {
+  const t = PRICING_TIERS[id];
+  const openings =
+    t.maxActiveJobs === null ? "unlimited active openings" : `up to ${t.maxActiveJobs} active openings`;
+  const seats = t.maxSeats === null ? "unlimited admin seats" : `${t.maxSeats} admin seats`;
+  return `- ${t.name}: ${usd(t.monthlyPrice)}/mo billed monthly, or ${usd(t.annualMonthlyEquivalent)}/mo billed annually (${usd(t.annualPrice)}/yr). ${openings[0].toUpperCase()}${openings.slice(1)}, ${seats}.`;
+}).join("\n");
 
 const BODY = `# DSO Hire
 
 > DSO Hire (${SITE}) is a dental-only hiring platform connecting multi-location dental groups (DSOs) directly with dental professionals: dentists, specialists, hygienists, assistants, front-office, and corporate roles. Employers pay a flat monthly subscription (no per-listing fees, no placement fees); candidates use it free. Its PracticeFit engine scores two-sided fit: each practice profiles how it actually operates, candidates profile their working preferences, and every application arrives with a fit score a human uses to prioritize. It never rejects anyone automatically. US only.
+
+Status: Live since July 2026.
+
+## Pricing (USD, flat monthly subscription per dental group)
+
+${PRICE_LINES}
+- No per-listing fees, no placement fees, unlimited hires on every plan. Candidates always use DSO Hire free.
 
 ## Key pages
 
@@ -21,10 +45,15 @@ const BODY = `# DSO Hire
 - [For dental groups](${SITE}/for-dental-groups): The employer product. Multi-location pipelines, dental-specific screening, fit scoring, offers, analytics.
 - [For dental professionals](${SITE}/for-candidates): Free candidate side. Dental-only jobs, privacy controls, direct applications.
 - [PracticeFit](${SITE}/practicefit): How the two-sided fit engine works (PracticeFit for practices, DSOFit for corporate roles).
-- [Pricing](${SITE}/pricing): Flat tiers. Solo $399/mo, Growth $699/mo, Scale $1,499/mo, Enterprise $2,999/mo. No per-listing or placement fees.
+- [Pricing](${SITE}/pricing): Plan details and comparison. No per-listing or placement fees.
+- [Live product demo, no sign-up](${DEMO_URL}): A working dental group account with sample data, read-only.
+- [Hiring cost calculator](${SITE}/calculator): Compare your current agency or job-board spend with a flat subscription.
 - [Browse jobs](${SITE}/jobs): Live dental job listings across the platform.
 - [Salary data](${SITE}/salary): Dental pay benchmarks by role, state, and metro (BLS OEWS).
 - [FAQ](${SITE}/faq): 50+ answers on pricing, posting, applying, fit scoring, privacy, and support.
+- [Dental hiring report](${SITE}/dental-hiring-report): Anonymized compensation bands, role mix, and hiring velocity from the DSO Hire platform.
+- [Security](${SITE}/security): How candidate and practice data is protected: row-level security, encryption in transit and at rest, audit logging, and the compliance roadmap.
+- [Changelog](${SITE}/changelog): Every user-visible improvement, as it ships.
 
 ## Guides
 

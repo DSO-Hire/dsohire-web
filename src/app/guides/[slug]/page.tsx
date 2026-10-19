@@ -13,6 +13,8 @@
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { JsonLd } from "@/components/seo/json-ld";
+import { breadcrumbJsonLd } from "@/components/seo/schema";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ArrowRight } from "lucide-react";
@@ -43,7 +45,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // metaTitle already carries the "| DSO Hire" suffix — skip the template.
     title: { absolute: guide.metaTitle },
     description: guide.metaDescription,
-    alternates: { canonical: `https://dsohire.com/guides/${slug}` },
+    alternates: { canonical: `/guides/${slug}` },
     openGraph: {
       title: guide.title,
       description: guide.metaDescription,
@@ -85,6 +87,13 @@ export default async function GuidePage({ params }: PageProps) {
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(buildGuideFaqJsonLd(guide)),
         }}
+      />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Hiring guides", path: "/guides" },
+          { name: guide.heading, path: `/guides/${guide.slug}` },
+        ])}
       />
 
       <article className="pt-[120px] pb-24 px-6 sm:px-14 max-w-[860px] mx-auto">

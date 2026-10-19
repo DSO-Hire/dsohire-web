@@ -14,6 +14,7 @@ import { INFO_EMAIL as SUPPORT_EMAIL, INFO_MAILTO as SUPPORT_MAILTO } from "@/li
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/contact" },
   title: "Contact",
   description: `Get in touch with DSO Hire. Email ${SUPPORT_EMAIL} or use the contact form.`,
 };

@@ -42,11 +42,15 @@ export default function robots(): MetadataRoute.Robots {
           "/employer/",
           "/candidate/",
           "/admin/",
+          "/crm/",
           "/api/",
           "/o/",
           "/r/",
           "/auth/",
           "/embed/",
+          // /demo is the redirect into the live demo (demo.dsohire.com);
+          // nothing to index, and hits shouldn't count as demo opens.
+          "/demo",
         ],
       },
     ],

@@ -9,6 +9,7 @@ import { INFO_EMAIL as SUPPORT_EMAIL, INFO_MAILTO as SUPPORT_MAILTO } from "@/li
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/legal" },
   title: "Legal",
   description:
     "Privacy, terms, cookies, acceptable use, and DMCA policies for DSO Hire LLC.",

@@ -20,6 +20,7 @@ import {
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/changelog" },
   title: "Changelog",
   description:
     "Every user-visible improvement to DSO Hire, as it ships. No vaporware: if it's on this page, it's live.",

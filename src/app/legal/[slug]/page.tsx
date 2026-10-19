@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: doc.title,
     description: `${doc.title} for DSO Hire LLC. Effective ${doc.effectiveDate}.`,
+    alternates: { canonical: `/legal/${slug}` },
   };
 }
 

@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 const config = ROLE_BY_SLUG.dentists;
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/for-dentists" },
   title: `For ${config.label}`,
   description: config.metaDescription,
 };

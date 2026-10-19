@@ -38,6 +38,7 @@ import type { Metadata } from "next";
 export const revalidate = 21600; // 6 hours
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/dental-hiring-report" },
   title: "Dental Hiring Report 2026 · DSO Hire",
   description:
     "Anonymized compensation bands, role mix, and hiring velocity across the DSO Hire platform, updated continuously from real job postings and applications. Built for DSO operators, dental professionals, and industry analysts.",

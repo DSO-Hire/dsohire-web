@@ -60,6 +60,7 @@ function parseNearInput(
 }
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/jobs" },
   title: "Browse Dental Jobs",
   description:
     "Browse jobs at multi-location dental groups (DSOs). Hygienist, associate dentist, office manager, and specialist roles posted directly on DSO Hire.",

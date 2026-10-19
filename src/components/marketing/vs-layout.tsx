@@ -13,6 +13,9 @@
 import Link from "next/link";
 import { ArrowRight, Check, Minus } from "lucide-react";
 import { Eyebrow } from "@/components/brand/eyebrow";
+import { FaqAccordion, type FaqItem } from "@/components/marketing/faq-accordion";
+import { JsonLd } from "@/components/seo/json-ld";
+import { faqPageJsonLd } from "@/components/seo/schema";
 
 export interface VsRow {
   dimension: string;
@@ -120,6 +123,26 @@ export function VsHonestNote({
           {title}
         </h2>
         <p className="text-[14.5px] text-slate-body leading-[1.7]">{body}</p>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Visible FAQ + matching FAQPage JSON-LD, both built from the same `items`
+ * array so markup and on-page text can never disagree. Answers must only
+ * restate facts already on the page (or in prices.ts).
+ */
+export function VsFaq({ items }: { items: FaqItem[] }) {
+  return (
+    <section className="px-6 sm:px-14 pb-20 max-w-[1240px] mx-auto">
+      <JsonLd data={faqPageJsonLd(items)} />
+      <div className="max-w-[860px]">
+        <Eyebrow className="text-heritage-deep mb-3.5">FAQ</Eyebrow>
+        <h2 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-[1.1] text-ink mb-8">
+          Common questions.
+        </h2>
+        <FaqAccordion items={items} />
       </div>
     </section>
   );

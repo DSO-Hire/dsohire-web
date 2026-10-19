@@ -30,10 +30,12 @@ import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { MotionMount } from "@/components/marketing/motion";
 import { RoiCalculator, type RoiInitial } from "@/components/marketing/roi-calculator";
 import { SALES_EMAIL } from "@/lib/contact";
+import { SoftwareAppJsonLd } from "@/components/seo/software-app-jsonld";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/pricing" },
   title: "Pricing",
   description:
     "Flat monthly subscription pricing for DSO Hire. Solo $399 · Growth $699 · Scale $1,499 · Enterprise $2,999. Save 10% with annual billing. Multi-location dental hiring, no per-listing fees, no placement fees.",
@@ -66,6 +68,7 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
           the reveal observer must mount here explicitly. Without it,
           [data-reveal] content stays hidden (the Day-31 "gray slab" bug). */}
       <MotionMount />
+      <SoftwareAppJsonLd />
       <PricingHero />
       {/* #115 FOH-5 — lead with outcomes, not capacity: the visitor's own
           agency math vs our flat fee, before the tier cards. */}

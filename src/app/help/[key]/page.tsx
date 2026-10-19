@@ -58,6 +58,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${found.entry.title} · Help · DSO Hire`,
     description: found.entry.tip,
+    alternates: { canonical: `/help/${found.key.replace(/\./g, "-")}` },
   };
 }
 

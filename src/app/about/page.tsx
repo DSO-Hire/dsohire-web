@@ -21,6 +21,7 @@ import { SiteShell } from "@/components/marketing/site-shell";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/about" },
   title: "About",
   description:
     "DSO Hire is the dental hiring platform built specifically for multi-location dental groups (DSOs). Born from ten years inside the business of dentistry. Dental-only, no placement fees ever.",

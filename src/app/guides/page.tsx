@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "Dental Hiring Guides",
   description:
     "Practical guides to dental hiring from DSO Hire: multi-location hiring for DSOs, cutting time-to-hire at a dental practice, and screening candidates for culture fit.",
-  alternates: { canonical: "https://dsohire.com/guides" },
+  alternates: { canonical: "/guides" },
   openGraph: {
     title: "Dental Hiring Guides · DSO Hire",
     description:

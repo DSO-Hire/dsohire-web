@@ -9,11 +9,14 @@
  * 7 role/audience pages, pricing, about, contact, the public dental hiring
  * report, jobs index, companies index, and the major legal slugs).
  *
- * What's NOT listed (intentionally): dynamic `/jobs/[id]` and `/companies/[slug]`
- * pages, dashboard routes, auth screens, the corporate-roles deep pages, and
- * tokenized endpoints (/o/[token], /r/[token]). Dynamic listings can be added
- * here later by reading from Supabase at build time — for now, keep it focused
- * on the surfaces we want crawlers prioritizing.
+ * Also listed: /faq, /help, /for-corporate, the four /pricing/[tier] pages,
+ * the 17 /corporate-roles/[function] landing pages, and (once distribution is
+ * live) dynamic /jobs/[id] + /companies/[slug].
+ *
+ * What's NOT listed (intentionally): dashboard routes, auth screens, redirects
+ * (/calculator, /for-dsos), /coming-soon, /demo, the individual /help/[key]
+ * tooltip entries (thin; reachable from /help), and tokenized endpoints
+ * (/o/[token], /r/[token], /refer/[code]).
  *
  * `lastModified` is set to the deploy time. That's a fine signal — Google
  * treats it as a hint, not gospel, and re-stamping every route on each deploy
@@ -23,6 +26,9 @@
 import type { MetadataRoute } from "next";
 import { SALARY_ROLES, ALL_STATE_SLUGS } from "@/lib/comp/salary";
 import { getPublicJobsForDistribution } from "@/lib/distribution/public-jobs";
+import { PRICING_TIER_ORDER } from "@/lib/stripe/prices";
+import { CORPORATE_FUNCTION_SLUGS } from "@/lib/corporate/functions";
+import { GUIDES_DATE_PUBLISHED } from "@/lib/guides/loader";
 
 const SITE_URL = "https://dsohire.com";
 
@@ -30,6 +36,8 @@ interface SitemapRoute {
   path: string;
   priority: number;
   changeFrequency: "daily" | "weekly" | "monthly" | "yearly";
+  /** Fixed content date when known; otherwise the deploy time is used. */
+  lastModified?: string;
 }
 
 const ROUTES: SitemapRoute[] = [
@@ -42,6 +50,9 @@ const ROUTES: SitemapRoute[] = [
   { path: "/companies", priority: 0.7, changeFrequency: "weekly" },
   { path: "/about", priority: 0.6, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.5, changeFrequency: "monthly" },
+  { path: "/faq", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/help", priority: 0.5, changeFrequency: "monthly" },
+  { path: "/for-corporate", priority: 0.6, changeFrequency: "monthly" },
   { path: "/dental-hiring-report", priority: 0.7, changeFrequency: "monthly" },
   { path: "/resume-templates", priority: 0.7, changeFrequency: "monthly" },
   { path: "/salary", priority: 0.7, changeFrequency: "weekly" },
@@ -57,9 +68,9 @@ const ROUTES: SitemapRoute[] = [
 
   // Pillar hiring guides (launch SEO spec, Phase 3).
   { path: "/guides", priority: 0.6, changeFrequency: "monthly" },
-  { path: "/guides/dso-multi-location-hiring", priority: 0.7, changeFrequency: "monthly" },
-  { path: "/guides/reduce-time-to-hire-dental-practice", priority: 0.7, changeFrequency: "monthly" },
-  { path: "/guides/dental-culture-fit-screening", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/guides/dso-multi-location-hiring", priority: 0.7, changeFrequency: "monthly", lastModified: GUIDES_DATE_PUBLISHED },
+  { path: "/guides/reduce-time-to-hire-dental-practice", priority: 0.7, changeFrequency: "monthly", lastModified: GUIDES_DATE_PUBLISHED },
+  { path: "/guides/dental-culture-fit-screening", priority: 0.7, changeFrequency: "monthly", lastModified: GUIDES_DATE_PUBLISHED },
 
   // Role / audience landing pages — keep all of them indexable so each
   // role-specific search query has a tailored landing page to rank.
@@ -88,9 +99,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const base = ROUTES.map((r) => ({
     url: `${SITE_URL}${r.path}`,
-    lastModified: now,
+    lastModified: r.lastModified ? new Date(r.lastModified) : now,
     changeFrequency: r.changeFrequency,
     priority: r.priority,
+  }));
+  // Per-tier plan pages (/pricing/[tier]).
+  const tierPages = PRICING_TIER_ORDER.map((tier) => ({
+    url: `${SITE_URL}/pricing/${tier}`,
+    lastModified: now,
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+  // Corporate-function landing pages (/corporate-roles/[function]).
+  const corporatePages = CORPORATE_FUNCTION_SLUGS.map((slug) => ({
+    url: `${SITE_URL}/corporate-roles/${slug}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.5,
   }));
   // Role-level salary hubs (/salary/[role]).
   const salaryHubs = SALARY_ROLES.map((role) => ({
@@ -134,5 +159,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
-  return [...base, ...salaryHubs, ...salary, ...jobPages, ...companyPages];
+  return [...base, ...tierPages, ...corporatePages, ...salaryHubs, ...salary, ...jobPages, ...companyPages];
 }

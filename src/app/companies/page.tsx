@@ -17,6 +17,7 @@ import { ListSort } from "@/components/ui/list-sort";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/companies" },
   title: "Dental Groups & DSOs on DSO Hire",
   description:
     "Browse the dental groups hiring through DSO Hire: multi-location practices and DSOs operating across the U.S.",

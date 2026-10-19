@@ -43,7 +43,7 @@ import {
 import { Eyebrow } from "@/components/brand/eyebrow";
 import { Button } from "@/components/ui/button";
 import { SiteShell } from "@/components/marketing/site-shell";
-import { OrgJsonLd } from "@/components/seo/org-jsonld";
+import { SoftwareAppJsonLd } from "@/components/seo/software-app-jsonld";
 import { BackOfficeShowcase } from "@/components/marketing/back-office/showcase";
 import { CountUp } from "@/components/marketing/motion";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
@@ -56,6 +56,7 @@ import {
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/" },
   title: {
     absolute: "DSO Hire · Dental hiring, done direct.",
   },
@@ -67,7 +68,7 @@ export default async function Home() {
   const live = await getHomeLiveSnapshot();
   return (
     <SiteShell>
-      <OrgJsonLd />
+      <SoftwareAppJsonLd />
       <Hero live={live} />
       <LiveMarketBand live={live} />
       <BackOfficeShowcase />

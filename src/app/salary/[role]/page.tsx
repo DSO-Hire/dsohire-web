@@ -6,6 +6,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteShell } from "@/components/marketing/site-shell";
+import { JsonLd } from "@/components/seo/json-ld";
+import { breadcrumbJsonLd } from "@/components/seo/schema";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { US_STATES } from "@/lib/us-states";
 import {
@@ -46,6 +48,12 @@ export default async function RoleSalaryIndex({ params }: { params: Promise<Para
 
   return (
     <SiteShell>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Dental Salary Data", path: "/salary" },
+          { name: `${role.searchTitle} salary`, path: `/salary/${role.slug}` },
+        ])}
+      />
       <section className="pt-[140px] pb-12 px-6 sm:px-14">
         <div className="max-w-[1100px] mx-auto">
           <p className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-5">Dental Salary Data · BLS OEWS</p>

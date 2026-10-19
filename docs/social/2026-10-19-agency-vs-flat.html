@@ -1,0 +1,77 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#14233f;--heritage:#4d7a60;--heritage-deep:#2f5d4f;--mint:#8db8a3;--paper:#f7f4ed;--card:#fffdf8;--rule:#e4ded1;--slate:#4a6278;--crit:#a8432f}
+html,body{width:1080px;height:1350px;background:var(--paper);font-family:Manrope,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+.wrap{position:relative;width:1080px;height:1350px;padding:76px 80px 64px;display:flex;flex-direction:column}
+.eyebrow{font-size:20px;font-weight:800;letter-spacing:5px;color:var(--heritage-deep);text-transform:uppercase;display:flex;align-items:center;gap:16px}
+.eyebrow:before{content:"";width:44px;height:4px;background:var(--heritage)}
+h1{margin-top:28px;font-size:76px;line-height:1.02;font-weight:800;letter-spacing:-2.6px}
+h1 em{font-style:normal;color:var(--heritage)}
+.cols{margin-top:56px;display:grid;grid-template-columns:1fr 1fr;gap:28px;flex:1}
+.col{border:2px solid var(--rule);background:var(--card);padding:36px 36px 30px;display:flex;flex-direction:column}
+.col.us{border:3px solid var(--ink);background:var(--ink);color:var(--paper)}
+.tag{font-size:17px;font-weight:800;letter-spacing:3.5px;text-transform:uppercase;color:var(--slate)}
+.us .tag{color:var(--mint)}
+.what{margin-top:10px;font-size:30px;font-weight:700;line-height:1.15;letter-spacing:-.5px}
+.bar{margin-top:30px;height:260px;display:flex;align-items:flex-end}
+.bar i{display:block;width:100%}
+.bar{position:relative}
+.them .bar i{height:100%;display:flex;flex-direction:column}
+.them .bar i span{display:block}
+.them .bar .hi{flex:0 0 40%;background:repeating-linear-gradient(135deg,#c9b9a6 0 14px,#e0d4c6 14px 28px)}
+.them .bar .lo{flex:1;background:#b9a690}
+.us .bar i{height:32.4%;background:var(--heritage)}
+.badge{position:absolute;bottom:18px;left:18px;background:var(--crit);color:#fff;font-size:17px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;padding:10px 14px}
+.lbl{position:absolute;right:14px;font-size:15px;font-weight:800;letter-spacing:1.5px;color:var(--ink);background:rgba(255,253,248,.85);padding:3px 8px}
+.price{margin-top:26px;font-size:66px;font-weight:800;letter-spacing:-2.4px;line-height:1}
+.them .price{color:var(--crit)}
+.per{margin-top:8px;font-size:22px;font-weight:600;color:var(--slate)}
+.us .per{color:#cfd8cf}
+ul{margin-top:28px;list-style:none;border-top:2px solid var(--rule);padding-top:22px;display:grid;gap:14px}
+.us ul{border-top-color:rgba(247,244,237,.18)}
+li{font-size:23px;font-weight:600;line-height:1.25;display:flex;gap:14px;align-items:flex-start}
+li b{flex:0 0 26px;height:26px;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800}
+.them li b{background:#efe4d9;color:var(--crit)}
+.us li b{background:var(--heritage);color:#fff}
+.foot{margin-top:40px;display:flex;align-items:flex-end;justify-content:space-between;gap:32px}
+.foot img{height:62px}
+.src{font-size:15px;line-height:1.45;color:var(--slate);max-width:600px;text-align:right}
+.src b{color:var(--ink)}
+</style></head>
+<body><div class="wrap">
+  <div class="eyebrow">The math on dental hiring</div>
+  <h1>One agency placement costs more than <em>a full year</em> of DSO&nbsp;Hire.</h1>
+  <div class="cols">
+    <div class="col them">
+      <div class="tag">Staffing agency</div>
+      <div class="what">One associate dentist placement</div>
+      <div class="bar"><i><span class="hi"></span><span class="lo"></span></i><span class="badge">Up to 3× more, for one hire</span><span class="lbl" style="top:6px">$50K</span><span class="lbl" style="top:40%;margin-top:-14px">$30K</span></div>
+      <div class="price">$30K–$50K</div>
+      <div class="per">for one hire, one office</div>
+      <ul>
+        <li><b>✕</b>15–25% of first-year salary</li>
+        <li><b>✕</b>Charged again every placement</li>
+        <li><b>✕</b>Their pipeline, not yours</li>
+      </ul>
+    </div>
+    <div class="col us">
+      <div class="tag">DSO Hire · Scale plan</div>
+      <div class="what">A full year, every location</div>
+      <div class="bar"><i></i></div>
+      <div class="price">$16,188</div>
+      <div class="per">per year, billed annually</div>
+      <ul>
+        <li><b>✓</b>One flat fee, unlimited hires</li>
+        <li><b>✓</b>No placement or per-listing fees</li>
+        <li><b>✓</b>Every applicant scored for fit</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot">
+    <img src="logo.svg" alt="DSO Hire">
+    <div class="src"><b>dsohire.com</b><br>Agency fees: typical 15–25% of first-year salary on a $200K associate dentist. DSO Hire Scale plan, annual billing; Solo starts at $399/mo.</div>
+  </div>
+</div></body></html>

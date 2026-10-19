@@ -54,8 +54,12 @@ import { DemoBand } from "@/components/marketing/demo-band";
 import { CtaBand } from "@/components/marketing/cta-band";
 import { RoiCalculator, type RoiInitial } from "@/components/marketing/roi-calculator";
 import { DEMO_URL } from "@/lib/marketing/demo";
+import { JsonLd } from "@/components/seo/json-ld";
+import { SoftwareAppJsonLd } from "@/components/seo/software-app-jsonld";
+import { faqPageJsonLd } from "@/components/seo/schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/for-dental-groups" },
   title: "Dental Group Hiring Platform: Flat-Fee Job Board for Multi-Location Practices",
   description:
     "DSO Hire is the flat-fee dental hiring platform built for multi-location dental groups, DSOs and independent multi-practice owners alike. Post across every location for one flat monthly fee: no per-listing fees, no 15–25% placement fees, no recruiter middlemen. Team accounts and an applicant pipeline built for the way dental groups actually hire.",
@@ -81,6 +85,7 @@ export default async function ForDsosPage({
   const entryPrice = Math.min(...tiers.map((t) => t.monthlyPrice));
   return (
     <SiteShell ctaIntent="dso">
+      <SoftwareAppJsonLd />
       <div className="mk-numbered">
       <Hero entryPrice={entryPrice} />
       <FeeStrip entryPrice={entryPrice} />
@@ -920,6 +925,8 @@ const FAQ_ITEMS = [
 function FAQ() {
   return (
     <section className="bg-cream border-y border-[var(--rule)] px-6 sm:px-14 pt-24 pb-24">
+      {/* FAQPage markup from the same FAQ_ITEMS the accordion renders. */}
+      <JsonLd data={faqPageJsonLd(FAQ_ITEMS)} />
       <div className="max-w-[860px] mx-auto">
         <Eyebrow data-kick className="text-heritage-deep mb-3.5">
           FAQ

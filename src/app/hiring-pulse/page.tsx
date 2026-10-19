@@ -30,6 +30,7 @@ import { PulseExplorer } from "./pulse-explorer";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/hiring-pulse" },
   title: "Dental Hiring Pulse · live dental job market data",
   description:
     "What dental roles actually pay and where demand is hottest: live data from real openings on DSO Hire. Posted-pay percentiles by role, demand by state, updated continuously.",

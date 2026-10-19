@@ -24,6 +24,7 @@ import { INFO_EMAIL, INFO_MAILTO } from "@/lib/contact";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/security" },
   title: "Security & Trust · DSO Hire",
   description:
     "How DSO Hire protects candidate and practice data: row-level security on every table, encryption in transit and at rest, an EEO data firewall, candidate anonymity architecture, audit logging, per-teammate permissions, and an honest compliance roadmap.",
