@@ -12,6 +12,7 @@ import { demoKeysFor, demoLinkFor, hostOf, hrefOf, type AccountLite, type DemoVi
 import { FitPill, StatusPill, Warmth } from "../ui";
 import Activity from "./Activity";
 import Contacts from "./Contacts";
+import { AccountDncBanner, AccountDncForm } from "./DncControls";
 import Overview from "./Overview";
 import type { ContactRec, EventRec, OppRec, SectionProps, TaskRec } from "./types";
 import "../accounts.css";
@@ -55,7 +56,7 @@ export default async function AccountProfile({
     supabase.from("crm_accounts").select("*").eq("id", id).maybeSingle(),
     supabase
       .from("crm_contacts")
-      .select("id, name, title, role, email, phone, linkedin_url, notes, created_at")
+      .select("id, name, title, role, email, phone, linkedin_url, notes, created_at, do_not_contact_at, do_not_contact_reason, do_not_contact_note")
       .eq("account_id", id)
       .order("created_at"),
     supabase
@@ -159,6 +160,7 @@ export default async function AccountProfile({
         </span>
       </StickyIdentity>
       <ActionError error={sp.error} />
+      <AccountDncBanner a={a} />
       {a.archived_at ? (
         <div className="sl-banner ac-arch-banner">
           <span>Archived {fmtDate(a.archived_at)}. It is off the list, the pipeline and Today.</span>
@@ -210,9 +212,16 @@ export default async function AccountProfile({
           </span>
           {a.next_step ? <span className="ac-hero-next">{a.next_step}</span> : null}
           <span className="mini2">ON FILE SINCE {fmtDate(a.created_at).toUpperCase()}</span>
-          <Link className="dbtn dbtn-green dbtn-sm" href={`/crm/accounts/${a.id}?tab=activity&compose=1#compose`}>
-            Compose email
-          </Link>
+          {a.do_not_contact_at ? (
+            <span className="pill crit">DO NOT CONTACT</span>
+          ) : (
+            <>
+              <Link className="dbtn dbtn-green dbtn-sm" href={`/crm/accounts/${a.id}?tab=activity&compose=1#compose`}>
+                Compose email
+              </Link>
+              <AccountDncForm accountId={a.id} />
+            </>
+          )}
         </div>
       </div>
 

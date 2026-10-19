@@ -55,7 +55,7 @@ type Opp = {
   created_at: string;
   updated_at: string;
   stage_changed_at: string | null;
-  crm_accounts: { name?: string; last_touch_at?: string | null } | null;
+  crm_accounts: { name?: string; last_touch_at?: string | null; do_not_contact_at?: string | null } | null;
 };
 type Task = {
   id: string;
@@ -127,7 +127,7 @@ export default async function Today({
     await Promise.all([
       supabase
         .from("crm_opportunities")
-        .select("*, crm_accounts(name, last_touch_at)")
+        .select("*, crm_accounts(name, last_touch_at, do_not_contact_at)")
         .not("stage", "in", "(won,lost)"),
       supabase
         .from("crm_tasks")
@@ -167,7 +167,8 @@ export default async function Today({
         .from("crm_accounts")
         .select("id", { count: "exact", head: true })
         .eq("status", "target")
-        .is("archived_at", null),
+        .is("archived_at", null)
+        .is("do_not_contact_at", null),
     ]);
 
   const opps = (oppsRes.data ?? []) as unknown as Opp[];
@@ -229,7 +230,9 @@ export default async function Today({
   const openByOpp = new Map<string, number>();
   for (const t of openTasks) if (t.opportunity_id) openByOpp.set(t.opportunity_id, (openByOpp.get(t.opportunity_id) ?? 0) + 1);
 
+  /* opted-out groups never get a "needs a touch" nudge */
   const touch = opps
+    .filter((o) => !o.crm_accounts?.do_not_contact_at)
     .map((o) => {
       const reasons: { label: string; tone: string }[] = [];
       const quiet = Math.floor((now - (lastTouch.get(o.id) ?? new Date(o.created_at).getTime())) / DAY);

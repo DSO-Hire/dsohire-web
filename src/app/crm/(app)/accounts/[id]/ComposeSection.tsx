@@ -15,6 +15,20 @@ export default async function ComposeSection({
   demoLink,
   sp,
 }: Pick<SectionProps, "a" | "contacts" | "events" | "demoLink" | "sp">) {
+  if (a.do_not_contact_at) {
+    return (
+      <div className="dcardx" id="compose">
+        <div className="ch">
+          <h3>Compose</h3>
+          <span className="mini">DO NOT CONTACT</span>
+        </div>
+        <div className="sl-note">
+          {a.name} opted out, so composing is off. Opt-outs are permanent. If they reach out first and ask to hear
+          from you again, clear the flag on the Overview tab.
+        </div>
+      </div>
+    );
+  }
   const gate = await crmPageGate(`/crm/accounts/${a.id}`);
   if (typeof gate === "string") return null;
   const { supabase } = gate;
@@ -47,7 +61,8 @@ export default async function ComposeSection({
   }
 
   const signal = (a.hiring_signal ?? "").trim() || (a.growth_signal ?? "").trim();
-  const recipients: ComposeContact[] = contacts.map((c) => ({
+  /* opted-out people are never offered as recipients */
+  const recipients: ComposeContact[] = contacts.filter((c) => !c.do_not_contact_at).map((c) => ({
     id: c.id,
     name: c.name,
     title: c.title,

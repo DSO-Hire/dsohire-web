@@ -52,10 +52,12 @@ export async function logTemplateSend(input: {
   if (body.length > 20000) return { error: "Keep the message under 20,000 characters." };
 
   const [{ data: acct }, { data: tpl }] = await Promise.all([
-    supabase.from("crm_accounts").select("id, status, next_step, next_step_due").eq("id", accountId).maybeSingle(),
+    supabase.from("crm_accounts").select("id, status, next_step, next_step_due, do_not_contact_at").eq("id", accountId).maybeSingle(),
     supabase.from("crm_email_templates").select("key, channel, next_step, next_step_days").eq("key", key).maybeSingle(),
   ]);
   if (!acct) return { error: "That account no longer exists." };
+  if ((acct as { do_not_contact_at?: string | null }).do_not_contact_at)
+    return { error: "This group is marked do not contact. Nothing was logged; don't send to them." };
   if (!tpl) return { error: "That template no longer exists. Reload the page." };
   const t = tpl as { key: string; channel: string; next_step: string | null; next_step_days: number | null };
   const a = acct as { id: string; status: string; next_step: string | null; next_step_due: string | null };
@@ -64,8 +66,15 @@ export async function logTemplateSend(input: {
   if (input?.contactId) {
     const c = String(input.contactId);
     if (!UUID_RE.test(c)) return { error: "That contact is not valid." };
-    const { data: owned } = await supabase.from("crm_contacts").select("id").eq("id", c).eq("account_id", accountId).maybeSingle();
+    const { data: owned } = await supabase
+      .from("crm_contacts")
+      .select("id, do_not_contact_at")
+      .eq("id", c)
+      .eq("account_id", accountId)
+      .maybeSingle();
     if (!owned) return { error: "That contact is not on this account." };
+    if ((owned as { do_not_contact_at?: string | null }).do_not_contact_at)
+      return { error: "That person is marked do not contact. Nothing was logged; don't send to them." };
     contactId = c;
   }
 

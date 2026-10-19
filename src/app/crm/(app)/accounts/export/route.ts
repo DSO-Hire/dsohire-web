@@ -69,6 +69,8 @@ export async function GET(req: Request) {
     "last_touch_at",
     "next_step",
     "next_step_due",
+    "do_not_contact_at",
+    "do_not_contact_reason",
     "open_opportunity_stage",
     "open_opportunity_plan",
     "open_opportunity_mrr",

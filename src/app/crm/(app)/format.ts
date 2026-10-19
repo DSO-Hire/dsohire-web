@@ -110,6 +110,15 @@ export const EVENT_LABELS: Record<string, string> = {
   import: "Added",
 };
 
+/* Do not contact (CAN-SPAM opt-outs are honored permanently). */
+export const DNC_REASONS: Record<string, string> = {
+  replied_no: "Replied no thanks",
+  unsubscribe_request: "Asked to be removed",
+  bounced: "Email bounced",
+  asked_elsewhere: "Pointed elsewhere, stop contacting",
+  other: "Other",
+};
+
 export const BALL_LABELS: Record<string, string> = {
   us: "US",
   prospect: "PROSPECT",

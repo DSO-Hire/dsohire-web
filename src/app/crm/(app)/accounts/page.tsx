@@ -572,6 +572,11 @@ export default async function AccountsPage({
                         <Link className="rowlink" href={`/crm/accounts/${a.id}`}>
                           <b>{a.name}</b>
                         </Link>
+                        {a.do_not_contact_at ? (
+                          <span className="pill crit" style={{ marginLeft: "0.375rem" }} title="Opted out: never email">
+                            DO NOT CONTACT
+                          </span>
+                        ) : null}
                         <br />
                         <span className="sl-sub">
                           {[host, a.hq_state].filter(Boolean).join(" · ") || "No website on file"}

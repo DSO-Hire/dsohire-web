@@ -86,6 +86,9 @@ export type AccountLite = {
   archived_at: string | null;
   created_at: string;
   updated_at: string;
+  do_not_contact_at?: string | null;
+  do_not_contact_reason?: string | null;
+  do_not_contact_note?: string | null;
 };
 
 export type OppLite = {
@@ -180,6 +183,7 @@ export type AccountFilters = {
   due?: string;
   quiet?: string;
   demo?: string;
+  dnc?: string;
 };
 
 export function filterAccounts(
@@ -192,6 +196,11 @@ export function filterAccounts(
   const q = (f.q ?? "").trim().toLowerCase().slice(0, 100);
   const quietDays = Number(f.quiet);
   return rows.filter((r) => {
+    /* do not contact: "only" lists the opt-outs; "hide" and any follow-up
+       style filter (due, quiet, untouched targets) leave them out */
+    if (f.dnc === "only") {
+      if (!r.do_not_contact_at) return false;
+    } else if (r.do_not_contact_at && (f.dnc === "hide" || f.due || f.quiet || f.status === "target")) return false;
     if (q) {
       const hay = [r.name, r.website, r.hq_state, r.current_tool, r.hiring_owner_title, r.next_step, ...(r.states ?? [])]
         .filter(Boolean)
@@ -338,6 +347,12 @@ export const VIEWS: { key: string; label: string; hint: string; params: Record<s
     hint: "Subscribed groups",
     params: { status: "customer", sort: "name" },
   },
+  {
+    key: "dnc",
+    label: "Do not contact",
+    hint: "Groups that opted out: never email them",
+    params: { dnc: "only", sort: "name" },
+  },
 ];
 
 /* ---------------- display ---------------- */
@@ -389,6 +404,7 @@ export const FILTER_KEYS = [
   "due",
   "quiet",
   "demo",
+  "dnc",
   "sort",
   "dir",
   "view",
@@ -421,6 +437,7 @@ export function filtersFrom(get: (k: string) => string | undefined): AccountFilt
     opp: get("opp"),
     due: get("due"),
     quiet: get("quiet"),
+    dnc: get("dnc"),
     demo: get("demo"),
   };
 }

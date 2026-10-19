@@ -3,6 +3,7 @@ import { addContact, deleteContact, updateContact } from "../actions";
 import { hrefOf } from "../lib";
 import { Area, Hidden, Sel, Txt } from "../ui";
 import type { ContactRec, SectionProps } from "./types";
+import { ContactDnc } from "./DncControls";
 
 /* Role order on the page: who signs first, then who champions, then the rest. */
 const ROLE_ORDER = ["decision_maker", "champion", "recruiter", "connector", "user", "other"];
@@ -50,7 +51,7 @@ export default function Contacts({ a, contacts }: SectionProps) {
             </div>
           ) : (
             sorted.map((c) => (
-              <div key={c.id} className="ac-contact">
+              <div key={c.id} className={`ac-contact${c.do_not_contact_at ? " is-dnc" : ""}`}>
                 <div className="ac-contact-h">
                   <span>
                     <b className="ac-cname">{c.name}</b>
@@ -72,6 +73,7 @@ export default function Contacts({ a, contacts }: SectionProps) {
                   <span className="sl-sub">Added {fmtDate(c.created_at)}</span>
                 </div>
                 {c.notes ? <div className="ac-contact-n ac-pre">{c.notes}</div> : null}
+                <ContactDnc accountId={a.id} c={c} />
                 <details className="ac-more">
                   <summary>Edit</summary>
                   <form className="dform" action={updateContact}>
