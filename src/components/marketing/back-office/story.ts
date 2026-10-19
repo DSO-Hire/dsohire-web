@@ -228,7 +228,7 @@ export const APPROVERS = [
 export const HIRE_STATS = [
   { k: "Posted to hired", v: "23 days" },
   { k: "Placement fee", v: "$0" },
-  // 20% of the $185k low end of her estimated annual (agency norm 15–25%).
+  // 20% of the $185k low end of her estimated annual (low end of the published 20–30% agency rate card).
   { k: "Typical agency fee", v: "$37,000" },
 ];
 

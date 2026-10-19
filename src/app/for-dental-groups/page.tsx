@@ -62,7 +62,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/for-dental-groups" },
   title: "Dental Group Hiring Platform: Flat-Fee Job Board for Multi-Location Practices",
   description:
-    "DSO Hire is the flat-fee dental hiring platform built for multi-location dental groups, DSOs and independent multi-practice owners alike. Post across every location for one flat monthly fee: no per-listing fees, no 15–25% placement fees, no recruiter middlemen. Team accounts and an applicant pipeline built for the way dental groups actually hire.",
+    "DSO Hire is the flat-fee dental hiring platform built for multi-location dental groups, DSOs and independent multi-practice owners alike. Post across every location for one flat monthly fee: no per-listing fees, no 20–30% placement fees, no recruiter middlemen. Team accounts and an applicant pipeline built for the way dental groups actually hire.",
   keywords: [
     "dental group hiring",
     "DSO hiring",
@@ -211,7 +211,7 @@ function Hero({ entryPrice }: { entryPrice: number }) {
             <p className="text-lg sm:text-xl text-slate-body leading-relaxed mb-8 sm:mb-10 text-pretty">
               One flat monthly fee covers every location you run, from a
               handful of practices to a national DSO. No per-listing charges,
-              no 15–25% placement fees, no recruiter in the middle.
+              no 20–30% placement fees, no recruiter in the middle.
             </p>
 
             <div className="flex flex-wrap items-center gap-3.5 mb-5">

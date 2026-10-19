@@ -15,7 +15,9 @@ import {
 } from "@/components/marketing/vs-layout";
 import { JsonLd } from "@/components/seo/json-ld";
 import { breadcrumbJsonLd } from "@/components/seo/schema";
+import Link from "next/link";
 import { PRICING_TIERS } from "@/lib/stripe/prices";
+import { researchPath, STAFFING_COSTS_2026 } from "@/lib/research/reports";
 import type { FaqItem } from "@/components/marketing/faq-accordion";
 import type { Metadata } from "next";
 
@@ -23,13 +25,13 @@ export const metadata: Metadata = {
   alternates: { canonical: "/vs/staffing-agencies" },
   title: "DSO Hire vs Staffing Agencies: Dental Recruiting Costs Compared",
   description:
-    "Dental staffing agencies charge 15–25% of first-year salary per placement ($30,000–$50,000 for an associate dentist). DSO Hire is a flat-fee hiring platform with unlimited hires. An honest comparison, including when an agency is still the right call.",
+    "The one published dental agency rate card lists 20–30% of first-year salary per placement (about $34,000–$51,000 for a general dentist at the BLS median wage). DSO Hire is a flat-fee hiring platform with unlimited hires. An honest comparison, including when an agency is still the right call.",
 };
 
 const ROWS: VsRow[] = [
   {
     dimension: "Cost per hire",
-    them: "15–25% of first-year salary, per placement. A $200K associate dentist costs $30,000–$50,000 in fees. Ten hires a year can clear $200K in fees alone.",
+    them: "Typically 20–30% of first-year salary, per placement. At the BLS median general-dentist wage ($170,950), that is about $34,000–$51,000 for one associate. Ten hygienist hires at that rate run about $196,000–$294,000 in fees.",
     us: "Flat monthly subscription, unlimited hires. The platform costs the same whether you hire two people this year or forty.",
   },
   {
@@ -61,7 +63,7 @@ const fmt = (n: number) => `$${n.toLocaleString("en-US")}`;
 const FAQ_ITEMS: FaqItem[] = [
   {
     q: "How much do dental staffing agencies charge?",
-    a: "Typically 15–25% of first-year salary, per placement. For a $200K associate dentist, that is $30,000–$50,000 in fees for a single hire.",
+    a: "Few agencies publish their fees. The one published dental rate card we found lists 20 to 30 percent of first-year base salary, per placement. At the BLS median general-dentist wage of $170,950 (May 2025), that is about $34,000 to $51,000 for a single associate hire.",
   },
   {
     q: "How is DSO Hire priced instead?",
@@ -108,6 +110,22 @@ export default function VsStaffingAgenciesPage() {
         body="A genuinely hard executive search with a tight deadline, a market you don't know, or temp coverage for tomorrow morning: agencies and shift marketplaces earn their fees there, and we'd tell you to use one. DSO Hire exists so those are the ONLY hires you pay a premium for, instead of all of them. (Run your own numbers with the calculator on our pricing page.)"
       />
       <VsFaq items={FAQ_ITEMS} />
+      <section className="px-6 sm:px-14 pb-20 max-w-[1240px] mx-auto">
+        <p className="max-w-[860px] text-xs text-slate-meta leading-[1.65]">
+          <span className="font-bold text-slate-body">Sources:</span> fee range from
+          Frontline Source Group&rsquo;s published rate card (direct hire, 20 to 30 percent of
+          first-year base salary); wages from BLS Occupational Employment and Wage Statistics,
+          May 2025 national medians (general dentist $170,950; dental hygienist $98,100). Dollar
+          amounts are our arithmetic on those inputs. Full sourcing in{" "}
+          <Link
+            href={researchPath(STAFFING_COSTS_2026.slug)}
+            className="font-semibold text-heritage-deep underline underline-offset-2 hover:text-ink"
+          >
+            {STAFFING_COSTS_2026.shortTitle}
+          </Link>
+          .
+        </p>
+      </section>
       <VsCta
         headline="Keep agencies for the searches that need them."
         sub="Move the other 90% of your hiring to a flat fee: applicants ranked by fit, your pipeline, your candidate relationships, compounding."

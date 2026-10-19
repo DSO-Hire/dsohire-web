@@ -481,7 +481,7 @@ const PROMISES = [
   {
     Icon: Send,
     title: "You apply direct",
-    body: "Your resume goes straight to the DSO that posted the job, not to an agency that takes 15-25% of your first-year salary, not to a recruiter who'll pitch you to half a dozen practices you didn't ask about. Direct applications, every time.",
+    body: "Your resume goes straight to the DSO that posted the job, not to an agency that charges your employer 20–30% of your first-year salary, not to a recruiter who'll pitch you to half a dozen practices you didn't ask about. Direct applications, every time.",
   },
   {
     Icon: Heart,

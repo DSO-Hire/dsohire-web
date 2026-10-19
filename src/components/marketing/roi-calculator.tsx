@@ -256,10 +256,12 @@ export function RoiCalculator({
             />
 
             <p className="mt-5 text-[11.5px] text-slate-meta leading-snug max-w-[440px]">
-              Illustrative math: your inputs, our flat fees. Agency placement
-              fees typically run 15–25% of first-year salary; sponsored
-              listings on the major boards commonly run $200–$600 per posting
-              per month. Adjust both to match your reality.
+              Illustrative math: your inputs, our flat fees. The one published
+              dental agency rate card lists 20–30% of first-year salary.
+              Indeed and LinkedIn bill per click or per started application
+              against a budget you set (LinkedIn&rsquo;s example: $10 a day for
+              30 days); DentalPost is $259 a month for one active post. Adjust
+              both to match your reality.
             </p>
           </div>
 

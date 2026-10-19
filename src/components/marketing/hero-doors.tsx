@@ -19,8 +19,8 @@
  * Above the fold: server component, every loop is pure CSS (.hd-* in
  * globals.css). Reduced motion shows a complete static frame (all receipt
  * rows + final total; the first job card). Preview data is sample data and
- * says so. Agency fees = 20% of first-year salary (the site's stated
- * 15–25% range, midpoint).
+ * says so. Agency fees = 20% of first-year salary (low end of the 20–30%
+ * published rate card cited in /research/dental-staffing-agency-costs-2026).
  */
 
 import Link from "next/link";

@@ -144,7 +144,7 @@ export default function SwitchPage() {
             {
               icon: Users,
               title: "From staffing agencies",
-              body: "Keep agencies for the searches that truly need them. Stop paying 15–25% for the hygienist your office manager found herself.",
+              body: "Keep agencies for the searches that truly need them. Stop paying 20–30% of salary for the hygienist your office manager found herself.",
             },
             {
               icon: Inbox,

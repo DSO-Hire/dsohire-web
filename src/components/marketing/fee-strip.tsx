@@ -5,16 +5,19 @@
  * percentage is abstract, twenty squares with four of them gone is not.
  * Each block is 5% of one associate's first-year salary.
  *
- * Numbers are the same ranges the rest of the site already publishes
- * (agency 15–25% of first-year salary; sponsored listings commonly
- * $200–$600 per posting per month) and the example salary is labeled
- * illustrative. Entry price comes from prices.ts via props.
+ * Numbers are sourced in /research/dental-staffing-agency-costs-2026
+ * (dossier: docs/research/staffing-agency-costs-2026.md): agency 20–30% of
+ * first-year salary (Frontline Source Group rate card); example salary is
+ * the BLS May 2025 median general-dentist wage; DentalPost $259/month for
+ * one active post; LinkedIn's own $10/day example; Indeed is auction priced.
+ * Entry price comes from prices.ts via props.
  */
 
 import { Eyebrow } from "@/components/brand/eyebrow";
 import { cn } from "@/lib/utils";
 
-const EXAMPLE_SALARY = 180_000;
+// BLS OEWS May 2025 national median, general dentists (29-1021).
+const EXAMPLE_SALARY = 170_950;
 
 export function FeeStrip({ entryPrice }: { entryPrice: number }) {
   return (
@@ -31,28 +34,28 @@ export function FeeStrip({ entryPrice }: { entryPrice: number }) {
           <span className="text-heritage">We charge neither.</span>
         </h2>
         <p className="text-base text-slate-body leading-[1.7] max-w-[620px] mb-12 text-pretty">
-          Here is one associate dentist hire (illustrative{" "}
-          <span className="tabular">${(EXAMPLE_SALARY / 1000).toFixed(0)}K</span>{" "}
-          first-year salary) priced three ways. Every square is 5% of that
-          salary.
+          Here is one associate dentist hire (at the BLS median
+          general-dentist wage, about{" "}
+          <span className="tabular">${(EXAMPLE_SALARY / 1000).toFixed(0)}K</span>)
+          priced three ways. Every square is 5% of that salary.
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-px bg-[var(--rule)] border border-[var(--rule)] shadow-2">
           <FeeCol
             label="Staffing agency"
-            figure="15–25%"
-            unit="of first-year salary, per hire"
-            body="A $27K to $45K invoice for one associate, and the next hire starts the meter over. Routine roles move at the agency's pace."
-            taken={4}
-            takenLabel="20% midpoint, gone"
+            figure="20–30%"
+            unit="of first-year salary, per hire (published rate card)"
+            body="About a $34K to $51K invoice for one associate, and the next hire starts the meter over. Routine roles move at the agency's pace."
+            taken={5}
+            takenLabel="25% midpoint, gone"
             tone="loss"
             delay={0}
           />
           <FeeCol
             label="Per-listing job boards"
-            figure="$200–$600"
-            unit="per listing, per location, per month"
-            body="Post the same hygienist role at five offices and you pay five meters, every month it stays open. Then re-enter it everywhere."
+            figure="$259/mo"
+            unit="DentalPost, for one active post at a time"
+            body="Indeed and LinkedIn bill per click or per started application against a budget you set (LinkedIn's own example: $10 a day for 30 days). Every sponsored post runs its own meter, and you re-enter the role everywhere."
             meter
             tone="loss"
             delay={90}
@@ -133,7 +136,7 @@ function FeeCol({
             keep ? "text-heritage-bright" : "text-stage-brick"
           )}
         >
-          {meter ? "5 locations × 12 months, all billed" : takenLabel}
+          {meter ? "5 sponsored posts, each billed while it runs" : takenLabel}
         </div>
       </div>
 
@@ -187,7 +190,7 @@ function ListingMeter() {
   return (
     <div
       role="img"
-      aria-label="Five locations each billed every month for a year"
+      aria-label="Five sponsored posts, each billed while it runs"
       className="fee-meter grid gap-1"
     >
       {Array.from({ length: 5 }, (_, r) => (
