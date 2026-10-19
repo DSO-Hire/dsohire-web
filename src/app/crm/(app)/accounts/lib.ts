@@ -89,6 +89,8 @@ export type AccountLite = {
   do_not_contact_at?: string | null;
   do_not_contact_reason?: string | null;
   do_not_contact_note?: string | null;
+  email_subject?: string | null;
+  email_opener?: string | null;
 };
 
 export type OppLite = {

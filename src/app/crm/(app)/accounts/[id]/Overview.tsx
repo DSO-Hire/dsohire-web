@@ -369,6 +369,8 @@ export default function Overview({
               </div>
               <Area idp="pf" name="hiring_signal" label="HIRING SIGNAL" value={a.hiring_signal} rows={2} max={2000} />
               <Area idp="pf" name="growth_signal" label="GROWTH SIGNAL" value={a.growth_signal} rows={2} max={2000} />
+              <Txt idp="pf" name="email_subject" label="EMAIL SUBJECT (FIRST TOUCH)" value={a.email_subject} max={200} placeholder={`${a.name}'s hiring`} />
+              <Area idp="pf" name="email_opener" label="EMAIL OPENING: THE SPECIFIC, TRUE REASON TO WRITE" value={a.email_opener} rows={4} max={2000} />
               <div>
                 <button className="dbtn dbtn-green" type="submit">
                   Save profile

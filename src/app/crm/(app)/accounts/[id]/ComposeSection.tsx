@@ -60,7 +60,10 @@ export default async function ComposeSection({
     });
   }
 
-  const signal = (a.hiring_signal ?? "").trim() || (a.growth_signal ?? "").trim();
+  /* The opening comes from the account's email-ready opener, never from
+     the raw research notes (those read like "STRONG. 2026-10-19: ..."). */
+  const opener = (a.email_opener ?? "").trim();
+  const subjectLine = (a.email_subject ?? "").trim() || `${a.name}'s hiring`;
   /* opted-out people are never offered as recipients */
   const recipients: ComposeContact[] = contacts.filter((c) => !c.do_not_contact_at).map((c) => ({
     id: c.id,
@@ -82,10 +85,12 @@ export default async function ComposeSection({
         group: a.name,
         demo_link: demoLink ?? "",
         calc_link: calcLinkFor(a.locations, a.open_roles),
-        signal: signal || signalPlaceholder(a.name),
+        signal: opener || signalPlaceholder(a.name),
+        opener: opener || signalPlaceholder(a.name),
+        subject: subjectLine,
         referrer: "",
       }}
-      hasSignal={!!signal}
+      hasSignal={!!opener}
       signature={settings.email_signature ?? ""}
       mailingAddress={settings.mailing_address ?? ""}
       footerAvailable={!setRes.error}

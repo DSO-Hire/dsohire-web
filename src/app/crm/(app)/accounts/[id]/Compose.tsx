@@ -237,9 +237,9 @@ export default function Compose({
               <div className="cmp-warns" aria-live="polite">
                 {!hasSignal ? (
                   <p className="cmp-warn">
-                    No hiring or growth signal on file, so the draft has a bracketed placeholder. The outreach rule: no
-                    specific, true reason to write to {group}, don&apos;t send yet. Add a signal in the profile or
-                    replace the placeholder.
+                    No email opening on file for {group}, so the draft has a bracketed placeholder. The outreach rule:
+                    no specific, true reason to write, don&apos;t send yet. Write the opening on the Overview tab (the
+                    research notes there help) or replace the placeholder here.
                   </p>
                 ) : null}
                 {hasSignal && placeholderLeft ? (

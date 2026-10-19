@@ -24,7 +24,9 @@ export const MERGE_FIELDS: [string, string][] = [
   ["{group}", "The account name"],
   ["{demo_link}", "Personalized live demo link for the group"],
   ["{calc_link}", "Cost calculator pre-filled with their locations and open roles"],
-  ["{signal}", "The account's hiring signal, else its growth signal"],
+  ["{subject}", "The account's email subject line, else \"<group>'s hiring\""],
+  ["{opener}", "The account's email opening (its specific, true reason to write)"],
+  ["{signal}", "Same as {opener} (older templates)"],
   ["{referrer}", "Who referred you (left blank to fill in by hand)"],
 ];
 
@@ -35,14 +37,14 @@ export const OPT_OUT_LINE = "Not the right person? Tell me who is, or reply \"no
 export const LINKEDIN_LIMIT = 300;
 /* Some mail apps cut mailto: bodies past roughly this many characters. */
 export const MAILTO_SOFT_LIMIT = 1800;
-export const SIGNAL_MARK = "[Add one specific, true observation about";
+export const SIGNAL_MARK = "[Write the opening for";
 
 export function isCold(key: string): boolean {
   return key.startsWith("cold_");
 }
 
 export function signalPlaceholder(group: string): string {
-  return `${SIGNAL_MARK} ${group} before sending]`;
+  return `${SIGNAL_MARK} ${group} on its Overview tab: one specific, true observation about their hiring, then how DSO Hire fits it]`;
 }
 
 /* Same formula as the link builder: hires about 1.5x locations rounded to
@@ -71,11 +73,13 @@ export type MergeVars = {
   demo_link: string;
   calc_link: string;
   signal: string;
+  opener: string;
+  subject: string;
   referrer: string;
 };
 
 export function mergeText(text: string, vars: MergeVars): string {
-  return text.replace(/\{(first_name|group|demo_link|calc_link|signal|referrer)\}/g, (_, k: keyof MergeVars) => vars[k]);
+  return text.replace(/\{(first_name|group|demo_link|calc_link|signal|opener|subject|referrer)\}/g, (_, k: keyof MergeVars) => vars[k]);
 }
 
 export type Footer = { signature: string; mailingAddress: string };

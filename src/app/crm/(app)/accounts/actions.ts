@@ -134,6 +134,8 @@ const SECTION_FIELDS: Record<string, Field[]> = {
     { k: "hiring_owner_title", t: "str", label: "Who owns hiring", max: 200 },
     { k: "hiring_signal", t: "str", label: "Hiring signal", max: 2000 },
     { k: "growth_signal", t: "str", label: "Growth signal", max: 2000 },
+    { k: "email_subject", t: "str", label: "Email subject", max: 200 },
+    { k: "email_opener", t: "str", label: "Email opening", max: 2000 },
   ],
 };
 
