@@ -30,6 +30,9 @@ export const MERGE_FIELDS: [string, string][] = [
   ["{referrer}", "Who referred you (left blank to fill in by hand)"],
 ];
 
+/* The intro ask sent to a connector inside the group. */
+export const WARM_INSIDE_KEY = "warm_inside_connector";
+
 /* The cold email sequence, in send order. */
 export const COLD_SEQUENCE = ["cold_first", "cold_follow_1", "cold_follow_2"] as const;
 

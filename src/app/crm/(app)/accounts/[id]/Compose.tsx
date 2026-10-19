@@ -20,6 +20,7 @@ import {
   isCold,
   mailtoHref,
   nextColdKey,
+  WARM_INSIDE_KEY,
   type MergeVars,
   type TemplateRec,
 } from "./compose-lib";
@@ -99,15 +100,20 @@ export default function Compose({
   initiallyOpen: boolean;
 }) {
   const sentKeys = useMemo(() => new Set(sent.map((s) => s.key)), [sent]);
-  const initialKey = useMemo(() => {
+  /* A connector (someone who knows the group but doesn't own hiring) gets
+     the warm intro ask; everyone else gets the next email in the cold
+     sequence. */
+  const keyFor = (cid: string): string => {
+    const role = contacts.find((c) => c.id === cid)?.role;
+    if (role === "connector" && templates.some((t) => t.key === WARM_INSIDE_KEY)) return WARM_INSIDE_KEY;
     const next = nextColdKey(sentKeys);
     if (next && templates.some((t) => t.key === next)) return next;
-    return templates[0]?.key ?? "";
-  }, [sentKeys, templates]);
-
+    return templates.find((t) => t.key === "cold_first")?.key ?? templates[0]?.key ?? "";
+  };
   const [open, setOpen] = useState(initiallyOpen);
-  const [tplKey, setTplKey] = useState(initialKey);
   const [contactId, setContactId] = useState(() => defaultContact(contacts));
+  const [initialKey] = useState(() => keyFor(contactId));
+  const [tplKey, setTplKey] = useState(initialKey);
   const footer = { signature, mailingAddress };
 
   const build = (key: string, cid: string) => {
@@ -221,7 +227,16 @@ export default function Compose({
                 </label>
                 <label className="cmp-field">
                   <span>TO</span>
-                  <select value={contactId} onChange={(e) => pick(tplKey, e.target.value)} disabled={!contacts.length}>
+                  <select
+                    value={contactId}
+                    onChange={(e) => {
+                      /* switching person re-picks the template only when the
+                         current one was the automatic choice */
+                      const auto = tplKey === WARM_INSIDE_KEY || COLD_SEQUENCE.includes(tplKey as (typeof COLD_SEQUENCE)[number]);
+                      pick(auto ? keyFor(e.target.value) : tplKey, e.target.value);
+                    }}
+                    disabled={!contacts.length}
+                  >
                     {contacts.length === 0 ? <option value="">No contacts yet</option> : null}
                     {contacts.map((c) => (
                       <option key={c.id} value={c.id}>
