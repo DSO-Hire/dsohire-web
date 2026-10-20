@@ -1060,6 +1060,13 @@ export default function HiringShortageReport() {
             openings in one pipeline, with a flat monthly subscription and no placement fees.{" "}
             <Link href="/pricing">See plan details</Link>.
           </p>
+          <p>
+            Founder Cam Eslinger walks through these findings in a LinkedIn article,{" "}
+            <a href="https://www.linkedin.com/pulse/hygiene-chair-still-empty-heres-what-2026-data-says-cam-eslinger-bxaoc">
+              The hygiene chair is still empty
+            </a>
+            .
+          </p>
         </Prose>
       </ReportSection>
 
