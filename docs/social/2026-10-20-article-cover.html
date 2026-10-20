@@ -1,0 +1,76 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0d1729;--navy:#14233f;--cream:#f4efe4;--dim:#9aa6b6;--faint:rgba(244,239,228,.10);
+  --mint:#8db8a3;--heritage:#4d7a60;--copper:#d0835f;--copper-dim:rgba(208,131,95,.16)
+}
+html,body{width:1920px;height:1080px;background:var(--ink);font-family:Manrope,sans-serif;color:var(--cream);-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1,"lnum" 1}
+.wrap{position:relative;width:1920px;height:1080px;overflow:hidden;padding:72px 110px 64px;display:flex;flex-direction:column;
+  background:
+    radial-gradient(900px 620px at 85% 62%, rgba(77,122,96,.30), transparent 62%),
+    radial-gradient(700px 500px at 0% 0%, rgba(41,64,104,.55), transparent 70%),
+    linear-gradient(180deg,#111d33 0%,#0c1527 100%)}
+/* hairline grid texture */
+.wrap:before{content:"";position:absolute;inset:0;background-image:
+  linear-gradient(rgba(244,239,228,.035) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(244,239,228,.035) 1px,transparent 1px);
+  background-size:54px 54px;mask-image:linear-gradient(180deg,transparent 0%,#000 30%,#000 75%,transparent 100%)}
+.top{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center}
+.top img{height:72px}
+.top span{font-size:15px;font-weight:700;letter-spacing:4px;color:var(--dim);text-transform:uppercase}
+.eyebrow{position:relative;z-index:1;margin-top:40px;font-size:17px;font-weight:800;letter-spacing:5px;text-transform:uppercase;color:var(--mint);display:flex;align-items:center;gap:14px}
+.eyebrow i{width:36px;height:3px;background:var(--mint)}
+h1{position:relative;z-index:1;margin-top:20px;font-size:80px;line-height:.98;font-weight:800;letter-spacing:-3.6px}
+h1 span{display:block}
+h1 .b{color:var(--mint)}
+
+
+.viz{position:relative;z-index:1;margin-top:60px}
+.row{margin-bottom:46px}
+.row .lab{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+.row .lab span{font-size:16px;font-weight:800;letter-spacing:3px;text-transform:uppercase}
+.row .lab b{font-size:64px;font-weight:800;letter-spacing:-2.6px;line-height:1}
+.hy .lab span,.hy .lab b{color:var(--copper)}
+.da .lab span{color:var(--dim)} .da .lab b{color:var(--cream)}
+.cells{display:grid;grid-template-columns:repeat(10,1fr);gap:10px}
+.cell{height:66px;border:2px solid rgba(244,239,228,.16);position:relative;overflow:hidden}
+.cell i{position:absolute;left:0;top:0;bottom:0;display:block}
+.hy .cell i{background:linear-gradient(160deg,#e3a07f,#c0704d)}
+.da .cell i{background:linear-gradient(160deg,#9cc6b1,#5e9078)}
+.cap{margin-top:12px;font-size:19px;color:var(--dim);font-weight:500}
+.stats{position:relative;z-index:1;margin-top:auto;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--faint);border-bottom:1px solid var(--faint)}
+.stats div{padding:26px 0}
+.stats div+div{padding-left:36px;border-left:1px solid var(--faint)}
+.stats b{display:block;font-size:52px;font-weight:800;letter-spacing:-2px;line-height:1;color:var(--cream)}
+.stats span{display:block;margin-top:10px;font-size:18px;line-height:1.35;color:var(--dim);font-weight:500}
+.cta{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;padding:22px 0 0}
+.cta .l{font-size:24px;font-weight:700;letter-spacing:-.4px}
+.cta .r{font-size:21px;font-weight:800;color:var(--mint);display:flex;align-items:center;gap:12px}
+.cta .r i{display:inline-block;width:32px;height:32px;background:var(--mint);color:var(--ink);font-style:normal;font-size:19px;line-height:32px;text-align:center}
+.src{position:relative;z-index:1;margin-top:18px;font-size:13.5px;line-height:1.5;color:rgba(154,166,182,.85)}
+
+.grid2{position:relative;z-index:1;display:grid;grid-template-columns:1fr 760px;gap:110px;margin-top:auto;margin-bottom:auto;align-items:center}
+.grid2 h1{margin-top:22px;font-size:92px}
+.grid2 .viz{margin-top:0}
+.grid2 .row:last-child{margin-bottom:0}
+.foot{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--faint);padding-top:24px}
+.foot .src{margin-top:0;max-width:1100px}
+.foot .r{font-size:22px;font-weight:800;color:var(--mint)}
+</style></head><body><div class="wrap">
+  <div class="top"><img src="logo-dark.svg" alt="DSO Hire"><span>dsohire.com/research</span></div>
+  <div class="grid2">
+    <div>
+      <div class="eyebrow" style="margin-top:0"><i></i>The dental hiring shortage, 2026</div>
+      <h1><span>The hygiene chair</span><span class="b">is still empty.</span></h1>
+    </div>
+    <div class="viz">
+
+    <div class="row hy"><div class="lab"><span>Dental hygienists</span><b>42.1%</b></div><div class="cells"><div class="cell"><i style="width:100.0%"></i></div><div class="cell"><i style="width:100.0%"></i></div><div class="cell"><i style="width:100.0%"></i></div><div class="cell"><i style="width:100.0%"></i></div><div class="cell"><i style="width:21.0%"></i></div><div class="cell"><i style="width:0.0%"></i></div><div class="cell"><i style="width:0.0%"></i></div><div class="cell"><i style="width:0.0%"></i></div><div class="cell"><i style="width:0.0%"></i></div><div class="cell"><i style="width:0.0%"></i></div></div><div class="cap">of dentists recruiting a hygienist filled the position</div></div>
+    <div class="row da"><div class="lab"><span>Dental assistants</span><b>66.8%</b></div><div class="cells"><div class="cell"><i style="width:100.0%"></i></div><div class="cell"><i style="width:100.0%"></i></div><div class="cell"><i style="width:100.0%"></i></div><div class="cell"><i style="width:100.0%"></i></div><div class="cell"><i style="width:100.0%"></i></div><div class="cell"><i style="width:100.0%"></i></div><div class="cell"><i style="width:68.0%"></i></div><div class="cell"><i style="width:0.0%"></i></div><div class="cell"><i style="width:0.0%"></i></div><div class="cell"><i style="width:0.0%"></i></div></div><div class="cap">of dentists recruiting an assistant filled the position</div></div>
+      </div>
+  </div>
+  <div class="foot"><div class="src">Source: ADA Health Policy Institute, State of the U.S. Dental Economy, Q3 2026. Private-practice dentists who recruited in the prior three months. Each square is 10 percent.</div><span class="r">dsohire.com/research</span></div>
+</div></body></html>

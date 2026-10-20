@@ -2,6 +2,7 @@ import Link from "next/link";
 import { logOutreach } from "../actions";
 import { OUTREACH_KINDS } from "../lib";
 import ComposeSection from "./ComposeSection";
+import DueChips from "./DueChips";
 import { Hidden } from "../ui";
 import { FEED_FILTERS, buildFeed, fmtWhen } from "./timeline";
 import type { SectionProps } from "./types";
@@ -70,6 +71,7 @@ export default function Activity({ a, contacts, opps, events, demo, demoLink, to
           <span className="sl-inline-l">NEXT STEP</span>
           <input name="next_step" maxLength={300} placeholder="Optional, replaces the current one" className="ac-grow" aria-label="Next step (optional)" />
           <input type="date" name="next_step_due" min={today} aria-label="Next step due (optional)" />
+          <DueChips today={today} />
           <button className="dbtn dbtn-green dbtn-sm" type="submit">
             Log it
           </button>
