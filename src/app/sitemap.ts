@@ -24,7 +24,9 @@
  */
 
 import type { MetadataRoute } from "next";
-import { SALARY_ROLES, ALL_STATE_SLUGS } from "@/lib/comp/salary";
+import { SALARY_ROLES, stateSlug } from "@/lib/comp/salary";
+import { isDuplicateRole, stateSalaryInSitemap } from "@/lib/comp/salary-seo";
+import { US_STATES } from "@/lib/us-states";
 import { getPublicJobsForDistribution } from "@/lib/distribution/public-jobs";
 import { PRICING_TIER_ORDER } from "@/lib/stripe/prices";
 import { CORPORATE_FUNCTION_SLUGS } from "@/lib/corporate/functions";
@@ -133,7 +135,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
   // Role-level salary hubs (/salary/[role]).
-  const salaryHubs = SALARY_ROLES.map((role) => ({
+  const salaryHubs = SALARY_ROLES.filter((role) => !isDuplicateRole(role.slug)).map((role) => ({
     url: `${SITE_URL}/salary/${role.slug}`,
     lastModified: SALARY_CONTENT_UPDATED,
     changeFrequency: "monthly" as const,
@@ -142,8 +144,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Programmatic salary pages: each SOC-bearing role × every state.
   // (Metro pages /salary/[role]/[state]/[metro] are discovered via internal
   // links from the state pages rather than enumerated here.)
+  // Only pages with their own state data, and no duplicate-role pages
+  // (rules in src/lib/comp/salary-seo.ts).
   const salary = SALARY_ROLES.flatMap((role) =>
-    ALL_STATE_SLUGS.map((state) => ({
+    US_STATES.filter((st) => stateSalaryInSitemap(role, st.code)).map((st) => stateSlug(st.name)).map((state) => ({
       url: `${SITE_URL}/salary/${role.slug}/${state}`,
       lastModified: SALARY_CONTENT_UPDATED,
       changeFrequency: "monthly" as const,

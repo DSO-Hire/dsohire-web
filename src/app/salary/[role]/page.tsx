@@ -7,6 +7,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { canonicalRoleSlug } from "@/lib/comp/salary-seo";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { JsonLd } from "@/components/seo/json-ld";
 import { breadcrumbJsonLd, faqPageJsonLd } from "@/components/seo/schema";
@@ -53,7 +54,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     description: med
       ? `The U.S. median ${role.searchTitle.toLowerCase()} salary is ${med} a year (BLS, ${OEWS_VINTAGE}). Compare pay, employment and job growth in every state, with the full pay range from the 10th to 90th percentile.`
       : `${role.searchTitle} salary across the U.S.: national median plus a state-by-state breakdown, based on the latest BLS data.`,
-    alternates: { canonical: `/salary/${p.role}` },
+    alternates: { canonical: `/salary/${canonicalRoleSlug(p.role)}` },
   };
 }
 

@@ -14,6 +14,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { canonicalRoleSlug, stateSalaryRobots } from "@/lib/comp/salary-seo";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { JsonLd } from "@/components/seo/json-ld";
 import { breadcrumbJsonLd, faqPageJsonLd } from "@/components/seo/schema";
@@ -89,7 +90,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   return {
     title,
     description,
-    alternates: { canonical: `/salary/${p.role}/${p.state}` },
+    alternates: { canonical: `/salary/${canonicalRoleSlug(p.role)}/${p.state}` },
+    robots: stateSalaryRobots(r.role, r.state.code),
   };
 }
 

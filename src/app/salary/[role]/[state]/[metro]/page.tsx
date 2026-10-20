@@ -10,6 +10,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { canonicalRoleSlug, metroPrincipalStateSlug, metroSalaryRobots } from "@/lib/comp/salary-seo";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { JsonLd } from "@/components/seo/json-ld";
 import { breadcrumbJsonLd, faqPageJsonLd, type FaqEntry } from "@/components/seo/schema";
@@ -65,7 +66,10 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     description: med
       ? `${r.role.searchTitle}s in the ${city} area earn a median ${med} a year (BLS, ${OEWS_VINTAGE}). Full pay range, local employment, and how ${city} compares to ${r.state.name} and the U.S.`
       : `${r.role.searchTitle} pay in ${city}: median, the typical range, and how it compares to ${r.state.name} and the U.S., based on the latest BLS data.`,
-    alternates: { canonical: `/salary/${p.role}/${p.state}/${p.metro}` },
+    alternates: {
+      canonical: `/salary/${canonicalRoleSlug(p.role)}/${metroPrincipalStateSlug(metro.name) ?? p.state}/${p.metro}`,
+    },
+    robots: metroSalaryRobots(r.role, metro.code),
   };
 }
 
