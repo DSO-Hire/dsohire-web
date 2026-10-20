@@ -13,21 +13,23 @@ import { loadAllGuides } from "@/lib/guides/loader";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Dental Hiring Guides",
+  title: "Dental Hiring and Career Guides",
   description:
-    "Practical guides to dental hiring from DSO Hire: multi-location hiring for DSOs, cutting time-to-hire at a dental practice, and screening candidates for culture fit.",
+    "Practical guides from DSO Hire: multi-location hiring for DSOs, cutting time-to-hire, screening for culture fit, and how to become a licensed dental hygienist in Texas.",
   alternates: { canonical: "/guides" },
   openGraph: {
-    title: "Dental Hiring Guides · DSO Hire",
+    title: "Dental Hiring and Career Guides · DSO Hire",
     description:
-      "Practical guides to dental hiring: multi-location hiring, time-to-hire, and culture-fit screening.",
+      "Practical guides to dental hiring and dental careers: multi-location hiring, time-to-hire, culture-fit screening, and Texas hygienist licensure.",
     url: "https://dsohire.com/guides",
     type: "website",
   },
 };
 
 export default function GuidesIndexPage() {
-  const guides = loadAllGuides();
+  const all = loadAllGuides();
+  const guides = all.filter((g) => g.audience === "employer");
+  const careerGuides = all.filter((g) => g.audience === "candidate");
   return (
     <SiteShell ctaIntent="dso">
       <section className="pt-[140px] pb-20 px-6 sm:px-14">
@@ -70,6 +72,41 @@ export default function GuidesIndexPage() {
               </li>
             ))}
           </ul>
+
+          {careerGuides.length > 0 && (
+            <>
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.8px] text-ink mt-16 mb-3">
+                Career guides for dental professionals
+              </h2>
+              <p className="text-sm text-slate-body leading-relaxed mb-6 max-w-[620px]">
+                Licensing and career paths, checked against official sources
+                and dated so you know how current they are.
+              </p>
+              <ul className="grid grid-cols-1 gap-4">
+                {careerGuides.map((guide) => (
+                  <li key={guide.slug}>
+                    <Link
+                      href={`/guides/${guide.slug}`}
+                      className="block border border-[var(--rule)] bg-card p-6 sm:p-8 hover:bg-cream/40 transition-colors"
+                    >
+                      <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
+                        Career guide
+                      </div>
+                      <div className="text-xl sm:text-2xl font-extrabold tracking-[-0.5px] text-ink mb-2">
+                        {guide.heading}
+                      </div>
+                      <p className="text-sm text-slate-body leading-relaxed mb-3 max-w-[640px]">
+                        {guide.metaDescription}
+                      </p>
+                      <span className="inline-flex items-center gap-1.5 text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep">
+                        Read the guide <ArrowRight className="h-3 w-3" aria-hidden />
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
       </section>
       <ReportSignup page="guides" />

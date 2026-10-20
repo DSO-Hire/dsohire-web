@@ -43,6 +43,20 @@ export interface Guide {
   /** Markdown body with the leading H1 stripped (rendered separately). */
   body: string;
   faq: GuideFaqItem[];
+  /**
+   * Who the guide is written for. "employer" (default) = the original
+   * hiring guides; "candidate" = career guides for dental professionals.
+   * Drives the eyebrow, breadcrumb label, nav CTA and bottom CTA.
+   */
+  audience: "employer" | "candidate";
+  /** Per-guide publish timestamp; falls back to GUIDES_DATE_PUBLISHED. */
+  datePublished: string;
+  /** ISO date (YYYY-MM-DD) of the last editorial review, if any. */
+  lastReviewed: string | null;
+  /** Visible byline, e.g. "By DSO Hire editorial. Reviewed by ...". */
+  byline: string | null;
+  /** Candidate guides: filtered /jobs link for the bottom CTA. */
+  jobsHref: string | null;
 }
 
 /** Order matters — this drives the /guides index page. */
@@ -50,6 +64,7 @@ export const GUIDE_SLUGS = [
   "dso-multi-location-hiring",
   "reduce-time-to-hire-dental-practice",
   "dental-culture-fit-screening",
+  "how-to-become-dental-hygienist-texas",
 ] as const;
 
 export function listGuideSlugs(): string[] {
@@ -106,7 +121,20 @@ export function loadGuide(slug: string): Guide {
     heading,
     body,
     faq: parseGuideFaq(content),
+    audience: data.audience === "candidate" ? "candidate" : "employer",
+    datePublished: (data.datePublished as string) ?? GUIDES_DATE_PUBLISHED,
+    lastReviewed: (data.lastReviewed as string) ?? null,
+    byline: (data.byline as string) ?? null,
+    jobsHref: (data.jobsHref as string) ?? null,
   };
+}
+
+/** "2026-10-20" -> "October 20, 2026" (UTC, so no off-by-one-day drift). */
+export function formatGuideDate(isoDate: string): string {
+  return new Date(`${isoDate.slice(0, 10)}T12:00:00Z`).toLocaleDateString(
+    "en-US",
+    { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" },
+  );
 }
 
 export function loadAllGuides(): Guide[] {
@@ -126,7 +154,8 @@ export function buildGuideArticleJsonLd(guide: Guide): Record<string, unknown> {
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
     // Site-wide OG card (1200×630) — guides don't ship their own hero art.
     image: [`${SITE_URL}/opengraph-image`],
-    datePublished: GUIDES_DATE_PUBLISHED,
+    datePublished: guide.datePublished,
+    ...(guide.lastReviewed ? { dateModified: guide.lastReviewed } : {}),
     author: {
       "@type": "Organization",
       name: "DSO Hire",

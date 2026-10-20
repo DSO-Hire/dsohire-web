@@ -88,6 +88,8 @@ const ROUTES: SitemapRoute[] = [
   { path: "/guides/dso-multi-location-hiring", priority: 0.7, changeFrequency: "monthly", lastModified: GUIDES_DATE_PUBLISHED },
   { path: "/guides/reduce-time-to-hire-dental-practice", priority: 0.7, changeFrequency: "monthly", lastModified: GUIDES_DATE_PUBLISHED },
   { path: "/guides/dental-culture-fit-screening", priority: 0.7, changeFrequency: "monthly", lastModified: GUIDES_DATE_PUBLISHED },
+  // Career guide (candidate audience), published + last reviewed 2026-10-20.
+  { path: "/guides/how-to-become-dental-hygienist-texas", priority: 0.7, changeFrequency: "monthly", lastModified: "2026-10-20T09:00:00-05:00" },
 
   // Role / audience landing pages — keep all of them indexable so each
   // role-specific search query has a tailored landing page to rank.

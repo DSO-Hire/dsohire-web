@@ -60,6 +60,7 @@ ${PRICE_LINES}
 - [How DSOs hire across multiple locations](${SITE}/guides/dso-multi-location-hiring): Centralized pipelines, per-location visibility, licensing across states, where temp marketplaces fall short for permanent roles.
 - [How to reduce time-to-hire at a dental practice](${SITE}/guides/reduce-time-to-hire-dental-practice): The self-inflicted delays (response speed, screening order, decision bottlenecks) and how to fix them.
 - [Screening dental candidates for culture fit](${SITE}/guides/dental-culture-fit-screening): Making fit measurable with office profiles, structured questions, and two-sided fit scoring.
+- [How to become a dental hygienist in Texas (2026)](${SITE}/guides/how-to-become-dental-hygienist-texas): Verified TSBDE licensure steps (CODA program, NBDHE, ADEX or CRDTS-SRTA clinical exam, jurisprudence, fingerprints), license by credentials for out-of-state hygienists, renewal and CE, local anesthesia rules, published exam fees, and Texas pay from BLS OEWS May 2025. 20 cited sources, last reviewed October 20, 2026.
 
 ## Research
 
