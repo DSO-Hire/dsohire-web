@@ -38,6 +38,7 @@ import {
 import { syncCrmFromSubscription, syncCrmOnCancel } from "@/lib/crm/stripe-sync";
 import { mrrFromPrice } from "@/lib/crm/match";
 import { autoPauseOverflowForDowngrade } from "@/lib/billing/caps";
+import { scheduleJobIndexingSync } from "@/lib/seo/job-indexing";
 import { recordEvent, EVENT_TYPE_GOAL } from "@/lib/analytics/record-event";
 
 // Raw body required for signature verification — opt out of any parsing.
@@ -432,7 +433,11 @@ async function upsertSubscription(params: UpsertParams): Promise<void> {
   // must not fail the webhook (it re-runs on the next event).
   if (subscription.status === "active" || subscription.status === "trialing") {
     try {
-      await autoPauseOverflowForDowngrade(admin, dsoId, tier);
+      // Paused jobs leave Google for Jobs; the sync probes Google's
+      // metadata so jobs that were never submitted cost no quota.
+      await autoPauseOverflowForDowngrade(admin, dsoId, tier, (ids) => {
+        for (const id of ids) scheduleJobIndexingSync(id);
+      });
     } catch (e) {
       console.warn(
         `[stripe-webhook] downgrade auto-pause failed for dso ${dsoId}`,

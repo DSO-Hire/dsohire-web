@@ -38,6 +38,7 @@ import {
 } from "@/lib/candidate/canonical-lists";
 import { recordGoal } from "@/lib/analytics/record-goal";
 import { after } from "next/server";
+import { scheduleJobIndexingSync } from "@/lib/seo/job-indexing";
 import { SUPPORT_EMAIL } from "@/lib/contact";
 import {
   scanScreeningQuestionForBias,
@@ -329,6 +330,10 @@ export async function createJob(
     }),
   );
 
+  // Google for Jobs + IndexNow ping when the new job is publicly live.
+  // Drafts are skipped inside the sync (never live, nothing to send).
+  if (parsed.status === "active") scheduleJobIndexingSync(job.id as string);
+
   redirect(`/employer/jobs/${job.id}`);
 }
 
@@ -593,6 +598,10 @@ export async function updateJob(
     },
   });
 
+  // Google for Jobs + IndexNow: re-read the committed row and send
+  // URL_UPDATED (still live) or URL_DELETED (no longer public).
+  scheduleJobIndexingSync(jobId);
+
   return { ok: true };
 }
 
@@ -676,6 +685,8 @@ export async function updateJobBasicsSection(
     metadata: { job_id: jobId, title, section: "basics" },
   });
 
+  scheduleJobIndexingSync(jobId);
+
   return { ok: true };
 }
 
@@ -720,6 +731,8 @@ export async function updateJobDescriptionSection(
     summary: `Updated description`,
     metadata: { job_id: jobId, section: "description" },
   });
+
+  scheduleJobIndexingSync(jobId);
 
   return { ok: true };
 }
@@ -994,6 +1007,8 @@ export async function updateJobDetailsSection(
       hide_stages_from_candidate: hideStagesFromCandidate,
     },
   });
+
+  scheduleJobIndexingSync(jobId);
 
   return { ok: true };
 }
@@ -1289,6 +1304,12 @@ export async function setJobStatus(
   const { error } = await supabase.from("jobs").update(update).eq("id", jobId);
   if (error) return { ok: false, error: error.message };
 
+  // Google for Jobs + IndexNow: activate -> URL_UPDATED; pause / fill /
+  // archive / back to draft -> URL_DELETED (wasLive skips the metadata probe).
+  if (priorStatus !== newStatus) {
+    scheduleJobIndexingSync(jobId, { wasLive: priorStatus === "active" });
+  }
+
   // Phase 4.8 follow-up — broadcast a job_filled inbox message to every
   // active applicant when the status transitions to 'filled'. Skip when
   // the prior status was already 'filled' (idempotent against double-clicks).
@@ -1503,6 +1524,12 @@ export async function updateJobSchedule(
     },
   });
 
+  // expires_at feeds JobPosting validThrough; an expiry moved into the past
+  // takes a live job down. Only live jobs have anything to tell Google.
+  if (jobStatus === "active") {
+    scheduleJobIndexingSync(jobId, { wasLive: true });
+  }
+
   revalidatePath(`/employer/jobs/${jobId}`);
   revalidatePath(`/employer/jobs/${jobId}/edit`);
   revalidatePath(`/employer/jobs`);
@@ -1575,6 +1602,11 @@ export async function setJobVisibility(
         to_visibility: newVisibility,
       },
     });
+  }
+
+  // Google for Jobs + IndexNow: internal_only drops the JobPosting JSON-LD.
+  if (priorVisibility !== newVisibility) {
+    scheduleJobIndexingSync(jobId, { wasLive: priorVisibility === "public" });
   }
 
   // Refresh the management surface + the public posting + discovery pages.
@@ -1803,7 +1835,7 @@ export async function softDeleteJob(
   // with full context.
   const { data: priorJob } = await supabase
     .from("jobs")
-    .select("title, dso_id")
+    .select("title, dso_id, status")
     .eq("id", jobId)
     .maybeSingle();
   const jobTitle =
@@ -1838,6 +1870,12 @@ export async function softDeleteJob(
       },
     });
   }
+
+  // Google for Jobs + IndexNow: the URL now 404s. Prior status decides
+  // whether it was ever live (metadata probe covers the rest).
+  scheduleJobIndexingSync(jobId, {
+    wasLive: (priorJob as Record<string, unknown> | null)?.status === "active",
+  });
 
   redirect("/employer/jobs");
 }

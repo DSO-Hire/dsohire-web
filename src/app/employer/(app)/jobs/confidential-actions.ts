@@ -21,6 +21,7 @@ import {
   syncJobConfidentiality,
 } from "@/lib/permissions/confidential";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { scheduleJobIndexingSync } from "@/lib/seo/job-indexing";
 
 export interface ConfidentialActionState {
   ok: boolean;
@@ -84,6 +85,13 @@ export async function updateJobConfidentiality(
         assignee_count: fields.assigneeIds.length,
       },
     });
+  }
+
+  // Google for Jobs + IndexNow: confidential jobs are never submitted, so
+  // turning it on sends URL_DELETED (if the job was live) and turning it off
+  // on a live public job sends URL_UPDATED. The sync re-reads the row.
+  if (priorConfidential !== fields.confidential) {
+    scheduleJobIndexingSync(jobId);
   }
 
   revalidatePath(`/employer/jobs/${jobId}`);

@@ -32,6 +32,13 @@ import { GUIDES_DATE_PUBLISHED } from "@/lib/guides/loader";
 
 const SITE_URL = "https://dsohire.com";
 
+/**
+ * Content date for the /salary templates (BLS OEWS May 2025 distribution,
+ * projections, licensing and FAQs added 2026-10-19). Bump when the salary
+ * data or templates materially change, instead of re-stamping every deploy.
+ */
+const SALARY_CONTENT_UPDATED = new Date("2026-10-19");
+
 interface SitemapRoute {
   path: string;
   priority: number;
@@ -55,7 +62,7 @@ const ROUTES: SitemapRoute[] = [
   { path: "/for-corporate", priority: 0.6, changeFrequency: "monthly" },
   { path: "/dental-hiring-report", priority: 0.7, changeFrequency: "monthly" },
   { path: "/resume-templates", priority: 0.7, changeFrequency: "monthly" },
-  { path: "/salary", priority: 0.7, changeFrequency: "weekly" },
+  { path: "/salary", priority: 0.7, changeFrequency: "weekly", lastModified: "2026-10-19" },
   // #115 FOH — dedicated home for the proprietary fit engine (PF + DSOFit).
   { path: "/practicefit", priority: 0.8, changeFrequency: "monthly" },
   // #115 FOH-6 — trust + comparison net.
@@ -128,7 +135,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Role-level salary hubs (/salary/[role]).
   const salaryHubs = SALARY_ROLES.map((role) => ({
     url: `${SITE_URL}/salary/${role.slug}`,
-    lastModified: now,
+    lastModified: SALARY_CONTENT_UPDATED,
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
@@ -138,7 +145,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const salary = SALARY_ROLES.flatMap((role) =>
     ALL_STATE_SLUGS.map((state) => ({
       url: `${SITE_URL}/salary/${role.slug}/${state}`,
-      lastModified: now,
+      lastModified: SALARY_CONTENT_UPDATED,
       changeFrequency: "monthly" as const,
       priority: 0.5,
     })),

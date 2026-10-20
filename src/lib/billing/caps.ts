@@ -216,7 +216,9 @@ export async function jobCapBlockError(
 export async function autoPauseOverflowForDowngrade(
   supabase: SupabaseClient,
   dsoId: string,
-  tier: string | null | undefined
+  tier: string | null | undefined,
+  /** Called with the paused job ids (e.g. to tell search engines). */
+  onPaused?: (jobIds: string[]) => void
 ): Promise<number> {
   const caps = resolveCaps(tier);
   if (caps.maxActiveJobs === null) return 0;
@@ -239,10 +241,11 @@ export async function autoPauseOverflowForDowngrade(
   }
   if (toPause.length === 0) return 0;
 
-  await supabase
+  const { error } = await supabase
     .from("jobs")
     .update({ status: "paused", auto_paused_reason: "plan_downgrade" })
     .in("id", toPause);
+  if (!error) onPaused?.(toPause);
   return toPause.length;
 }
 

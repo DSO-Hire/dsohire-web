@@ -19,19 +19,22 @@ export type SalaryRole = {
   soc: string;
   searchTitle: string; // the keyword phrase, e.g. "Dental Hygienist"
   hubHref: string; // the matching /for-[role] hub
+  plural: string; // lower-case plural for prose, e.g. "dental hygienists"
+  blsTitle: string; // the official BLS SOC title the figures come from
+  jobCategory: string; // /jobs ?category= value (role_category enum)
   ownerHeavy?: boolean; // high self-employment → OEWS undercounts (show caveat)
 };
 
 /** The dental roles that have a clean BLS SOC mapping (others are excluded). */
 export const SALARY_ROLES: readonly SalaryRole[] = [
-  { slug: "hygienists", soc: "29-1292", searchTitle: "Dental Hygienist", hubHref: "/for-hygienists" },
-  { slug: "dental-assistants", soc: "31-9091", searchTitle: "Dental Assistant", hubHref: "/for-dental-assistants" },
-  { slug: "dentists", soc: "29-1021", searchTitle: "Dentist", hubHref: "/for-dentists", ownerHeavy: true },
-  { slug: "specialists", soc: "29-1029", searchTitle: "Dental Specialist", hubHref: "/for-specialists", ownerHeavy: true },
-  { slug: "front-desk", soc: "43-6013", searchTitle: "Dental Front Office", hubHref: "/for-front-desk" },
-  { slug: "office-managers", soc: "11-9111", searchTitle: "Dental Office Manager", hubHref: "/for-office-managers" },
-  { slug: "practice-administrators", soc: "11-9111", searchTitle: "Dental Practice Administrator", hubHref: "/for-practice-administrators" },
-  { slug: "dental-lab-technicians", soc: "51-9081", searchTitle: "Dental Lab Technician", hubHref: "/for-dental-lab-technicians" },
+  { slug: "hygienists", soc: "29-1292", searchTitle: "Dental Hygienist", plural: "dental hygienists", blsTitle: "Dental Hygienists", jobCategory: "dental_hygienist", hubHref: "/for-hygienists" },
+  { slug: "dental-assistants", soc: "31-9091", searchTitle: "Dental Assistant", plural: "dental assistants", blsTitle: "Dental Assistants", jobCategory: "dental_assistant", hubHref: "/for-dental-assistants" },
+  { slug: "dentists", soc: "29-1021", searchTitle: "Dentist", plural: "dentists", blsTitle: "Dentists, General", jobCategory: "dentist", hubHref: "/for-dentists", ownerHeavy: true },
+  { slug: "specialists", soc: "29-1029", searchTitle: "Dental Specialist", plural: "dental specialists", blsTitle: "Dentists, All Other Specialists", jobCategory: "specialist", hubHref: "/for-specialists", ownerHeavy: true },
+  { slug: "front-desk", soc: "43-6013", searchTitle: "Dental Front Office", plural: "dental front office staff", blsTitle: "Medical Secretaries and Administrative Assistants", jobCategory: "front_office", hubHref: "/for-front-desk" },
+  { slug: "office-managers", soc: "11-9111", searchTitle: "Dental Office Manager", plural: "dental office managers", blsTitle: "Medical and Health Services Managers", jobCategory: "office_manager", hubHref: "/for-office-managers" },
+  { slug: "practice-administrators", soc: "11-9111", searchTitle: "Dental Practice Administrator", plural: "dental practice administrators", blsTitle: "Medical and Health Services Managers", jobCategory: "practice_administrator", hubHref: "/for-practice-administrators" },
+  { slug: "dental-lab-technicians", soc: "51-9081", searchTitle: "Dental Lab Technician", plural: "dental lab technicians", blsTitle: "Dental Laboratory Technicians", jobCategory: "lab_tech", hubHref: "/for-dental-lab-technicians" },
 ];
 
 export const SALARY_ROLE_BY_SLUG: Readonly<Record<string, SalaryRole>> =
@@ -129,7 +132,7 @@ export async function loadNationalSalary(
   return { areaName: f.areaName || "the United States", level: "national", annual: f.annual, hourly: f.hourly, vintage: f.vintage, source: f.source };
 }
 
-export type MetroPay = { name: string; slug: string; annual: PayTriple | null; hourly: PayTriple | null };
+export type MetroPay = { name: string; code: string; slug: string; annual: PayTriple | null; hourly: PayTriple | null };
 
 /** All metros within a state for a SOC, sorted by median desc. Metros carry the state in `area_name`. */
 export async function loadStateMetros(
@@ -139,11 +142,11 @@ export async function loadStateMetros(
 ): Promise<MetroPay[]> {
   const res = await supabase
     .from("comp_benchmarks")
-    .select("area_name, pay_unit, p25, p50, p75")
+    .select("area_name, area_code, pay_unit, p25, p50, p75")
     .eq("soc_code", soc)
     .eq("area_level", "metro");
   const rows = (res.data ?? []) as Record<string, unknown>[];
-  const byName = new Map<string, { annual: PayTriple | null; hourly: PayTriple | null }>();
+  const byName = new Map<string, { code: string; annual: PayTriple | null; hourly: PayTriple | null }>();
   for (const r of rows) {
     const name = (r.area_name as string) ?? "";
     const statePart = name.split(",").pop()?.trim() ?? "";
@@ -153,7 +156,7 @@ export async function loadStateMetros(
     const p50 = num(r.p50);
     const p75 = num(r.p75);
     if (p25 === null || p50 === null || p75 === null) continue;
-    const cur = byName.get(name) ?? { annual: null, hourly: null };
+    const cur = byName.get(name) ?? { code: String(r.area_code ?? ""), annual: null, hourly: null };
     const triple = { p25, p50, p75 };
     if (r.pay_unit === "annual") cur.annual = triple;
     else if (r.pay_unit === "hourly") cur.hourly = triple;
@@ -161,6 +164,7 @@ export async function loadStateMetros(
   }
   const list: MetroPay[] = [...byName.entries()].map(([name, v]) => ({
     name,
+    code: v.code,
     slug: metroCitySlug(name),
     annual: v.annual,
     hourly: v.hourly,
@@ -212,5 +216,5 @@ export function resolveRoleState(roleSlug: string, stSlug: string) {
  */
 export function ownerCaveat(role: SalaryRole): string | null {
   if (!role.ownerHeavy) return null;
-  return `Note: BLS figures reflect employed ${role.searchTitle.toLowerCase()}s. Many ${role.searchTitle.toLowerCase()}s own their practices, and owner earnings aren't included — which can make high-ownership areas read lower than you'd expect.`;
+  return `Note: BLS figures reflect employed ${role.searchTitle.toLowerCase()}s. Many ${role.searchTitle.toLowerCase()}s own their practices, and owner earnings aren't included. That can make high-ownership areas read lower than you'd expect.`;
 }

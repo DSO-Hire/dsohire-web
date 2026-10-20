@@ -125,6 +125,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { scheduleJobIndexingSync } from "@/lib/seo/job-indexing";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { capabilityBlockError } from "@/lib/permissions/guard";
 import { demoWriteBlockError } from "@/lib/demo/mode";
@@ -878,6 +879,9 @@ export async function createCorporateJob(
     },
   });
 
+  // Google for Jobs + IndexNow ping when the new job is publicly live.
+  if (parsed.status === "active") scheduleJobIndexingSync(job.id as string);
+
   redirect(`/employer/jobs/${job.id}`);
 }
 
@@ -1019,6 +1023,9 @@ export async function updateCorporateJob(
       section: "all",
     },
   });
+
+  // Google for Jobs + IndexNow: URL_UPDATED if still live, else URL_DELETED.
+  scheduleJobIndexingSync(jobId);
 
   return { ok: true };
 }
@@ -1215,6 +1222,8 @@ export async function updateCorporateJobBasicsSection(
     },
   });
 
+  scheduleJobIndexingSync(jobId);
+
   return { ok: true };
 }
 
@@ -1335,6 +1344,8 @@ export async function updateCorporateJobDetailsSection(
       hide_stages_from_candidate: parsed.hideStagesFromCandidate,
     },
   });
+
+  scheduleJobIndexingSync(jobId);
 
   return { ok: true };
 }

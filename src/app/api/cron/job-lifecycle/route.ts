@@ -21,13 +21,22 @@
  *
  * Idempotent: each pass only matches rows still in the source status, so
  * re-running is a no-op once the transitions have landed.
+ *
+ * Search engines: promoted + expired job ids are handed to
+ * scheduleJobIndexingSync (Google Indexing API + IndexNow), capped per run.
  */
 
 import { NextResponse } from "next/server";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
+import { scheduleJobIndexingSync } from "@/lib/seo/job-indexing";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+// Headroom for the after() search-engine pings below.
+export const maxDuration = 60;
+
+/** Per-run ceiling on search-engine syncs (Google quota is 200/day). */
+const MAX_INDEXING_SYNCS_PER_RUN = 100;
 
 interface LifecycleReport {
   published: number;
@@ -91,6 +100,16 @@ export async function GET(request: Request) {
       report.expired_ids = ids;
     }
   }
+
+  // Google for Jobs + IndexNow: newly promoted jobs go in (URL_UPDATED when
+  // public), expired jobs come out (URL_DELETED when Google had them). Each
+  // sync re-reads the row and runs in after(), so this response is not
+  // delayed. Anything over the cap is picked up by /api/cron/google-jobs-sync.
+  const toSync = [...report.published_ids, ...report.expired_ids].slice(
+    0,
+    MAX_INDEXING_SYNCS_PER_RUN
+  );
+  for (const id of toSync) scheduleJobIndexingSync(id);
 
   return NextResponse.json(report);
 }

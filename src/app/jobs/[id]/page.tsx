@@ -1055,7 +1055,9 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
       {/* JSON-LD JobPosting for Google for Jobs. E1.22 — internal-only jobs
           are reachable by direct link but are NOT public postings, so we
           suppress the structured data (this is also the hook the future
-          Google for Jobs feed uses to exclude internal roles). */}
+          Google for Jobs feed uses to exclude internal roles). Keep in sync
+          with isJobIndexable() in src/lib/seo/job-indexing.ts, which decides
+          what is pushed to the Google Indexing API. */}
       {(job.visibility as string) !== "internal_only" && (
         <script
           type="application/ld+json"
