@@ -9,6 +9,7 @@ import {
   IcPipeline,
   IcReports,
   IcRequests,
+  IcSellers,
   IcSettings,
   IcToday,
 } from "./icons";
@@ -22,6 +23,7 @@ const NAV: [string, ReactNode, string][] = [
 const NAV2: [string, ReactNode, string][] = [
   ["/crm/accounts", <IcBuyers key="i" />, "Accounts"],
   ["/crm/tasks", <IcRequests key="i" />, "Tasks"],
+  ["/crm/people", <IcSellers key="i" />, "People"],
 ];
 
 export type NavBadge = { count: number; label: string; crit?: boolean };

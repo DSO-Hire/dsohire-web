@@ -33,7 +33,7 @@ export interface AccountRoster {
   counts: { candidates: number; employers: number; admins: number; noProfile: number };
 }
 
-interface AuthUserLite {
+export interface AuthUserLite {
   id: string;
   email: string | null;
   created_at: string;
@@ -41,7 +41,7 @@ interface AuthUserLite {
 }
 
 /** Page through GoTrue admin users (plenty for current scale; capped defensively). */
-async function listAllAuthUsers(
+export async function listAllAuthUsers(
   admin: ReturnType<typeof createSupabaseServiceRoleClient>
 ): Promise<AuthUserLite[]> {
   const out: AuthUserLite[] = [];
