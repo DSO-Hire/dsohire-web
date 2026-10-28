@@ -1,0 +1,39 @@
+name: Demo nightly reset
+
+# Nightly reseed of the live demo (demo.dsohire.com). The vercel.json cron
+# entry for /api/cron/demo-reset never fired on the dsohire-demo project (the
+# demo still showed late-September data in late October), so it runs from
+# GitHub Actions like the other crons. The route 404s off the demo
+# deployment and only touches seed_batch='demo_v1' rows.
+#
+# Cadence: daily at 08:00 UTC (3am US Central), before any prospect is awake.
+#
+# Setup: reuses the CRON_SECRET repo secret; the dsohire-demo Vercel project
+# must have the same CRON_SECRET env var.
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  # Manual trigger: reset the demo right before a sales call.
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Hit the demo-reset cron route
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::error::CRON_SECRET is not set. Add it in repo Settings → Secrets → Actions."
+            exit 1
+          fi
+          response=$(curl -sS --fail-with-body --max-time 300 -w "\n%{http_code}" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "https://demo.dsohire.com/api/cron/demo-reset")
+          status=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          echo "HTTP $status"
+          echo "$body"

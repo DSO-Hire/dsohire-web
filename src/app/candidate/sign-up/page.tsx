@@ -18,6 +18,7 @@ export const metadata: Metadata = {
   title: "Create a Candidate Account",
   description:
     "Create a free DSO Hire candidate account to apply to jobs at multi-location dental groups.",
+  alternates: { canonical: "/candidate/sign-up" },
 };
 
 interface PageProps {
