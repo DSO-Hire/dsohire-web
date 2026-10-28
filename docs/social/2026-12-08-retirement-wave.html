@@ -1,0 +1,61 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0d1729;--navy:#14233f;--cream:#f4efe4;--dim:#9aa6b6;--faint:rgba(244,239,228,.10);
+  --mint:#8db8a3;--heritage:#4d7a60;--copper:#d0835f;--copper-dim:rgba(208,131,95,.16)
+}
+html,body{width:1080px;height:1350px;background:var(--ink);font-family:Manrope,sans-serif;color:var(--cream);-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1,"lnum" 1}
+.wrap{position:relative;width:1080px;height:1350px;overflow:hidden;padding:72px 84px 60px;display:flex;flex-direction:column;
+  background:
+    radial-gradient(900px 620px at 85% 62%, rgba(77,122,96,.30), transparent 62%),
+    radial-gradient(700px 500px at 0% 0%, rgba(41,64,104,.55), transparent 70%),
+    linear-gradient(180deg,#111d33 0%,#0c1527 100%)}
+/* hairline grid texture */
+.wrap:before{content:"";position:absolute;inset:0;background-image:
+  linear-gradient(rgba(244,239,228,.035) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(244,239,228,.035) 1px,transparent 1px);
+  background-size:54px 54px;mask-image:linear-gradient(180deg,transparent 0%,#000 30%,#000 75%,transparent 100%)}
+.top{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center}
+.top img{height:72px}
+.top span{font-size:15px;font-weight:700;letter-spacing:4px;color:var(--dim);text-transform:uppercase}
+.eyebrow{position:relative;z-index:1;margin-top:40px;font-size:17px;font-weight:800;letter-spacing:5px;text-transform:uppercase;color:var(--mint);display:flex;align-items:center;gap:14px}
+.eyebrow i{width:36px;height:3px;background:var(--mint)}
+h1{position:relative;z-index:1;margin-top:20px;font-size:80px;line-height:.98;font-weight:800;letter-spacing:-3.6px}
+h1 span{display:block}
+h1 .b{color:var(--mint)}
+
+
+
+.stats{position:relative;z-index:1;margin-top:auto;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--faint);border-bottom:1px solid var(--faint)}
+.stats div{padding:26px 0}
+.stats div+div{padding-left:36px;border-left:1px solid var(--faint)}
+.stats b{display:block;font-size:52px;font-weight:800;letter-spacing:-2px;line-height:1;color:var(--cream)}
+.stats span{display:block;margin-top:10px;font-size:18px;line-height:1.35;color:var(--dim);font-weight:500}
+.cta{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;padding:22px 0 0}
+.cta .l{font-size:24px;font-weight:700;letter-spacing:-.4px}
+.cta .r{font-size:21px;font-weight:800;color:var(--mint);display:flex;align-items:center;gap:12px}
+.cta .r i{display:inline-block;width:32px;height:32px;background:var(--mint);color:var(--ink);font-style:normal;font-size:19px;line-height:32px;text-align:center}
+.src{position:relative;z-index:1;margin-top:18px;font-size:13.5px;line-height:1.5;color:rgba(154,166,182,.85)}
+h1{font-size:72px}
+.pair{position:relative;z-index:1;margin-top:auto;margin-bottom:auto;display:grid;grid-template-columns:1fr 1fr;gap:36px}
+.pair b{display:block;font-size:150px;font-weight:800;letter-spacing:-5px;line-height:.9}
+.pair .hy b{color:var(--copper)} .pair .da b{color:var(--cream)}
+.pair span{display:block;margin-top:14px;font-size:22px;line-height:1.35;color:var(--dim);font-weight:600}
+.short{position:relative;z-index:1;border-top:1px solid var(--faint);border-bottom:1px solid var(--faint);padding:28px 0}
+.short b{display:block;font-size:84px;font-weight:800;letter-spacing:-3px;line-height:1;color:var(--mint)}
+.short span{display:block;margin-top:10px;font-size:22px;line-height:1.35;color:var(--cream);font-weight:600}
+</style></head><body><div class="wrap">
+  <div class="top"><img src="logo-dark.svg" alt="DSO Hire"><span>dsohire.com</span></div>
+  <div class="eyebrow"><i></i>The workforce math ahead</div>
+  <h1><span>A third of the team</span><span>expects to retire</span><span class="b">within five years.</span></h1>
+  <div class="pair">
+    <div class="hy"><b>31.4%</b><span>of dental hygienists expect to retire in five years or less</span></div>
+    <div class="da"><b>33.7%</b><span>of dental assistants expect to retire in five years or less</span></div>
+  </div>
+  <div class="short"><b>33,220</b><span>full-time hygienists the U.S. is projected to be short by 2038</span></div>
+  <div class="cta"><span class="l">Full report: 24 sources, 7 charts</span><span class="r">dsohire.com/research <i>→</i></span></div>
+  <div class="src">ADA HPI with ADAA, ADHA, DANB and IgniteDA, Oct 2022 (n=5,122 hygienists, 4,255 assistants; self-reported expectations, 2022). HRSA workforce projections, Dec 2025.</div>
+</div></body></html>

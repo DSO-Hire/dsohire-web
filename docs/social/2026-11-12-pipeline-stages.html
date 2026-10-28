@@ -1,0 +1,60 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0d1729;--navy:#14233f;--cream:#f4efe4;--dim:#9aa6b6;--faint:rgba(244,239,228,.10);
+  --mint:#8db8a3;--heritage:#4d7a60;--copper:#d0835f;--copper-dim:rgba(208,131,95,.16)
+}
+html,body{width:1080px;height:1350px;background:var(--ink);font-family:Manrope,sans-serif;color:var(--cream);-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1,"lnum" 1}
+.wrap{position:relative;width:1080px;height:1350px;overflow:hidden;padding:72px 84px 60px;display:flex;flex-direction:column;
+  background:
+    radial-gradient(900px 620px at 85% 62%, rgba(77,122,96,.30), transparent 62%),
+    radial-gradient(700px 500px at 0% 0%, rgba(41,64,104,.55), transparent 70%),
+    linear-gradient(180deg,#111d33 0%,#0c1527 100%)}
+/* hairline grid texture */
+.wrap:before{content:"";position:absolute;inset:0;background-image:
+  linear-gradient(rgba(244,239,228,.035) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(244,239,228,.035) 1px,transparent 1px);
+  background-size:54px 54px;mask-image:linear-gradient(180deg,transparent 0%,#000 30%,#000 75%,transparent 100%)}
+.top{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center}
+.top img{height:72px}
+.top span{font-size:15px;font-weight:700;letter-spacing:4px;color:var(--dim);text-transform:uppercase}
+.eyebrow{position:relative;z-index:1;margin-top:0;font-size:17px;font-weight:800;letter-spacing:5px;text-transform:uppercase;color:var(--mint);display:flex;align-items:center;gap:14px}
+.eyebrow i{width:36px;height:3px;background:var(--mint)}
+h1{position:relative;z-index:1;margin-top:20px;font-size:80px;line-height:.98;font-weight:800;letter-spacing:-3.6px}
+h1 span{display:block}
+h1 .b{color:var(--mint)}
+
+
+
+.stats{position:relative;z-index:1;margin-top:auto;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--faint);border-bottom:1px solid var(--faint)}
+.stats div{padding:26px 0}
+.stats div+div{padding-left:36px;border-left:1px solid var(--faint)}
+.stats b{display:block;font-size:52px;font-weight:800;letter-spacing:-2px;line-height:1;color:var(--cream)}
+.stats span{display:block;margin-top:10px;font-size:18px;line-height:1.35;color:var(--dim);font-weight:500}
+.cta{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;padding:22px 0 0}
+.cta .l{font-size:24px;font-weight:700;letter-spacing:-.4px}
+.cta .r{font-size:21px;font-weight:800;color:var(--mint);display:flex;align-items:center;gap:12px}
+.cta .r i{display:inline-block;width:32px;height:32px;background:var(--mint);color:var(--ink);font-style:normal;font-size:19px;line-height:32px;text-align:center}
+.src{position:relative;z-index:1;margin-top:18px;font-size:13.5px;line-height:1.5;color:rgba(154,166,182,.85)}
+h1{font-size:76px}
+.steps{position:relative;z-index:1;margin-top:46px}
+.st{display:grid;grid-template-columns:78px 1fr;gap:22px;align-items:start;padding:32px 0;border-top:1px solid var(--faint)}
+.st:last-child{border-bottom:1px solid var(--faint)}
+.st .k{width:60px;height:60px;border:2px solid var(--mint);color:var(--mint);font-size:30px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.st b{display:block;font-size:30px;font-weight:800;letter-spacing:-.6px;color:var(--cream);line-height:1.1}
+.st span{display:block;margin-top:6px;font-size:20px;line-height:1.35;color:var(--dim);font-weight:500}
+.st.one .k{background:var(--mint);color:var(--ink)}
+.foot{position:relative;z-index:1;margin-top:auto;font-size:30px;font-weight:800;letter-spacing:-.8px;line-height:1.25;color:var(--cream)}
+.foot em{font-style:normal;color:var(--copper)}
+.bot{position:relative;z-index:1;margin-top:22px;padding-top:18px;border-top:1px solid var(--faint);display:flex;justify-content:space-between;align-items:center}
+.bot img{height:44px}.bot span{font-size:21px;font-weight:800;color:var(--mint)}
+</style></head><body><div class="wrap">
+  <div class="eyebrow"><i></i>The hiring playbook</div>
+  <h1><span>A job ad is not</span><span class="b">a hiring process.</span></h1>
+  <div class="steps"><div class="st one"><div class="k">1</div><div><b>Attract</b><span>A listing with real pay, real schedule, real expectations.</span></div></div><div class="st"><div class="k">2</div><div><b>Source</b><span>Search for candidates proactively instead of waiting for applications.</span></div></div><div class="st"><div class="k">3</div><div><b>Decide</b><span>Structured interviews, people making the calls, notes in one place.</span></div></div><div class="st"><div class="k">4</div><div><b>Close</b><span>Fast offers. Strong candidates have other options.</span></div></div><div class="st"><div class="k">5</div><div><b>Verify</b><span>Licenses and credentials tracked before day one, not after.</span></div></div></div>
+  <div class="foot">Most groups have real tooling for stage one. <em>The leak is in the other four.</em></div>
+  <div class="bot"><img src="logo-dark.svg" alt="DSO Hire"><span>dsohire.com</span></div>
+</div></body></html>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0d1729;--navy:#14233f;--cream:#f4efe4;--dim:#9aa6b6;--faint:rgba(244,239,228,.10);
+  --mint:#8db8a3;--heritage:#4d7a60;--copper:#d0835f;--copper-dim:rgba(208,131,95,.16)
+}
+html,body{width:1080px;height:1350px;background:var(--ink);font-family:Manrope,sans-serif;color:var(--cream);-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1,"lnum" 1}
+.wrap{position:relative;width:1080px;height:1350px;overflow:hidden;padding:72px 84px 60px;display:flex;flex-direction:column;
+  background:
+    radial-gradient(900px 620px at 85% 62%, rgba(77,122,96,.30), transparent 62%),
+    radial-gradient(700px 500px at 0% 0%, rgba(41,64,104,.55), transparent 70%),
+    linear-gradient(180deg,#111d33 0%,#0c1527 100%)}
+/* hairline grid texture */
+.wrap:before{content:"";position:absolute;inset:0;background-image:
+  linear-gradient(rgba(244,239,228,.035) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(244,239,228,.035) 1px,transparent 1px);
+  background-size:54px 54px;mask-image:linear-gradient(180deg,transparent 0%,#000 30%,#000 75%,transparent 100%)}
+.top{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center}
+.top img{height:72px}
+.top span{font-size:15px;font-weight:700;letter-spacing:4px;color:var(--dim);text-transform:uppercase}
+.eyebrow{position:relative;z-index:1;margin-top:40px;font-size:17px;font-weight:800;letter-spacing:5px;text-transform:uppercase;color:var(--mint);display:flex;align-items:center;gap:14px}
+.eyebrow i{width:36px;height:3px;background:var(--mint)}
+h1{position:relative;z-index:1;margin-top:20px;font-size:80px;line-height:.98;font-weight:800;letter-spacing:-3.6px}
+h1 span{display:block}
+h1 .b{color:var(--mint)}
+
+
+
+.stats{position:relative;z-index:1;margin-top:auto;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--faint);border-bottom:1px solid var(--faint)}
+.stats div{padding:26px 0}
+.stats div+div{padding-left:36px;border-left:1px solid var(--faint)}
+.stats b{display:block;font-size:52px;font-weight:800;letter-spacing:-2px;line-height:1;color:var(--cream)}
+.stats span{display:block;margin-top:10px;font-size:18px;line-height:1.35;color:var(--dim);font-weight:500}
+.cta{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;padding:22px 0 0}
+.cta .l{font-size:24px;font-weight:700;letter-spacing:-.4px}
+.cta .r{font-size:21px;font-weight:800;color:var(--mint);display:flex;align-items:center;gap:12px}
+.cta .r i{display:inline-block;width:32px;height:32px;background:var(--mint);color:var(--ink);font-style:normal;font-size:19px;line-height:32px;text-align:center}
+.src{position:relative;z-index:1;margin-top:18px;font-size:13.5px;line-height:1.5;color:rgba(154,166,182,.85)}
+.bars{position:relative;z-index:1;margin-top:56px}
+.r{margin-bottom:34px}
+.r .lab{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.r .lab span{font-size:22px;font-weight:800;color:var(--cream)}
+.r .lab em{font-style:normal;font-size:17px;color:var(--dim);font-weight:600}
+.track{position:relative;height:30px;border:2px solid rgba(244,239,228,.16)}
+.track i{position:absolute;top:0;bottom:0;background:linear-gradient(160deg,#e3a07f,#c0704d)}
+.val{margin-top:8px;font-size:30px;font-weight:800;letter-spacing:-1px;color:var(--copper)}
+.flat{position:relative;z-index:1;margin-top:auto;border-top:1px solid var(--faint);border-bottom:1px solid var(--faint);padding:26px 0;font-size:34px;font-weight:800;letter-spacing:-1px;line-height:1.2;color:var(--mint)}
+</style></head><body><div class="wrap">
+  <div class="top"><img src="logo-dark.svg" alt="DSO Hire"><span>dsohire.com</span></div>
+  <div class="eyebrow"><i></i>What an agency placement costs</div>
+  <h1><span>The fee on one hire,</span><span class="b">by role.</span></h1>
+  <div class="bars">
+    <div class="r"><div class="lab"><span>Dental hygienist</span><em>median salary $98,100</em></div>
+      <div class="track"><i style="left:61.3%;width:30.6%"></i></div>
+      <div class="val">$19,600 to $29,400</div></div>
+    <div class="r"><div class="lab"><span>Office manager*</span><em>median salary $63,910</em></div>
+      <div class="track"><i style="left:40.0%;width:20.0%"></i></div>
+      <div class="val">$12,800 to $19,200</div></div>
+    <div class="r"><div class="lab"><span>Dental assistant</span><em>median salary $48,070</em></div>
+      <div class="track"><i style="left:30.0%;width:15.0%"></i></div>
+      <div class="val">$9,600 to $14,400</div></div>
+    <div class="r"><div class="lab"><span>Dental receptionist</span><em>median salary $46,500</em></div>
+      <div class="track"><i style="left:29.1%;width:14.7%"></i></div>
+      <div class="val">$9,300 to $14,000</div></div>
+  </div>
+  <div class="flat">DSO Hire: one flat monthly fee. Every location. No placement fees.</div>
+  
+  <div class="src">Fee range: 20 to 30% of first-year base salary, the only published dental agency rate card found. Salaries: BLS OEWS May 2025 national medians (*office manager = first-line office supervisors; receptionist and office supervisor: offices of dentists). DSO Hire calculation.</div>
+</div></body></html>

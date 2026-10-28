@@ -1,0 +1,66 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0d1729;--navy:#14233f;--cream:#f4efe4;--dim:#9aa6b6;--faint:rgba(244,239,228,.10);
+  --mint:#8db8a3;--heritage:#4d7a60;--copper:#d0835f;--copper-dim:rgba(208,131,95,.16)
+}
+html,body{width:1080px;height:1350px;background:var(--ink);font-family:Manrope,sans-serif;color:var(--cream);-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1,"lnum" 1}
+.wrap{position:relative;width:1080px;height:1350px;overflow:hidden;padding:72px 84px 60px;display:flex;flex-direction:column;
+  background:
+    radial-gradient(900px 620px at 85% 62%, rgba(77,122,96,.30), transparent 62%),
+    radial-gradient(700px 500px at 0% 0%, rgba(41,64,104,.55), transparent 70%),
+    linear-gradient(180deg,#111d33 0%,#0c1527 100%)}
+/* hairline grid texture */
+.wrap:before{content:"";position:absolute;inset:0;background-image:
+  linear-gradient(rgba(244,239,228,.035) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(244,239,228,.035) 1px,transparent 1px);
+  background-size:54px 54px;mask-image:linear-gradient(180deg,transparent 0%,#000 30%,#000 75%,transparent 100%)}
+.top{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center}
+.top img{height:72px}
+.top span{font-size:15px;font-weight:700;letter-spacing:4px;color:var(--dim);text-transform:uppercase}
+.eyebrow{position:relative;z-index:1;margin-top:40px;font-size:17px;font-weight:800;letter-spacing:5px;text-transform:uppercase;color:var(--mint);display:flex;align-items:center;gap:14px}
+.eyebrow i{width:36px;height:3px;background:var(--mint)}
+h1{position:relative;z-index:1;margin-top:20px;font-size:80px;line-height:.98;font-weight:800;letter-spacing:-3.6px}
+h1 span{display:block}
+h1 .b{color:var(--mint)}
+
+
+
+.stats{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--faint);border-bottom:1px solid var(--faint)}
+.stats div{padding:26px 0}
+.stats div+div{padding-left:36px;border-left:1px solid var(--faint)}
+.stats b{display:block;font-size:52px;font-weight:800;letter-spacing:-2px;line-height:1;color:var(--cream)}
+.stats span{display:block;margin-top:10px;font-size:18px;line-height:1.35;color:var(--dim);font-weight:500}
+.cta{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;padding:22px 0 0}
+.cta .l{font-size:24px;font-weight:700;letter-spacing:-.4px}
+.cta .r{font-size:21px;font-weight:800;color:var(--mint);display:flex;align-items:center;gap:12px}
+.cta .r i{display:inline-block;width:32px;height:32px;background:var(--mint);color:var(--ink);font-style:normal;font-size:19px;line-height:32px;text-align:center}
+.src{position:relative;z-index:1;margin-top:18px;font-size:13.5px;line-height:1.5;color:rgba(154,166,182,.85)}
+.cmp{position:relative;z-index:1;margin-top:auto;margin-bottom:auto}
+.cmp .row{margin-bottom:40px}
+.cmp .lab{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+.cmp .lab span{font-size:17px;font-weight:800;letter-spacing:3px;text-transform:uppercase}
+.cmp .lab b{font-size:72px;font-weight:800;letter-spacing:-3px;line-height:1}
+.cmp .bar{height:54px;border:2px solid rgba(244,239,228,.16);position:relative}
+.cmp .bar i{position:absolute;left:0;top:0;bottom:0}
+.pay .lab span,.pay .lab b{color:var(--mint)} .pay .bar i{background:linear-gradient(160deg,#9cc6b1,#5e9078)}
+.cpi .lab span,.cpi .lab b{color:var(--copper)} .cpi .bar i{background:linear-gradient(160deg,#e3a07f,#c0704d)}
+.cmp .cap{margin-top:12px;font-size:19px;color:var(--dim);font-weight:500}
+</style></head><body><div class="wrap">
+  <div class="top"><img src="logo-dark.svg" alt="DSO Hire"><span>dsohire.com</span></div>
+  <div class="eyebrow"><i></i>Dental staff pay since 2021</div>
+  <h1><span>Pay went up.</span><span class="b">Prices went up more.</span></h1>
+  <div class="cmp">
+    <div class="row pay"><div class="lab"><span>Dental office staff pay</span><b>+24.6%</b></div><div class="bar"><i style="width:90.4%"></i></div><div class="cap">Average hourly earnings, $28.26 to $35.22 an hour, Jan 2021 to Aug 2026</div></div>
+    <div class="row cpi"><div class="lab"><span>Consumer prices</span><b>+27.2%</b></div><div class="bar"><i style="width:100%"></i></div><div class="cap">CPI-U, same period</div></div>
+  </div>
+  <div class="stats">
+    <div><b>+1.4%</b><span>staff pay, Aug 2025 to Aug 2026</span></div>
+    <div><b>+3.35%</b><span>consumer prices, same 12 months</span></div>
+  </div>
+  <div class="cta"><span class="l">Full report: 24 sources, 7 charts</span><span class="r">dsohire.com/research <i>→</i></span></div>
+  <div class="src">BLS series CES6562120008 (offices of dentists, production and nonsupervisory employees) and CUSR0000SA0. Aug 2026 preliminary. DSO Hire calculation. ADA HPI's own Q3 2026 reading: +21% vs +27%.</div>
+</div></body></html>
