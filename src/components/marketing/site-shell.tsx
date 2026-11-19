@@ -243,56 +243,39 @@ export function SiteFooter() {
   return (
     <footer className="bg-hero text-hero-foreground px-6 sm:px-14 pt-16 pb-10 border-t border-hero-foreground/10">
       <div className="max-w-[1240px] mx-auto">
-        <div className="grid grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-10 lg:gap-14 pb-12 border-b border-hero-foreground/10 mb-9">
-          <div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-10 lg:gap-16 pb-12 border-b border-hero-foreground/10 mb-9">
+          <div className="col-span-2 sm:col-span-3 lg:col-span-1">
             <BrandLockup dark height={56} />
             <p className="text-sm text-hero-foreground/55 leading-[1.7] mt-5 max-w-[280px]">
-              Dental hiring, done direct. The hiring platform built for
-              multi-location dental groups. One flat monthly fee, no placement fees.
-              Born from ten years inside the business of dentistry.
+              The hiring platform for multi-location dental groups. One flat
+              monthly fee, no placement fees.
             </p>
           </div>
 
-          <FooterCol title="Dental Groups">
+          <FooterCol title="Dental groups">
             <FooterLink href="/pricing">Pricing</FooterLink>
-            <FooterLink href="/for-dental-groups">Why DSO Hire</FooterLink>
             <FooterLink href={DEMO_URL}>Live demo</FooterLink>
+            <FooterLink href="/for-dental-groups">Why DSO Hire</FooterLink>
             <FooterLink href="/switch">Switch to DSO Hire</FooterLink>
-            <FooterLink href="/vs/job-boards">vs Job Boards</FooterLink>
-            <FooterLink href="/vs/staffing-agencies">vs Staffing Agencies</FooterLink>
-            <FooterLink href="/vs/dental-hiring-software">Compare hiring software</FooterLink>
+            <FooterLink href="/vs/dental-hiring-software">Compare</FooterLink>
             <FooterLink href="/research">Research</FooterLink>
-            <FooterLink href="/employer/sign-in">Sign in</FooterLink>
           </FooterCol>
 
-          <FooterCol title="For Candidates">
-            <FooterLink href="/jobs">Browse Jobs</FooterLink>
-            <FooterLink href="/practicefit">PracticeFit™</FooterLink>
-            <FooterLink href="/for-candidates">Job Candidates</FooterLink>
-            <FooterLink href="/for-dentists">For Dentists</FooterLink>
-            <FooterLink href="/for-hygienists">For Hygienists</FooterLink>
-            <FooterLink href="/for-office-managers">For Office Managers</FooterLink>
+          <FooterCol title="Candidates">
+            <FooterLink href="/jobs">Browse jobs</FooterLink>
             <FooterLink href="/companies">Browse DSOs</FooterLink>
-            <FooterLink href="/candidate/sign-in">Applicant Sign In</FooterLink>
+            <FooterLink href="/practicefit">PracticeFit™</FooterLink>
+            <FooterLink href="/for-dentists">Dentists</FooterLink>
+            <FooterLink href="/for-hygienists">Hygienists</FooterLink>
+            <FooterLink href="/for-office-managers">Office managers</FooterLink>
           </FooterCol>
 
           <FooterCol title="Company">
             <FooterLink href="/about">About</FooterLink>
-            <FooterLink href="/changelog">Changelog</FooterLink>
             <FooterLink href="/hiring-pulse">Hiring Pulse</FooterLink>
-            <FooterLink href="/security">Security &amp; Trust</FooterLink>
+            <FooterLink href="/security">Security</FooterLink>
+            <FooterLink href="/help">Help center</FooterLink>
             <FooterLink href="/contact">Contact</FooterLink>
-            <FooterLink href="/help">Help Center</FooterLink>
-            <FooterLink href="/faq">FAQ</FooterLink>
-            <FooterLink href="/legal">All Policies</FooterLink>
-          </FooterCol>
-
-          <FooterCol title="Legal">
-            <FooterLink href="/legal/privacy">Privacy</FooterLink>
-            <FooterLink href="/legal/terms">Terms of Service</FooterLink>
-            <FooterLink href="/legal/cookies">Cookies</FooterLink>
-            <FooterLink href="/legal/acceptable-use">Acceptable Use</FooterLink>
-            <FooterLink href="/legal/dmca">DMCA</FooterLink>
           </FooterCol>
         </div>
 
@@ -316,6 +299,30 @@ export function SiteFooter() {
               className="hover:text-hero-foreground/70 transition-colors"
             >
               Terms
+            </Link>
+            <Link
+              href="/legal"
+              className="hover:text-hero-foreground/70 transition-colors"
+            >
+              All policies
+            </Link>
+            <Link
+              href="/changelog"
+              className="hover:text-hero-foreground/70 transition-colors"
+            >
+              Changelog
+            </Link>
+            <Link
+              href="/employer/sign-in"
+              className="hover:text-hero-foreground/70 transition-colors"
+            >
+              Employer sign in
+            </Link>
+            <Link
+              href="/candidate/sign-in"
+              className="hover:text-hero-foreground/70 transition-colors"
+            >
+              Candidate sign in
             </Link>
             <Link
               href={SUPPORT_MAILTO}
