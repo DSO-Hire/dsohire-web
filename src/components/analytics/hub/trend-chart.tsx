@@ -176,7 +176,7 @@ export function TrendChart({
                   </span>
                 </div>
               ))}
-              <div className="mt-1 text-[9px] text-hero-foreground/60 uppercase tracking-[1px]">
+              <div className="mt-1 text-2xs text-hero-foreground/60 uppercase tracking-[1px]">
                 Click to open applications
               </div>
             </div>

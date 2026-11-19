@@ -132,7 +132,7 @@ export function LocationsView({
                   }
                 >
                   {st}
-                  <span className={on ? "font-bold text-[#8db8a3]" : "font-bold text-heritage-deep"}>
+                  <span className={on ? "font-bold text-heritage-bright" : "font-bold text-heritage-deep"}>
                     {n}
                   </span>
                 </button>
@@ -241,7 +241,7 @@ function LocationRowItem({ location }: { location: LocationCardData }) {
                 {cityState || "Address incomplete"}
               </span>
             </div>
-            <div className="text-[17px] font-extrabold tracking-[-0.3px] text-ink leading-tight mb-1 truncate">
+            <div className="text-[0.944rem] font-extrabold tracking-[-0.3px] text-ink leading-tight mb-1 truncate">
               {location.name}
             </div>
             {street && (
@@ -253,10 +253,10 @@ function LocationRowItem({ location }: { location: LocationCardData }) {
           </div>
           <div className="flex items-center gap-8 text-right flex-shrink-0">
             <div>
-              <div className="text-[16px] font-extrabold text-ink leading-none">
+              <div className="text-[0.889rem] font-extrabold text-ink leading-none">
                 {activeJobs}
               </div>
-              <div className="text-[9px] font-semibold tracking-[1.5px] uppercase text-slate-meta mt-1">
+              <div className="text-2xs font-semibold tracking-[1.5px] uppercase text-slate-meta mt-1">
                 {activeJobs === 1 ? "Job" : "Jobs"}
               </div>
             </div>
@@ -287,7 +287,7 @@ function LocationCard({ location }: { location: LocationCardData }) {
       {/* header band — soft heritage wash that fades into the white card
           (no hard border, so the overlapping logo isn't bisected) */}
       <div className="relative h-14 bg-gradient-to-b from-heritage/[0.16] via-heritage/[0.07] to-card">
-        <div className="absolute left-4 top-2.5 inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[1.5px] text-heritage-deep">
+        <div className="absolute left-4 top-2.5 inline-flex items-center gap-1.5 text-2xs font-bold uppercase tracking-[1.5px] text-heritage-deep">
           <MapPin className="h-3 w-3" />
           {cityState || "Address incomplete"}
         </div>
@@ -303,10 +303,10 @@ function LocationCard({ location }: { location: LocationCardData }) {
             className="ring-4 ring-card"
           />
         </div>
-        <div className="truncate text-[16px] font-extrabold tracking-[-0.3px] leading-tight text-ink">
+        <div className="truncate text-[0.889rem] font-extrabold tracking-[-0.3px] leading-tight text-ink">
           {location.name}
         </div>
-        <div className="mt-0.5 truncate text-[12.5px] tracking-[0.2px] text-slate-meta">
+        <div className="mt-0.5 truncate text-xs tracking-[0.2px] text-slate-meta">
           {street
             ? `${street}${location.postal_code ? ` · ${location.postal_code}` : ""}`
             : "Address incomplete"}

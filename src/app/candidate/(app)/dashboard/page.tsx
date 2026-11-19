@@ -957,13 +957,13 @@ export default async function CandidateDashboardPage() {
                 <h3 className="text-xl sm:text-2xl font-extrabold tracking-[-0.4px] leading-tight">
                   {offerDsoName} extended you an offer.
                 </h3>
-                <p className="mt-1.5 text-[13.5px] text-primary-foreground/80">
+                <p className="mt-1.5 text-xs text-primary-foreground/80">
                   {offerJob?.title ?? "Role"}
                   {offerLocation ? ` · ${offerLocation}` : ""} · no rush — it’s
                   open.
                 </p>
                 {offerMarketBand && marketRange && (
-                  <p className="mt-2 text-[12.5px] text-primary-foreground/70">
+                  <p className="mt-2 text-xs text-primary-foreground/70">
                     For context, {marketRange.areaName} pay for your field runs{" "}
                     <strong className="text-primary-foreground tabular">{offerMarketBand}</strong> —
                     weigh your offer against it.

@@ -10,7 +10,7 @@
  *
  * STICKY FIX: the old AdminShell rendered <aside> as a flex sibling whose
  * height grew with the page, so the "Sign out" footer scrolled away on long
- * pages (e.g. Vantage). Here the aside is `sticky top-0 h-screen flex-col`;
+ * pages (e.g. Vantage). Here the aside is `sticky top-0 h-dvh flex-col`;
  * the nav region scrolls internally (`flex-1 overflow-y-auto`) and the footer
  * is pinned (`shrink-0`).
  *
@@ -58,14 +58,14 @@ export default async function AdminAppLayout({
   const founder = isSuperadminEmail(user.email);
 
   return (
-    <div className="min-h-screen bg-cream flex">
+    <div className="min-h-dvh bg-cream flex">
       {/* Sidebar — pinned to the viewport so the footer never scrolls away. */}
-      <aside className="w-[240px] bg-hero text-hero-foreground flex flex-col sticky top-0 h-screen">
+      <aside className="w-[240px] bg-hero text-hero-foreground flex flex-col sticky top-0 h-dvh">
         <div className="px-6 py-6 border-b border-hero-foreground/10 shrink-0">
           <Link href="/admin" className="block" aria-label="Admin home">
             <BrandLockup dark height={32} />
           </Link>
-          <div className="mt-3 text-[9px] font-bold tracking-[2.5px] uppercase text-heritage-light">
+          <div className="mt-3 text-2xs font-bold tracking-[2.5px] uppercase text-heritage-light">
             Admin · {String(adminRow.role)}
           </div>
         </div>

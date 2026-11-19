@@ -80,7 +80,7 @@ export function AdminSignInForm({ next }: { next?: string }) {
               maxLength={10}
               pattern="[0-9 ]{6,16}"
               placeholder="Enter code from email"
-              className={`${inputClasses} text-[22px] font-bold tracking-[6px] text-center placeholder:font-medium placeholder:text-sm placeholder:tracking-[1px]`}
+              className={`${inputClasses} text-[1.222rem] font-bold tracking-[6px] text-center placeholder:font-medium placeholder:text-sm placeholder:tracking-[1px]`}
             />
           </div>
 

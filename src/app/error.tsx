@@ -26,7 +26,7 @@ export default function RootError({
   }, [error]);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-ivory px-6 pt-[140px] pb-24 sm:px-14">
+    <main className="relative min-h-dvh overflow-hidden bg-ivory px-6 pt-[140px] pb-24 sm:px-14">
       {/* Blueprint grid + heritage glow — same backdrop language as the 404 */}
       <div
         aria-hidden
@@ -39,15 +39,6 @@ export default function RootError({
             "radial-gradient(ellipse at 50% 30%, #000 0%, transparent 72%)",
           WebkitMaskImage:
             "radial-gradient(ellipse at 50% 30%, #000 0%, transparent 72%)",
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-[18%] left-1/2 h-[60vw] w-[60vw] -translate-x-1/2"
-        style={{
-          background:
-            "radial-gradient(circle, var(--heritage-glow), transparent 60%)",
-          filter: "blur(40px)",
         }}
       />
 

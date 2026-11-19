@@ -364,7 +364,7 @@ export default async function CustomerSuccessDashboard() {
   ).length;
 
   return (
-    <main className="min-h-screen bg-cream/30 px-6 py-10">
+    <main className="min-h-dvh bg-cream/30 px-6 py-10">
       <div className="mx-auto max-w-[1200px] space-y-8">
         <header className="space-y-2">
           <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep inline-flex items-center gap-2">
@@ -461,7 +461,7 @@ export default async function CustomerSuccessDashboard() {
                       </span>
                       <RiskLabel flag={flag} />
                     </div>
-                    <p className="text-[12.5px] text-slate-body mt-0.5">
+                    <p className="text-xs text-slate-body mt-0.5">
                       {reason}
                     </p>
                   </div>

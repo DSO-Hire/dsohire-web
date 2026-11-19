@@ -141,7 +141,7 @@ export function KanbanColumn({
               )}
             </span>
             <span
-              className={`text-[9px] font-semibold tabular whitespace-nowrap ${toneClasses.text}`}
+              className={`text-2xs font-semibold tabular whitespace-nowrap ${toneClasses.text}`}
             >
               median {currentMedian}d
               {ratio !== null && ratio >= 1.3

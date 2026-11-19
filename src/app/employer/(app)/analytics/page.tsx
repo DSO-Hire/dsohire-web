@@ -653,7 +653,7 @@ function BenchmarksTab({
         </p>
         {vacancy && openSeats > 0 ? (
           <>
-            <div className="text-[28px] font-extrabold tracking-[-0.8px] text-ink leading-none">
+            <div className="text-[1.556rem] font-extrabold tracking-[-0.8px] text-ink leading-none">
               {usd(vacancy.monthly_low)}
               <span className="text-slate-meta font-bold"> – </span>
               {usd(vacancy.monthly_high)}
@@ -744,7 +744,7 @@ function ReqAgingCard({
                   />
                   {s.label}
                 </div>
-                <div className="text-[20px] font-extrabold tabular-nums text-ink leading-none">
+                <div className="text-[1.111rem] font-extrabold tabular-nums text-ink leading-none">
                   {s.n}
                 </div>
               </div>
@@ -886,7 +886,7 @@ function MiniStat({ label, value }: { label: string; value: string | number }) {
       <div className="text-2xs font-bold tracking-[1px] uppercase text-slate-meta mb-1">
         {label}
       </div>
-      <div className="text-[24px] font-extrabold tabular-nums text-ink leading-none">
+      <div className="text-[1.333rem] font-extrabold tabular-nums text-ink leading-none">
         {typeof value === "number" ? value.toLocaleString("en-US") : value}
       </div>
     </div>

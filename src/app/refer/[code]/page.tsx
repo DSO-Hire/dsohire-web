@@ -20,7 +20,7 @@ export default async function ReferPage({
   const dso = await lookupDsoByReferralCode(code);
 
   return (
-    <main className="min-h-screen bg-ivory flex flex-col items-center px-4 py-10 sm:py-16">
+    <main className="min-h-dvh bg-ivory flex flex-col items-center px-4 py-10 sm:py-16">
       <div className="w-full max-w-[640px]">
         {!dso ? (
           <div className="border border-[var(--rule)] bg-card p-8 text-center">

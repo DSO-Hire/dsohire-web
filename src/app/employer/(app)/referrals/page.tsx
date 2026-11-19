@@ -162,7 +162,7 @@ export default async function ReferralsPage() {
                         {r.candidate_name}
                       </span>
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 text-[9px] font-bold tracking-[1px] uppercase border ${
+                        className={`inline-flex items-center px-2 py-0.5 text-2xs font-bold tracking-[1px] uppercase border ${
                           STATUS_TONE[r.status] ?? STATUS_TONE.submitted
                         }`}
                       >

@@ -48,7 +48,7 @@ export function PracticeFitChip({
         {mark}
         {style.label}
         {showScore && (
-          <span className="tabular text-[9px] opacity-70">{fit.score}</span>
+          <span className="tabular text-2xs opacity-70">{fit.score}</span>
         )}
       </span>
     );

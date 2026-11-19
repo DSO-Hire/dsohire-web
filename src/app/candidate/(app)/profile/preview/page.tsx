@@ -113,7 +113,7 @@ export default async function CandidateProfilePreviewPage() {
           <p className="text-xs font-bold text-ink">
             This is how employers see you.
           </p>
-          <p className="mt-0.5 text-[12.5px] text-slate-body leading-relaxed">
+          <p className="mt-0.5 text-xs text-slate-body leading-relaxed">
             Browsing employers see your headline, summary, skills, and the states
             you&apos;re licensed in. Your full work history, education, and
             credential details are shared with an employer once you apply to one

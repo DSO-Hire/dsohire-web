@@ -39,7 +39,7 @@ export function ResetDemoCard() {
       <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-2">
         Demo controls · founder-only
       </div>
-      <h2 className="text-[16px] font-extrabold text-ink">Reset demo data</h2>
+      <h2 className="text-[0.889rem] font-extrabold text-ink">Reset demo data</h2>
       <p className="mt-1.5 mb-4 text-xs text-slate-body leading-relaxed max-w-[560px]">
         Wipes and reseeds the curated demo set (DSOs, candidates, pipelines, sourcing, analytics,
         pre-warmed fit scores) back to pristine between demos. Scoped to{" "}

@@ -243,7 +243,7 @@ function SequenceRow({
           <div className="text-sm font-extrabold tracking-[-0.3px] text-ink">
             {sequence.name}
             {!sequence.is_enabled && (
-              <span className="ml-2 text-[9px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+              <span className="ml-2 text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta">
                 · paused
               </span>
             )}
@@ -370,7 +370,7 @@ function SequenceEditor({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#14233F]/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 backdrop-blur-sm p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget && !pending) onClose();
       }}
@@ -381,7 +381,7 @@ function SequenceEditor({
             <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-1">
               Drip sequence
             </div>
-            <h2 className="text-[18px] font-extrabold tracking-[-0.4px] text-ink">
+            <h2 className="text-[1rem] font-extrabold tracking-[-0.4px] text-ink">
               {initial ? "Edit sequence" : "New sequence"}
             </h2>
           </div>
@@ -575,11 +575,11 @@ function StepEditor({
 
       {preview ? (
         <div className="rounded border border-[var(--rule)] bg-card p-3">
-          <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-slate-meta">Subject</div>
+          <div className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta">Subject</div>
           <div className="text-xs font-semibold text-ink mb-2">
             {fillPreview(step.subject) || "—"}
           </div>
-          <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-slate-meta">Body</div>
+          <div className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta">Body</div>
           <div className="text-xs text-slate-body whitespace-pre-wrap leading-relaxed">
             {fillPreview(step.body) || "—"}
           </div>

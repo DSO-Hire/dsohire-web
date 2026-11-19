@@ -351,7 +351,7 @@ export default function FaqPage() {
           </div>
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-[-2px] leading-[1.05] text-ink mb-7 max-w-[720px]">
             Frequently asked{" "}
-            <em className="not-italic text-heritage-light">questions.</em>
+            <em className="not-italic">questions.</em>
           </h1>
           <p className="text-lg sm:text-xl text-slate-body leading-relaxed max-w-[620px]">
             Everything about DSO Hire in one place: pricing, posting and
@@ -365,7 +365,7 @@ export default function FaqPage() {
               <a
                 key={cat.id}
                 href={`#${cat.id}`}
-                className="text-[13px] font-semibold text-ink border border-[var(--rule-strong)] rounded-full px-4 py-2 hover:bg-hero hover:text-hero-foreground hover:border-hero transition-colors"
+                className="text-xs font-semibold text-ink border border-[var(--rule-strong)] rounded-full px-4 py-2 hover:bg-hero hover:text-hero-foreground hover:border-hero transition-colors"
               >
                 {cat.label}
               </a>
@@ -411,14 +411,14 @@ export default function FaqPage() {
           <div className="flex flex-wrap gap-4 justify-center">
             <Link
               href="/for-dental-groups"
-              className="inline-flex items-center gap-2 bg-hero-foreground text-hero font-bold text-[15px] px-6 py-3.5 rounded-md hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-2 bg-hero-foreground text-hero font-bold text-sm px-6 py-3.5 rounded-md hover:opacity-90 transition-opacity"
             >
               I&apos;m a dental group
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
             </Link>
             <Link
               href="/for-candidates"
-              className="inline-flex items-center gap-2 border border-hero-foreground/30 text-hero-foreground font-bold text-[15px] px-6 py-3.5 rounded-md hover:bg-hero-foreground/10 transition-colors"
+              className="inline-flex items-center gap-2 border border-hero-foreground/30 text-hero-foreground font-bold text-sm px-6 py-3.5 rounded-md hover:bg-hero-foreground/10 transition-colors"
             >
               I&apos;m a dental professional
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} />

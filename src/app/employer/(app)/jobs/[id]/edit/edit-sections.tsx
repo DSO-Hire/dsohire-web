@@ -2007,12 +2007,12 @@ function QuestionCard({
             </div>
             <div className="flex items-center gap-1.5 flex-shrink-0">
               {question.required && (
-                <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-heritage-deep">
+                <span className="text-2xs font-bold tracking-[1.2px] uppercase text-heritage-deep">
                   Required
                 </span>
               )}
               {question.knockout && (
-                <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-warning bg-warning-bg px-1.5 py-0.5">
+                <span className="text-2xs font-bold tracking-[1.2px] uppercase text-warning bg-warning-bg px-1.5 py-0.5">
                   Knockout
                 </span>
               )}

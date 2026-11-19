@@ -42,7 +42,7 @@ export default function ChangelogPage() {
         {months.map((m) => (
           <section key={m.key} className="pt-14">
             <div data-reveal className="flex items-baseline gap-3.5 mb-6">
-              <h2 className="text-[22px] font-extrabold tracking-[-0.4px] text-ink">
+              <h2 className="text-[1.222rem] font-extrabold tracking-[-0.4px] text-ink">
                 {m.label}
               </h2>
               <span className="text-2xs font-bold tracking-[1.2px] uppercase text-slate-meta">
@@ -63,15 +63,15 @@ export default function ChangelogPage() {
                   {formatDay(e.date)}
                 </time>
                 <div>
-                  <h3 className="text-[16.5px] font-extrabold tracking-[-0.2px] text-ink flex items-center gap-2.5 flex-wrap">
+                  <h3 className="text-[0.917rem] font-extrabold tracking-[-0.2px] text-ink flex items-center gap-2.5 flex-wrap">
                     {e.title}
                     <span
-                      className={`text-[8.5px] font-extrabold tracking-[1px] uppercase px-2 py-0.5 ${KIND_STYLES[e.kind].className}`}
+                      className={`text-2xs font-extrabold tracking-[1px] uppercase px-2 py-0.5 ${KIND_STYLES[e.kind].className}`}
                     >
                       {KIND_STYLES[e.kind].label}
                     </span>
                   </h3>
-                  <p className="text-[13.5px] text-slate-body leading-[1.7] mt-1.5 max-w-[640px]">
+                  <p className="text-xs text-slate-body leading-[1.7] mt-1.5 max-w-[640px]">
                     {e.body}
                   </p>
                 </div>
@@ -99,7 +99,7 @@ function Hero({ lastShipped }: { lastShipped: string }) {
           style={{ "--mk-delay": "70ms" } as React.CSSProperties}
           className="text-4xl sm:text-6xl font-extrabold tracking-[-2px] leading-[1.05] text-ink mb-6"
         >
-          We ship <em className="not-italic text-heritage-light">constantly.</em>
+          We ship <em className="not-italic">constantly.</em>
           <br />
           Here&rsquo;s the receipt.
         </h1>

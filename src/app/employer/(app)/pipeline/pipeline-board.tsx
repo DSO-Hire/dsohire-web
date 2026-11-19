@@ -80,7 +80,7 @@ export function PipelineHqBoard({
       {/* header */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-          <h1 className="flex items-center gap-2.5 text-[22px] font-extrabold tracking-[-0.5px] text-ink">
+          <h1 className="flex items-center gap-2.5 text-[1.222rem] font-extrabold tracking-[-0.5px] text-ink">
             <SquareKanban className="h-5 w-5 text-heritage" aria-hidden />
             Pipeline HQ
           </h1>
@@ -168,7 +168,7 @@ function JobChip({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-[11.5px] font-bold border transition-colors max-w-[280px] ${
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-2xs font-bold border transition-colors max-w-[280px] ${
         active
           ? "bg-primary text-primary-foreground border-primary"
           : "bg-card text-slate-body border-[var(--rule-strong)] hover:border-ink hover:text-ink"
@@ -177,7 +177,7 @@ function JobChip({
       {confidential && <Lock className="h-3 w-3 shrink-0 text-warning" aria-label="Confidential search" />}
       <span className="truncate">{label}</span>
       {paused && (
-        <span className="text-[8px] font-extrabold tracking-[0.8px] uppercase opacity-60">
+        <span className="text-2xs font-extrabold tracking-[0.8px] uppercase opacity-60">
           paused
         </span>
       )}

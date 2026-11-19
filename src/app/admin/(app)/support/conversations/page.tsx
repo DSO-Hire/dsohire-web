@@ -161,7 +161,7 @@ export default async function AdminConversationsPage({ searchParams }: PageProps
   const first100 = isFirstHundredMode();
 
   return (
-    <main className="min-h-screen bg-cream/30 px-6 py-10">
+    <main className="min-h-dvh bg-cream/30 px-6 py-10">
       <div className="mx-auto max-w-[1200px] space-y-6">
         <header className="space-y-2">
           <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep inline-flex items-center gap-2">
@@ -245,7 +245,7 @@ export default async function AdminConversationsPage({ searchParams }: PageProps
                         {r.body}
                       </div>
                       {r.auto_flag_reason && (
-                        <div className="text-[11.5px] text-danger inline-flex items-center gap-1.5">
+                        <div className="text-2xs text-danger inline-flex items-center gap-1.5">
                           <AlertTriangle className="size-3" />
                           {r.auto_flag_reason}
                         </div>

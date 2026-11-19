@@ -153,7 +153,7 @@ export function CandidateShell({
   });
 
   return (
-    <div className="min-h-screen flex bg-ivory">
+    <div className="min-h-dvh flex bg-ivory">
       {/* Realtime listener — bumps the Inbox nav badge when an employer
           message arrives without requiring navigation. */}
       <NavBadgeRealtime audience="candidate" />
@@ -165,7 +165,7 @@ export function CandidateShell({
            the soft-delete guard above are untouched. */}
       <aside
         id="candidate-rail"
-        className="hidden lg:flex w-[240px] flex-shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border sticky top-0 h-screen relative transition-[width] duration-[450ms] print:hidden"
+        className="hidden lg:flex w-[240px] flex-shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border sticky top-0 h-dvh relative transition-[width] duration-[450ms] print:hidden"
       >
         <RailCollapse targetId="candidate-rail" storageKey="dsoh-cand-rail-slim" />
 
@@ -198,10 +198,10 @@ export function CandidateShell({
             />
           </svg>
           <span className="rail-word inline-flex flex-col leading-none" aria-hidden="true">
-            <span className="text-[23px] font-extrabold tracking-[-0.5px] text-sidebar-foreground">
+            <span className="text-[1.278rem] font-extrabold tracking-[-0.5px] text-sidebar-foreground">
               DSO
             </span>
-            <span className="block w-full text-[8.5px] font-bold text-heritage-bright mt-[3px] text-justify [text-align-last:justify]">
+            <span className="block w-full text-2xs font-bold text-heritage-bright mt-[3px] text-justify [text-align-last:justify]">
               H I R E
             </span>
           </span>
@@ -220,7 +220,7 @@ export function CandidateShell({
               <div className="text-xs font-semibold text-sidebar-foreground truncate leading-tight">
                 {candidateName}
               </div>
-              <Eyebrow className="text-[8.5px] tracking-[1.2px] text-heritage-bright truncate mt-0.5">Candidate</Eyebrow>
+              <Eyebrow className="text-2xs tracking-[1.2px] text-heritage-bright truncate mt-0.5">Candidate</Eyebrow>
             </div>
           </div>
         </div>

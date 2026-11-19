@@ -152,7 +152,7 @@ export default async function PublicOfferResponsePage({
         : null;
 
   return (
-    <main className="min-h-screen bg-ivory py-12 px-4 sm:px-6">
+    <main className="min-h-dvh bg-ivory py-12 px-4 sm:px-6">
       <div className="mx-auto max-w-[680px]">
         <PublicHeader />
         <div className="bg-card border border-ivory-deep shadow-sm p-6 sm:p-10">

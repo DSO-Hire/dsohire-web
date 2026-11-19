@@ -37,15 +37,6 @@ export default function NotFound() {
               "radial-gradient(ellipse at 50% 30%, #000 0%, transparent 72%)",
           }}
         />
-        <div
-          aria-hidden
-          className="absolute -top-[18%] left-1/2 -translate-x-1/2 w-[60vw] h-[60vw] pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(circle, var(--heritage-glow), transparent 60%)",
-            filter: "blur(40px)",
-          }}
-        />
 
         <div className="relative z-10 max-w-[820px] mx-auto text-center">
           <div className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-4">
@@ -74,7 +65,7 @@ export default function NotFound() {
               <div className="text-2xs font-bold tracking-[2.5px] uppercase text-hero-foreground/65 mb-1">
                 Dental Groups
               </div>
-              <div className="text-[18px] font-extrabold tracking-[-0.4px] leading-tight text-hero-foreground mb-4">
+              <div className="text-[1rem] font-extrabold tracking-[-0.4px] leading-tight text-hero-foreground mb-4">
                 Hiring across your practices
               </div>
               <span className="inline-flex items-center gap-2 text-2xs font-bold tracking-[1.8px] uppercase text-hero-foreground/85 group-hover:text-hero-foreground transition-colors">
@@ -96,7 +87,7 @@ export default function NotFound() {
               <div className="text-2xs font-bold tracking-[2.5px] uppercase text-hero-foreground/65 mb-1">
                 Job Candidates
               </div>
-              <div className="text-[18px] font-extrabold tracking-[-0.4px] leading-tight text-hero-foreground mb-4">
+              <div className="text-[1rem] font-extrabold tracking-[-0.4px] leading-tight text-hero-foreground mb-4">
                 Find your next dental role
               </div>
               <span className="inline-flex items-center gap-2 text-2xs font-bold tracking-[1.8px] uppercase text-hero-foreground/85 group-hover:text-hero-foreground transition-colors">

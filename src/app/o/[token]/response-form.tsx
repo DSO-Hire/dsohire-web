@@ -141,7 +141,7 @@ export function OfferResponseForm({
 
   return (
     <div>
-      <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-[-0.8px] text-ink mb-2 leading-tight">
+      <h1 className="text-2xl sm:text-[1.556rem] font-extrabold tracking-[-0.8px] text-ink mb-2 leading-tight">
         {firstName ? `${firstName}, ` : ""}you have an offer from {dsoName}
       </h1>
       <p className="text-sm text-slate-body leading-relaxed mb-1">

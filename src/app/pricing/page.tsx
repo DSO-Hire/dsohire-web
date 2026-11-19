@@ -12,6 +12,7 @@
  */
 
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import {
   getAllTiers,
@@ -23,7 +24,7 @@ import { BillingPeriodToggle } from "./billing-period-toggle";
 import { PlanFinder } from "./plan-finder";
 import { CompareMatrixAccordion } from "./compare-matrix-accordion";
 import { Eyebrow } from "@/components/brand/eyebrow";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Tag } from "@/components/brand/tag";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { MotionMount } from "@/components/marketing/motion";
@@ -305,7 +306,7 @@ function SoloStandoutCard({
             {tier.tagline}
           </div>
           <div className="flex items-baseline gap-1.5 mb-1.5">
-            <div className="text-[44px] font-extrabold tracking-[-1.5px] leading-none text-ink tabular">
+            <div className="text-[2.444rem] font-extrabold tracking-[-1.5px] leading-none text-ink tabular">
               ${headlinePrice.toLocaleString()}
             </div>
             <div className="text-sm font-medium text-slate-body">
@@ -323,7 +324,7 @@ function SoloStandoutCard({
           >
             Start with Solo
           </Link>
-          <p className="mt-4 text-[11.5px] text-slate-meta leading-relaxed">
+          <p className="mt-4 text-2xs text-slate-meta leading-relaxed">
             Up to 5 active listings · 5 admin seats · unlimited hiring
             managers and applications.
           </p>
@@ -336,7 +337,7 @@ function SoloStandoutCard({
             {tier.features.map((feature, i) => (
               <li
                 key={i}
-                className="text-[13.5px] text-ink py-1 flex items-start gap-2 leading-snug"
+                className="text-xs text-ink py-1 flex items-start gap-2 leading-snug"
               >
                 <span
                   aria-hidden="true"
@@ -427,7 +428,7 @@ function TierCard({
 
       <div className="flex items-baseline gap-1.5 mb-1.5">
         <div
-          className={`text-[40px] font-extrabold tracking-[-1.5px] leading-none tabular ${
+          className={`text-[2.222rem] font-extrabold tracking-[-1.5px] leading-none tabular ${
             isFeatured ? "text-hero-foreground" : "text-ink"
           }`}
         >
@@ -453,11 +454,13 @@ function TierCard({
 
       <Link
         href={ctaHref}
-        className={`block text-center px-4 py-3.5 text-sm font-bold mb-6 transition-colors border ${
-          isFeatured
-            ? "bg-heritage text-primary-foreground border-heritage hover:bg-heritage-deep hover:border-heritage-deep"
-            : "bg-ivory text-ink border-[var(--rule-strong)] hover:bg-primary hover:text-primary-foreground hover:border-primary"
-        }`}
+        className={cn(
+          buttonVariants({
+            variant: isFeatured ? "heritage" : "outline",
+            size: "lg",
+          }),
+          "flex w-full mb-6",
+        )}
       >
         {ctaLabel[tier.id]}
       </Link>
@@ -470,7 +473,7 @@ function TierCard({
         {tier.features.map((feature, i) => (
           <li
             key={i}
-            className={`text-[13.5px] py-1.5 flex items-start gap-2 leading-snug ${
+            className={`text-xs py-1.5 flex items-start gap-2 leading-snug ${
               isFeatured ? "text-hero-foreground/90" : "text-ink"
             }`}
           >

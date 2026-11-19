@@ -101,36 +101,20 @@ function Hero({ live }: { live: HomeLiveSnapshot }) {
             "radial-gradient(ellipse at 50% 30%, #000 0%, transparent 72%)",
         }}
       />
-      <div
-        aria-hidden
-        className="absolute -top-[18%] left-1/2 -translate-x-1/2 w-[70vw] h-[70vw] pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle, var(--heritage-glow), transparent 60%)",
-          filter: "blur(40px)",
-        }}
-      />
 
       <div className="relative z-10 max-w-[1180px] mx-auto text-center">
         {/* Above-the-fold hero uses mk-hero (pure CSS entrance) instead of
             data-reveal — the first paint must never wait for hydration. */}
-        <span
-          className="mk-hero inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-ink border border-heritage/35 mb-5"
-          style={{
-            background: "var(--heritage-tint)",
-            boxShadow: "0 0 0 4px var(--heritage-glow)",
-          }}
-        >
-          <span className="text-heritage-deep">★</span>
-          <span>The dental-only hiring platform</span>
-        </span>
+        <p className="mk-hero text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-5">
+          The dental-only hiring platform
+        </p>
 
         <h1
           style={{ "--mk-delay": "70ms" } as React.CSSProperties}
           className="mk-hero text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-0.025em] leading-[1.02] text-ink mb-4"
         >
           Dental hiring,{" "}
-          <em className="not-italic text-heritage-light">done direct.</em>
+          <em className="not-italic">done direct.</em>
         </h1>
         <p
           style={{ "--mk-delay": "140ms" } as React.CSSProperties}
@@ -207,7 +191,7 @@ function LiveMarketBand({ live }: { live: HomeLiveSnapshot }) {
               <LiveStat value={live.activeJobs} label="Open roles live" />
               <LiveStat value={live.states} label="States covered" />
               <div>
-                <div className="text-[34px] font-extrabold tracking-[-1.5px] leading-none text-heritage-deep tabular">
+                <div className="text-[1.889rem] font-extrabold tracking-[-1.5px] leading-none text-heritage-deep tabular">
                   $0
                 </div>
                 <div className="mt-1 text-xs font-semibold text-slate-meta">
@@ -247,7 +231,7 @@ function LiveMarketBand({ live }: { live: HomeLiveSnapshot }) {
 function LiveStat({ value, label }: { value: number; label: string }) {
   return (
     <div>
-      <div className="text-[34px] font-extrabold tracking-[-1.5px] leading-none text-ink tabular">
+      <div className="text-[1.889rem] font-extrabold tracking-[-1.5px] leading-none text-ink tabular">
         <CountUp to={value} duration={800} />
       </div>
       <div className="mt-1 text-xs font-semibold text-slate-meta">
@@ -268,7 +252,7 @@ function MarqueeCard({ job, ariaHidden }: { job: MarqueeJob; ariaHidden?: boolea
       <span className="inline-flex self-start items-center px-1.5 py-0.5 mb-2.5 text-2xs font-semibold text-heritage-deep border border-heritage/30" style={{ background: "var(--heritage-tint)" }}>
         {job.chip}
       </span>
-      <span className="text-[14.5px] font-extrabold tracking-[-0.3px] leading-snug text-ink mb-1.5 line-clamp-2">
+      <span className="text-sm font-extrabold tracking-[-0.3px] leading-snug text-ink mb-1.5 line-clamp-2">
         {job.title}
       </span>
       <span className="mt-auto flex items-center justify-between gap-3 text-xs text-slate-body">
@@ -313,9 +297,9 @@ function MachineBand() {
       // reversed-palette pair (Cam, Day 32: no plain-text "DSOFit").
       title: (
         <span className="inline-flex flex-wrap items-baseline gap-x-1.5">
-          <PracticeFitWordmark surface="light" className="text-[17px]" />
+          <PracticeFitWordmark surface="light" className="text-[0.944rem]" />
           <span className="text-slate-meta font-bold">+</span>
-          <DsoFitWordmark surface="light" className="text-[17px]" />
+          <DsoFitWordmark surface="light" className="text-[0.944rem]" />
         </span>
       ),
       body: "Two-sided fit scoring for clinical and corporate roles. Displayed, never used to auto-screen. Honest by design.",
@@ -372,7 +356,7 @@ function MachineBand() {
         >
           {stats.map((s) => (
             <div key={s.label} className="bg-ivory px-6 py-6">
-              <div className="text-[34px] font-extrabold tracking-[-1.5px] leading-none text-ink tabular">
+              <div className="text-[1.889rem] font-extrabold tracking-[-1.5px] leading-none text-ink tabular">
                 <CountUp to={s.value} duration={800} />
                 {s.suffix && <span className="text-heritage">{s.suffix}</span>}
               </div>
@@ -449,17 +433,17 @@ function CandidateStrip() {
               style={{ "--mk-delay": `${i * 90}ms` } as React.CSSProperties}
               className="bg-cream/60 p-7"
             >
-              <h3 className="text-[16px] font-extrabold tracking-[-0.3px] leading-tight text-ink mb-1.5">
+              <h3 className="text-[0.889rem] font-extrabold tracking-[-0.3px] leading-tight text-ink mb-1.5">
                 {f.title}
               </h3>
-              <p className="text-[13.5px] text-slate-body leading-[1.6]">{f.body}</p>
+              <p className="text-xs text-slate-body leading-[1.6]">{f.body}</p>
             </div>
           ))}
         </div>
 
         <div className="order-1 lg:order-2">
           <div data-reveal className="mb-4">
-            <PracticeFitWordmark surface="light" tm className="text-[26px]" />
+            <PracticeFitWordmark surface="light" tm className="text-[1.444rem]" />
           </div>
           <h2
             data-reveal

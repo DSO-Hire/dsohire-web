@@ -170,7 +170,7 @@ function EventRow({
           <p className="text-sm font-bold text-ink">{event.title}</p>
           {event.forced && (
             <span
-              className="inline-flex items-center gap-1 rounded-full bg-cream border border-[var(--rule-strong)] px-2 py-0.5 text-[9px] font-bold tracking-[1px] uppercase text-slate-body"
+              className="inline-flex items-center gap-1 rounded-full bg-cream border border-[var(--rule-strong)] px-2 py-0.5 text-2xs font-bold tracking-[1px] uppercase text-slate-body"
               title="Required — needed for the platform to function"
             >
               <Lock className="h-2.5 w-2.5" />
@@ -178,7 +178,7 @@ function EventRow({
             </span>
           )}
           {!event.shipped && !event.forced && (
-            <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[9px] font-bold tracking-[1px] uppercase text-slate-meta">
+            <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-2xs font-bold tracking-[1px] uppercase text-slate-meta">
               Coming soon
             </span>
           )}

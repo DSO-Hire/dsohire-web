@@ -122,10 +122,10 @@ export function VsHonestNote({
         data-reveal
         className="max-w-[860px] border-l-2 border-heritage bg-cream/70 px-8 py-7"
       >
-        <h2 className="text-[17px] font-extrabold tracking-[-0.3px] text-ink mb-2">
+        <h2 className="text-[0.944rem] font-extrabold tracking-[-0.3px] text-ink mb-2">
           {title}
         </h2>
-        <p className="text-[14.5px] text-slate-body leading-[1.7]">{body}</p>
+        <p className="text-sm text-slate-body leading-[1.7]">{body}</p>
       </div>
     </section>
   );

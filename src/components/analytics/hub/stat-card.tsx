@@ -86,7 +86,7 @@ export function StatCard({
       </div>
 
       <div className="mt-2 flex items-baseline gap-1.5">
-        <span className="text-[32px] font-extrabold tracking-[-1px] tabular-nums text-ink leading-none">
+        <span className="text-[1.778rem] font-extrabold tracking-[-1px] tabular-nums text-ink leading-none">
           {/* FOH-9 — integer values count up on view; formatted values render as-is. */}
           <StatValue value={value} />
         </span>

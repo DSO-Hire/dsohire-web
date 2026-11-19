@@ -84,7 +84,7 @@ export default async function AdminSearch({
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="inline-block px-1.5 py-0.5 text-[9px] font-bold tracking-[1px] uppercase text-heritage-deep bg-heritage/10 shrink-0">
+                    <span className="inline-block px-1.5 py-0.5 text-2xs font-bold tracking-[1px] uppercase text-heritage-deep bg-heritage/10 shrink-0">
                       {TYPE_LABEL[r.type]}
                     </span>
                     <span className="text-sm text-ink font-semibold truncate">

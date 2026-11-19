@@ -71,7 +71,7 @@ export default async function HiringReportPage() {
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-5">
             How the dental industry is hiring.
           </h1>
-          <p className="text-[16px] text-slate-body leading-relaxed mb-3">
+          <p className="text-[0.889rem] text-slate-body leading-relaxed mb-3">
             Real compensation bands, role mix, and hiring velocity drawn
             from the DSO Hire platform. Continuously updated as dental groups post
             jobs and candidates apply, refreshed every six hours.

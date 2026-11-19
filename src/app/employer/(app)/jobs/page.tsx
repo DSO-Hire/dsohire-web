@@ -515,7 +515,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
             >
               {filter.label}
               <span
-                className={`px-1.5 py-0 text-[9px] tracking-[-0.2px] ${
+                className={`px-1.5 py-0 text-2xs tracking-[-0.2px] ${
                   isActive
                     ? "bg-primary-foreground/15 text-primary-foreground"
                     : "bg-cream text-slate-meta"
@@ -624,14 +624,14 @@ function SummaryTile({
       className="group bg-card p-4 sm:p-5 hover:bg-ivory-deep transition-colors flex flex-col"
     >
       <div
-        className={`flex items-center gap-2 text-[9px] font-extrabold tracking-[1.8px] uppercase mb-2.5 ${
+        className={`flex items-center gap-2 text-2xs font-extrabold tracking-[1.8px] uppercase mb-2.5 ${
           warn ? "text-warning" : "text-heritage-deep"
         }`}
       >
         <Icon className="h-3 w-3" />
         {label}
       </div>
-      <div className="text-[28px] font-black tracking-[-1px] text-ink leading-none mb-1.5">
+      <div className="tabular text-[1.556rem] font-black tracking-[-1px] text-ink leading-none mb-1.5">
         {value}
       </div>
       {meta && (
@@ -696,12 +696,12 @@ function HeroJobCard({
         }}
         aria-hidden
       />
-      <ChevronRight className="absolute top-5 right-5 h-4 w-4 text-hero-foreground/50 group-hover:text-[#8db8a3] group-hover:translate-x-1 transition-all" />
+      <ChevronRight className="absolute top-5 right-5 h-4 w-4 text-hero-foreground/50 group-hover:text-heritage-bright group-hover:translate-x-1 transition-all" />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 lg:gap-10 w-full items-stretch">
         <div>
           <div
-            className="inline-flex items-center gap-1.5 px-2 py-1 mb-3 text-[9px] font-extrabold tracking-[1.5px] uppercase text-[#8db8a3]"
+            className="inline-flex items-center gap-1.5 px-2 py-1 mb-3 text-2xs font-extrabold tracking-[1.5px] uppercase text-heritage-bright"
             style={{ background: "rgba(141,184,163,0.18)" }}
           >
             <Star className="h-2.5 w-2.5" strokeWidth={2.5} />
@@ -709,7 +709,7 @@ function HeroJobCard({
           </div>
           <div className="flex items-center gap-3 flex-wrap mb-2.5">
             <span
-              className={`inline-flex items-center px-2 py-0.5 text-[9px] font-extrabold tracking-[1.5px] uppercase ${
+              className={`inline-flex items-center px-2 py-0.5 text-2xs font-extrabold tracking-[1.5px] uppercase ${
                 status === "active"
                   ? "bg-heritage text-primary-foreground"
                   : "bg-ivory-deep text-ink"
@@ -717,14 +717,14 @@ function HeroJobCard({
             >
               {status}
             </span>
-            <span className="text-2xs font-bold tracking-[1.4px] uppercase text-[#8db8a3]">
+            <span className="text-2xs font-bold tracking-[1.4px] uppercase text-heritage-bright">
               {roleCategory}
             </span>
-            <span className="text-2xs font-bold tracking-[1.4px] uppercase text-[#8db8a3]">
+            <span className="text-2xs font-bold tracking-[1.4px] uppercase text-heritage-bright">
               {employmentType}
             </span>
           </div>
-          <h2 className="text-[24px] font-extrabold tracking-[-0.6px] leading-tight text-hero-foreground mb-1.5">
+          <h2 className="text-[1.333rem] font-extrabold tracking-[-0.6px] leading-tight text-hero-foreground mb-1.5">
             {title}
           </h2>
           {/* Location pills — same shape as JobRow but tuned for the navy hero
@@ -732,7 +732,7 @@ function HeroJobCard({
               top-performer belongs to without clicking through. */}
           {locations.length > 0 && (
             <div className="flex flex-wrap items-center gap-1 mb-2.5">
-              <MapPin className="h-3 w-3 text-[#8db8a3]" />
+              <MapPin className="h-3 w-3 text-heritage-bright" />
               {locations.slice(0, 2).map((loc) => (
                 <span
                   key={loc.id}
@@ -756,16 +756,16 @@ function HeroJobCard({
 
           <div className="flex gap-7 sm:gap-9 items-end">
             <div>
-              <div className="text-[9px] font-extrabold tracking-[1.6px] uppercase text-hero-foreground/55">
+              <div className="text-2xs font-extrabold tracking-[1.6px] uppercase text-hero-foreground/55">
                 Apps · 7d
               </div>
-              <div className="text-[36px] font-black tracking-[-1.2px] text-hero-foreground leading-none mt-1">
+              <div className="text-[2rem] font-black tracking-[-1.2px] text-hero-foreground leading-none mt-1">
                 {thisWeek}
               </div>
               {(thisWeek > 0 || lastWeek > 0) && (
                 <div className="mt-1.5">
                   <span
-                    className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-bold tracking-[0.4px] text-[#8db8a3]"
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-bold tracking-[0.4px] text-heritage-bright"
                     style={{ background: "rgba(141,184,163,0.18)" }}
                   >
                     {delta > 0 ? "↗" : delta < 0 ? "↘" : "—"}{" "}
@@ -775,18 +775,18 @@ function HeroJobCard({
               )}
             </div>
             <div>
-              <div className="text-[9px] font-extrabold tracking-[1.6px] uppercase text-hero-foreground/55">
+              <div className="text-2xs font-extrabold tracking-[1.6px] uppercase text-hero-foreground/55">
                 Total apps
               </div>
-              <div className="text-[36px] font-black tracking-[-1.2px] text-hero-foreground leading-none mt-1">
+              <div className="text-[2rem] font-black tracking-[-1.2px] text-hero-foreground leading-none mt-1">
                 {totalApps}
               </div>
             </div>
             <div>
-              <div className="text-[9px] font-extrabold tracking-[1.6px] uppercase text-hero-foreground/55">
+              <div className="text-2xs font-extrabold tracking-[1.6px] uppercase text-hero-foreground/55">
                 Views
               </div>
-              <div className="text-[36px] font-black tracking-[-1.2px] text-hero-foreground leading-none mt-1">
+              <div className="text-[2rem] font-black tracking-[-1.2px] text-hero-foreground leading-none mt-1">
                 {views}
               </div>
             </div>
@@ -795,7 +795,7 @@ function HeroJobCard({
 
         <div className="flex flex-col items-stretch lg:items-end justify-between gap-5 lg:min-w-[260px]">
           <HeroJobSpark data={spark} />
-          <div className="inline-flex items-center gap-1.5 text-2xs font-extrabold tracking-[1.8px] uppercase text-[#8db8a3] self-start lg:self-end">
+          <div className="inline-flex items-center gap-1.5 text-2xs font-extrabold tracking-[1.8px] uppercase text-heritage-bright self-start lg:self-end">
             Open job
             <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
           </div>
@@ -929,7 +929,7 @@ function JobRow({
             </span>
           )}
         </div>
-        <div className="text-[16px] font-extrabold tracking-[-0.2px] leading-tight text-ink truncate mb-1">
+        <div className="text-[0.889rem] font-extrabold tracking-[-0.2px] leading-tight text-ink truncate mb-1">
           {job.title}
         </div>
         {/* Location chips — show first 2 inline, "+N" overflow when
@@ -980,17 +980,17 @@ function JobRow({
             No 7d activity
           </div>
         )}
-        <span className="text-[9px] font-bold tracking-[1.4px] uppercase text-slate-meta">
+        <span className="text-2xs font-bold tracking-[1.4px] uppercase text-slate-meta">
           7-day apps
         </span>
       </div>
 
       {/* Apps count */}
       <div className="flex flex-col items-end gap-1">
-        <span className="text-[18px] font-black tracking-[-0.5px] text-ink leading-none">
+        <span className="text-[1rem] font-black tracking-[-0.5px] text-ink leading-none">
           {job.applications_count}
         </span>
-        <span className="text-[9px] font-bold tracking-[1.4px] uppercase text-slate-meta">
+        <span className="text-2xs font-bold tracking-[1.4px] uppercase text-slate-meta">
           Apps
         </span>
         {hasTrendSignal && <TrendPill delta={delta} intent={intent} />}
@@ -998,10 +998,10 @@ function JobRow({
 
       {/* Views count */}
       <div className="flex flex-col items-end gap-1">
-        <span className="text-[18px] font-black tracking-[-0.5px] text-ink leading-none">
+        <span className="text-[1rem] font-black tracking-[-0.5px] text-ink leading-none">
           {job.views}
         </span>
-        <span className="text-[9px] font-bold tracking-[1.4px] uppercase text-slate-meta">
+        <span className="text-2xs font-bold tracking-[1.4px] uppercase text-slate-meta">
           Views
         </span>
       </div>
@@ -1027,7 +1027,7 @@ function StatusBadge({
     new Date(scheduledPublishAt).getTime() > Date.now()
   ) {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 text-[9px] font-bold tracking-[1.5px] uppercase bg-heritage/15 text-heritage-deep border border-heritage/40">
+      <span className="inline-flex items-center px-2 py-0.5 text-2xs font-bold tracking-[1.5px] uppercase bg-heritage/15 text-heritage-deep border border-heritage/40">
         Scheduled
       </span>
     );
@@ -1046,7 +1046,7 @@ function StatusBadge({
   const m = map[status] ?? { label: status, cls: "bg-cream text-slate-body" };
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 text-[9px] font-bold tracking-[1.5px] uppercase ${m.cls}`}
+      className={`inline-flex items-center px-2 py-0.5 text-2xs font-bold tracking-[1.5px] uppercase ${m.cls}`}
     >
       {m.label}
     </span>

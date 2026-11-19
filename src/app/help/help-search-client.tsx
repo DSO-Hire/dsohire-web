@@ -103,7 +103,7 @@ export function HelpSearchClient({ entries }: Props) {
                     onClick={() => setOpen(false)}
                   >
                     <div className="flex items-baseline justify-between gap-3">
-                      <div className="font-semibold text-ink text-[13.5px]">
+                      <div className="font-semibold text-ink text-xs">
                         {r.title}
                       </div>
                       <span className="text-2xs font-semibold tracking-[1px] uppercase text-slate-meta shrink-0">

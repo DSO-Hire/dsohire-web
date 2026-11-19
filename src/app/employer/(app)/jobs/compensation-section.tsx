@@ -558,7 +558,7 @@ export function CompensationSection(props: CompensationSectionProps) {
               <div className={`text-xs font-bold tracking-[2px] uppercase ${a.text}`}>
                 On-Target Earnings
               </div>
-              <div className="mt-0.5 text-[20px] font-extrabold text-ink">
+              <div className="mt-0.5 text-[1.111rem] font-extrabold text-ink">
                 {ote.isRange && ote.ote_low != null && ote.ote_high != null
                   ? `~${formatUsd(ote.ote_low)}–${formatUsd(ote.ote_high)}`
                   : `~${formatUsd(ote.ote)}`}

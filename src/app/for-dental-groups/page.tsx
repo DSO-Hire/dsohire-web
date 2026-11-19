@@ -149,38 +149,19 @@ function Hero({ entryPrice }: { entryPrice: number }) {
         }}
       />
       {/* Heritage glow */}
-      <div
-        aria-hidden
-        className="absolute -top-[15%] -right-[10%] w-[60vw] h-[60vw] pointer-events-none"
-        style={{
-          background: "radial-gradient(circle, var(--heritage-glow), transparent 60%)",
-          filter: "blur(40px)",
-        }}
-      />
 
       <div className="relative z-10 max-w-[1240px] mx-auto">
         {/* ── Headline band — spans the full container so the H1 owns the
               top of the hero. The chip + headline don't compete for
               horizontal space with the kanban illustration anymore. */}
         <div className="mb-8">
-          <span
-            className="mk-hero inline-flex flex-wrap items-center gap-x-2 gap-y-1 px-3 py-1.5 text-xs font-semibold text-ink border border-heritage/35 [&>span]:whitespace-nowrap"
-            style={{
-              background: "var(--heritage-tint)",
-              boxShadow: "0 0 0 4px var(--heritage-glow)",
-            }}
-          >
-            <span className="text-heritage-deep">★</span>
-            <span>Built for dental groups</span>
-            <span className="text-heritage-deep">·</span>
-            <span>Multi-location</span>
-            <span className="text-heritage-deep">·</span>
-            <span>Flat monthly fee</span>
-          </span>
+          <p className="mk-hero text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
+            Built for multi-location dental groups
+          </p>
         </div>
 
         {/* Headline: text-4xl on phones (≤640px) → text-5xl at sm → text-7xl
-              at md → text-[80px] at lg. The second-line `<em>` only locks
+              at md → text-[4.444rem] at lg. The second-line `<em>` only locks
               `whitespace-nowrap` from lg up, where the type fits on one line;
               below that it's allowed to wrap so the headline never overflows
               the viewport. The heritage-tint underline is only rendered at
@@ -188,17 +169,12 @@ function Hero({ entryPrice }: { entryPrice: number }) {
               inline element only sits under the last line and looks broken. */}
         <h1
           style={{ "--mk-delay": "60ms" } as React.CSSProperties}
-          className="mk-hero text-4xl sm:text-5xl md:text-7xl lg:text-[80px] font-extrabold tracking-[-0.035em] leading-[1.02] text-ink mb-7 sm:mb-12 text-balance"
+          className="mk-hero text-4xl sm:text-5xl md:text-7xl lg:text-[4.444rem] font-extrabold tracking-[-0.035em] leading-[1.02] text-ink mb-7 sm:mb-12 text-balance"
         >
           Every practice. Every role.{" "}
           <br className="hidden sm:inline" />
-          <em className="not-italic relative lg:whitespace-nowrap text-heritage-light">
+          <em className="not-italic lg:whitespace-nowrap">
             One pipeline.
-            <span
-              aria-hidden
-              className="hidden lg:block absolute left-0 right-0 bottom-1.5 h-2 -z-10"
-              style={{ background: "var(--heritage-tint)" }}
-            />
           </em>
         </h1>
 
@@ -368,7 +344,7 @@ function HeroKanbanPreview() {
             Greenfield Dental Group is the same fictional DSO used in the
             /for-candidates mock card for cross-page continuity. */}
         <div className="px-5 pt-5 pb-3 border-b border-[var(--rule)]">
-          <Eyebrow className="text-[9px] text-heritage-deep mb-1.5">
+          <Eyebrow className="text-2xs text-heritage-deep mb-1.5">
             Pipeline · Live
           </Eyebrow>
           <div className="text-sm font-bold tracking-[-0.3px] text-ink leading-tight">
@@ -392,11 +368,11 @@ function HeroKanbanPreview() {
               >
                 <span className="flex items-center gap-1.5">
                   <span className={`block w-1.5 h-1.5 rounded-full ${col.dot}`} />
-                  <Eyebrow as="span" className="text-[8.5px] text-inherit">
+                  <Eyebrow as="span" className="text-2xs text-inherit">
                     {col.label}
                   </Eyebrow>
                 </span>
-                <span className="text-[9px] font-bold tabular-nums">
+                <span className="text-2xs font-bold tabular-nums">
                   {col.cards.length}
                 </span>
               </header>
@@ -455,27 +431,27 @@ function HeroKanbanPreview() {
 function HeroKanbanCard({ name, role, days, heat, comments, score }: HeroCard) {
   return (
     <div className="bg-card border border-[var(--rule)] px-2 py-1.5">
-      <div className="text-[10.5px] font-bold text-ink truncate leading-tight mb-0.5">
+      <div className="text-2xs font-bold text-ink truncate leading-tight mb-0.5">
         {name}
       </div>
-      <div className="text-[9.5px] text-slate-body truncate mb-1.5">
+      <div className="text-2xs text-slate-body truncate mb-1.5">
         {role}
       </div>
       <div className="flex items-center justify-between gap-1">
         <span
-          className={`text-[8px] font-semibold px-1 py-0.5 tabular ${HEAT_PILL[heat]}`}
+          className={`text-2xs font-semibold px-1 py-0.5 tabular ${HEAT_PILL[heat]}`}
         >
           {days}d
         </span>
         <div className="flex items-center gap-1.5">
           {score && (
-            <span className="inline-flex items-center gap-0.5 text-[9px] text-heritage-deep font-semibold tabular-nums">
+            <span className="inline-flex items-center gap-0.5 text-2xs text-heritage-deep font-semibold tabular-nums">
               <Star className="h-2.5 w-2.5 fill-current" />
               {score}
             </span>
           )}
           {comments !== undefined && comments > 0 && (
-            <span className="inline-flex items-center gap-0.5 text-[9px] text-slate-meta tabular-nums">
+            <span className="inline-flex items-center gap-0.5 text-2xs text-slate-meta tabular-nums">
               <MessageCircle className="h-2.5 w-2.5" />
               {comments}
             </span>
@@ -501,7 +477,7 @@ function PracticeFitBand() {
           {/* The wordmark IS the eyebrow — large and load-bearing. (It embeds
               its own sparkle mark; never pair it with a standalone mark.) */}
           <div data-reveal className="mb-5">
-            <PracticeFitWordmark surface="light" tm className="text-[30px]" />
+            <PracticeFitWordmark surface="light" tm className="text-[1.667rem]" />
           </div>
           <h2
             data-reveal
@@ -528,8 +504,8 @@ function PracticeFitBand() {
             style={{ "--mk-delay": "180ms" } as React.CSSProperties}
             className="flex flex-wrap items-center gap-x-3 gap-y-2 border-l-2 border-heritage bg-cream/70 px-5 py-4 mb-8 max-w-[560px]"
           >
-            <DsoFitWordmark surface="light" tm className="text-[17px]" />
-            <span className="text-[13.5px] text-slate-body leading-snug">
+            <DsoFitWordmark surface="light" tm className="text-[0.944rem]" />
+            <span className="text-xs text-slate-body leading-snug">
               Hiring for HQ too? The same engine scores corporate candidates
               (finance, ops, marketing, HR):{" "}
               <Link
@@ -565,10 +541,10 @@ function PracticeFitBand() {
           >
             <div className="flex items-start justify-between gap-4 px-6 py-4 bg-cream border-b border-[var(--rule)]">
               <div className="min-w-0">
-                <Eyebrow className="text-[9px] text-heritage-deep mb-1">
+                <Eyebrow className="text-2xs text-heritage-deep mb-1">
                   New Applicant · Hygienist · Maple &amp; 3rd
                 </Eyebrow>
-                <div className="text-[16px] font-bold tracking-[-0.3px] text-ink leading-tight">
+                <div className="text-[0.889rem] font-bold tracking-[-0.3px] text-ink leading-tight">
                   Sarah Chen, RDH
                 </div>
                 <div className="text-xs text-slate-body mt-0.5 tabular">
@@ -591,7 +567,7 @@ function PracticeFitBand() {
                 ]}
               />
             </div>
-            <div className="px-6 py-4 border-t border-[var(--rule)] bg-cream/50 text-[12.5px] text-slate-body leading-relaxed">
+            <div className="px-6 py-4 border-t border-[var(--rule)] bg-cream/50 text-xs text-slate-body leading-relaxed">
               <strong className="text-heritage-deep font-bold">Why this match:</strong>{" "}
               4-day week lines up with the schedule · Eaglesoft is her daily
               driver · recall-heavy hygiene mix matches the book.
@@ -622,7 +598,7 @@ const SHOWCASE_TOP: ShowcaseFeature[] = [
     icon: PracticeFitMark,
     title: (
       <span className="inline-flex flex-wrap items-center gap-1.5">
-        <PracticeFitWordmark surface="light" tm className="text-[18px]" />
+        <PracticeFitWordmark surface="light" tm className="text-[1rem]" />
         <span>matching</span>
       </span>
     ),
@@ -633,7 +609,7 @@ const SHOWCASE_TOP: ShowcaseFeature[] = [
     icon: DsoFitMark,
     title: (
       <span className="inline-flex flex-wrap items-center gap-1.5">
-        <DsoFitWordmark surface="light" tm className="text-[18px]" />
+        <DsoFitWordmark surface="light" tm className="text-[1rem]" />
         <span>for corporate hiring</span>
       </span>
     ),
@@ -743,10 +719,10 @@ function FeatureCard({ feature }: { feature: ShowcaseFeature }) {
         <Icon className="h-5 w-5" />
       </span>
 
-      <div className="text-[18px] font-extrabold tracking-[-0.4px] text-ink mb-2.5 leading-tight pr-20">
+      <div className="text-[1rem] font-extrabold tracking-[-0.4px] text-ink mb-2.5 leading-tight pr-20">
         {feature.title}
       </div>
-      <p className="text-[14.5px] text-slate-body leading-[1.65]">
+      <p className="text-sm text-slate-body leading-[1.65]">
         {feature.body}
       </p>
     </div>
@@ -823,7 +799,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
 
       <div className="flex items-baseline gap-1.5 mb-1.5">
         <div
-          className={`text-[40px] font-extrabold tracking-[-1.5px] leading-none tabular ${
+          className={`text-[2.222rem] font-extrabold tracking-[-1.5px] leading-none tabular ${
             isFeatured ? "text-hero-foreground" : "text-ink"
           }`}
         >
@@ -870,7 +846,7 @@ function PricingTier({ tier }: { tier: TierConfig }) {
         {tier.features.map((feature, i) => (
           <li
             key={i}
-            className={`text-[13.5px] py-1.5 flex items-start gap-2 leading-snug ${
+            className={`text-xs py-1.5 flex items-start gap-2 leading-snug ${
               isFeatured ? "text-hero-foreground/90" : "text-ink"
             }`}
           >

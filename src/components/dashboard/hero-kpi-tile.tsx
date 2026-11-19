@@ -118,7 +118,7 @@ export function HeroKpiTile({
 
       {/* Live tag */}
       {live && (
-        <div className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-[9px] font-bold tracking-[1.5px] uppercase text-[var(--heritage-bright,#8db8a3)]"
+        <div className="inline-flex items-center gap-1.5 px-2 py-1 mb-5 self-start text-2xs font-bold tracking-[1.5px] uppercase text-[var(--heritage-bright,#8db8a3)]"
           style={{ background: "rgba(141,184,163,0.18)" }}
         >
           <span
@@ -131,7 +131,7 @@ export function HeroKpiTile({
 
       {/* Giant value + SLA / delta pill — FOH-9: counts up on view. */}
       <div className="flex items-baseline gap-3 flex-wrap mb-3">
-        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground tabular-nums">
+        <div className="text-[4.889rem] sm:text-[5.333rem] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground tabular-nums">
           <StatValue value={value} duration={800} />
         </div>
         {slaChip && (
@@ -169,7 +169,7 @@ export function HeroKpiTile({
       {showSpark && (
         <div className="mt-5">
           <div className="flex items-baseline justify-between mb-1.5">
-            <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-hero-foreground/45">
+            <span className="text-2xs font-bold tracking-[1.5px] uppercase text-hero-foreground/45">
               {sparkLabel ?? "Trend · last 7 days"}
             </span>
             <span className="text-xs font-bold text-hero-foreground/80">
@@ -184,7 +184,7 @@ export function HeroKpiTile({
           not a trend of the queue count above. */}
       {stageStrip && stageStrip.length > 0 && (
         <div className="mt-5">
-          <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-hero-foreground/45">
+          <div className="text-2xs font-bold tracking-[1.5px] uppercase text-hero-foreground/45">
             Where your pipeline stands · last 30 days
           </div>
           <StageStrip stages={stageStrip} explicitMax={stageStripMax} />
@@ -283,7 +283,7 @@ function StageStrip({
                 }}
               />
             </div>
-            <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-hero-foreground/55">
+            <div className="text-2xs font-bold tracking-[1.5px] uppercase text-hero-foreground/55">
               {s.label}
             </div>
             <div className="text-sm font-extrabold text-hero-foreground mt-0.5">

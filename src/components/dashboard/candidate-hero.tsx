@@ -154,7 +154,7 @@ function NewRepliesBody({ unreadCount, replies }: NewRepliesProps) {
       </div>
 
       <div className="flex items-baseline gap-3 flex-wrap mb-3">
-        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground tabular">
+        <div className="text-[4.889rem] sm:text-[5.333rem] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground tabular">
           {unreadCount}
         </div>
         <span className="px-2 py-1 text-xs font-bold tracking-[0.4px] text-heritage-bright bg-heritage-bright/15">
@@ -211,7 +211,7 @@ function ActiveAppsBody({ activeCount, hint, stages }: ActiveAppsProps) {
       </div>
 
       <div className="flex items-baseline gap-3 flex-wrap mb-3">
-        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground tabular">
+        <div className="text-[4.889rem] sm:text-[5.333rem] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground tabular">
           {activeCount}
         </div>
       </div>
@@ -260,10 +260,10 @@ function InterviewBody({ interviewCount, items, hint }: InterviewProps) {
       </div>
 
       <div className="flex items-baseline gap-3 flex-wrap mb-3">
-        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground tabular">
+        <div className="text-[4.889rem] sm:text-[5.333rem] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground tabular">
           {interviewCount}
         </div>
-        <span className="text-[24px] text-hero-foreground/50">
+        <span className="text-[1.333rem] text-hero-foreground/50">
           interview{interviewCount === 1 ? "" : "s"}
         </span>
       </div>
@@ -306,10 +306,10 @@ function SetupBody({ totalSteps, doneSteps, hint, steps }: SetupProps) {
       </div>
 
       <div className="flex items-baseline gap-3 flex-wrap mb-3">
-        <div className="text-[88px] sm:text-[96px] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground tabular">
+        <div className="text-[4.889rem] sm:text-[5.333rem] font-black tracking-[-4.5px] leading-[0.92] text-hero-foreground tabular">
           {totalSteps}
         </div>
-        <span className="text-[32px] text-hero-foreground/50">steps</span>
+        <span className="text-[1.778rem] text-hero-foreground/50">steps</span>
       </div>
 
       <div className="text-xs leading-[1.55] max-w-[420px] text-hero-foreground/70">

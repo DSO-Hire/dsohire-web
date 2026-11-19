@@ -371,7 +371,7 @@ function SetupWizard({
               }}
               maxLength={6}
               placeholder="123456"
-              className="w-40 rounded border border-[var(--rule-strong)] bg-card px-3 py-2 font-mono text-[18px] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
+              className="w-40 rounded border border-[var(--rule-strong)] bg-card px-3 py-2 font-mono text-[1rem] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
             />
           </div>
           {error && (
@@ -506,7 +506,7 @@ function DisableDialog({
           setCode(e.target.value.replace(/\D/g, "").slice(0, 6));
         }}
         placeholder="123456"
-        className="w-40 rounded border border-[var(--rule-strong)] bg-card px-3 py-2 font-mono text-[18px] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
+        className="w-40 rounded border border-[var(--rule-strong)] bg-card px-3 py-2 font-mono text-[1rem] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
       />
       {error && (
         <p className="text-xs text-danger">{error}</p>
@@ -626,7 +626,7 @@ function RegenerateDialog({
           setCode(e.target.value.replace(/\D/g, "").slice(0, 6));
         }}
         placeholder="123456"
-        className="w-40 rounded border border-[var(--rule-strong)] bg-card px-3 py-2 font-mono text-[18px] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
+        className="w-40 rounded border border-[var(--rule-strong)] bg-card px-3 py-2 font-mono text-[1rem] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
       />
       {error && <p className="text-xs text-danger">{error}</p>}
       <div className="flex flex-wrap items-center gap-2">

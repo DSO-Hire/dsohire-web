@@ -166,7 +166,7 @@ export async function SiteNav({
             aria-label="PracticeFit"
             className="flex items-center hover:opacity-75 transition-opacity"
           >
-            <PracticeFitWordmark surface="light" tm className="text-[15.5px]" />
+            <PracticeFitWordmark surface="light" tm className="text-sm" />
           </Link>
         </li>
         <NavLink href="/pricing">Pricing</NavLink>

@@ -25,14 +25,14 @@ export default async function ComingSoonPage({ searchParams }: PageProps) {
   const wrongCode = typeof sp.preview === "string" && sp.preview.length > 0;
 
   return (
-    <div className="min-h-screen w-full bg-hero text-hero-foreground flex items-center justify-center px-6 py-16">
+    <div className="min-h-dvh w-full bg-hero text-hero-foreground flex items-center justify-center px-6 py-16">
       <div className="w-full max-w-[460px]">
         {/* Wordmark */}
         <div className="flex items-baseline gap-2 mb-12">
-          <span className="text-[22px] font-extrabold tracking-[-0.5px] text-hero-foreground">
+          <span className="text-[1.222rem] font-extrabold tracking-[-0.5px] text-hero-foreground">
             DSO
           </span>
-          <span className="text-[22px] font-medium tracking-[6px] text-hero-foreground/80">
+          <span className="text-[1.222rem] font-medium tracking-[6px] text-hero-foreground/80">
             HIRE
           </span>
           <span className="ml-1 h-2 w-2 rounded-full bg-heritage" aria-hidden="true" />

@@ -414,7 +414,7 @@ export function ChatPanel({
                         <div className={"px-3 py-2 text-xs leading-snug " +
                           (m.mine ? "bg-heritage text-primary-foreground" : "bg-card border border-[var(--rule)] text-ink")}>
                           {m.body}
-                          <div className={"mt-0.5 text-[9px] " + (m.mine ? "text-primary-foreground/60" : "text-slate-meta")}>
+                          <div className={"mt-0.5 text-2xs " + (m.mine ? "text-primary-foreground/60" : "text-slate-meta")}>
                             {relTime(m.created_at)}
                           </div>
                         </div>
@@ -540,7 +540,7 @@ function MsgAvatar({
     .map((s) => s[0]?.toUpperCase() ?? "")
     .join("");
   return (
-    <div className="h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[9px] font-bold shrink-0">
+    <div className="h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xs font-bold shrink-0">
       {initials || "?"}
     </div>
   );

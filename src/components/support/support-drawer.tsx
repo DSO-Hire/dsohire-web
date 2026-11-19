@@ -798,7 +798,7 @@ function Bubble({
         )}
         {message.citations && message.citations.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-            <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-slate-meta">
+            <span className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta">
               Sources
             </span>
             {message.citations.map((c, i) =>
@@ -1020,7 +1020,7 @@ function DraftActionCard({ draft }: { draft: UiDraftAction }) {
       <div className="text-2xs font-bold tracking-[0.3px] uppercase text-warning">
         Draft action — needs your click
       </div>
-      <p className="mt-1 mb-2 text-[12.5px] text-ink leading-snug">
+      <p className="mt-1 mb-2 text-xs text-ink leading-snug">
         {draft.summary}.
       </p>
       {status === "error" && error && (
@@ -1104,7 +1104,7 @@ function EmptyState({
                     <div className="font-semibold text-ink text-xs leading-tight">
                       {entry.title}
                     </div>
-                    <p className="mt-0.5 text-[11.5px] text-slate-meta leading-snug line-clamp-2">
+                    <p className="mt-0.5 text-2xs text-slate-meta leading-snug line-clamp-2">
                       {entry.tip}
                     </p>
                   </div>

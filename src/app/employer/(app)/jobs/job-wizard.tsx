@@ -1735,14 +1735,14 @@ function BasicsStep({
                     {loc.name}
                     {loc.anonymizeName ? (
                       <span
-                        className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-ink text-ivory text-[9px] font-bold tracking-[0.8px] uppercase"
+                        className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-ink text-ivory text-2xs font-bold tracking-[0.8px] uppercase"
                         title="This practice's name is hidden from candidates — listings show 'Dental Office in {city}'."
                       >
                         Name hidden
                       </span>
                     ) : loc.publicDsoAffiliation === false ? (
                       <span
-                        className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-heritage/15 text-heritage-deep text-[9px] font-bold tracking-[0.8px] uppercase"
+                        className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-heritage/15 text-heritage-deep text-2xs font-bold tracking-[0.8px] uppercase"
                         title="Your dental-group name is hidden from candidates on this location's listings."
                       >
                         Anonymous
@@ -2869,12 +2869,12 @@ function QuestionCard({
             </div>
             <div className="flex items-center gap-1.5 flex-shrink-0">
               {question.required && (
-                <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-heritage-deep">
+                <span className="text-2xs font-bold tracking-[1.2px] uppercase text-heritage-deep">
                   Required
                 </span>
               )}
               {question.knockout && (
-                <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-warning bg-warning-bg px-1.5 py-0.5">
+                <span className="text-2xs font-bold tracking-[1.2px] uppercase text-warning bg-warning-bg px-1.5 py-0.5">
                   Knockout
                 </span>
               )}
@@ -2945,7 +2945,7 @@ function QuestionCard({
 
         {isScale && (
           <div>
-            <label className="block text-[16px] font-bold text-ink mb-1.5">
+            <label className="block text-[0.889rem] font-bold text-ink mb-1.5">
               Slider end labels <span className="text-heritage">*</span>
             </label>
             <p className="mb-2.5 text-xs text-slate-meta">

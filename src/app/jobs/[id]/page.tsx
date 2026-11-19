@@ -1083,7 +1083,7 @@ function Detail({
         <Icon className="h-3.5 w-3.5" />
         {label}
       </Eyebrow>
-      <div className="text-[17px] font-semibold text-hero-foreground leading-snug">
+      <div className="text-[0.944rem] font-semibold text-hero-foreground leading-snug">
         {children}
       </div>
     </div>
@@ -1209,7 +1209,7 @@ function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
       return (
         <div className="space-y-1.5">
           {deal.headline && (
-            <div className="tabular text-[17px] font-extrabold text-hero-foreground leading-snug">
+            <div className="tabular text-[0.944rem] font-extrabold text-hero-foreground leading-snug">
               {deal.headline}
             </div>
           )}
@@ -1270,7 +1270,7 @@ function CompensationGlance({ job }: { job: { [k: string]: unknown } }) {
     <div className="space-y-1.5">
       {ote.hasVariable && ote.ote != null ? (
         <>
-          <div className="tabular text-[20px] font-extrabold text-hero-foreground leading-tight">
+          <div className="tabular text-[1.111rem] font-extrabold text-hero-foreground leading-tight">
             {ote.isRange && ote.ote_low != null && ote.ote_high != null
               ? `~${formatUsd(ote.ote_low)}–${formatUsd(ote.ote_high)}`
               : `~${formatUsd(ote.ote)}`}

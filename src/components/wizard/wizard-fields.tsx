@@ -39,7 +39,7 @@ export function FieldShell({
 }) {
   return (
     <fieldset>
-      <legend className="text-[16px] font-bold text-ink">
+      <legend className="text-[0.889rem] font-bold text-ink">
         {label}
         {optional && (
           <span className="ml-2 text-xs font-medium text-slate-meta">optional</span>

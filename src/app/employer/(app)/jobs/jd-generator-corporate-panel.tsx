@@ -444,7 +444,7 @@ function ResultCard({
 
       {appliedFlash && (
         <div
-          className="mt-3 px-3 py-2 border-l-2 text-[12.5px]"
+          className="mt-3 px-3 py-2 border-l-2 text-xs"
           style={{
             backgroundColor: `color-mix(in oklab, ${CORP_ACCENT} 10%, transparent)`,
             borderColor: CORP_ACCENT,

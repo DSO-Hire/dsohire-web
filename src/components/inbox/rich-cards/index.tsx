@@ -143,7 +143,7 @@ function OfferLetterCard({
       eyebrowIcon={isAccepted ? CheckCircle2 : isDeclined ? XCircle : FileText}
       accent={isAccepted ? "heritage" : isDeclined ? "slate" : "ink"}
     >
-      <div className="text-[14.5px] font-semibold text-ink mb-1.5 leading-snug">
+      <div className="text-sm font-semibold text-ink mb-1.5 leading-snug">
         {payload.subject}
       </div>
       <p className="text-xs text-slate-body leading-[1.55] mb-3">

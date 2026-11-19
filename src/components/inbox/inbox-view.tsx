@@ -959,12 +959,12 @@ function ThreadRow({
           (thread.stage || thread.awaiting_reply) && (
             <p className="mt-1.5 flex items-center gap-1.5 flex-wrap">
               {thread.stage && (
-                <span className="inline-flex items-center px-1.5 py-0.5 border border-[var(--rule)] bg-cream/60 text-[9px] font-bold tracking-[1px] uppercase text-foreground">
+                <span className="inline-flex items-center px-1.5 py-0.5 border border-[var(--rule)] bg-cream/60 text-2xs font-bold tracking-[1px] uppercase text-foreground">
                   {EMPLOYER_STAGE_LABELS[thread.stage] ?? thread.stage}
                 </span>
               )}
               {thread.awaiting_reply && !thread.archived && (
-                <span className="inline-flex items-center px-1.5 py-0.5 bg-heritage/10 text-[9px] font-bold tracking-[1px] uppercase text-heritage-deep">
+                <span className="inline-flex items-center px-1.5 py-0.5 bg-heritage/10 text-2xs font-bold tracking-[1px] uppercase text-heritage-deep">
                   Awaiting you
                 </span>
               )}

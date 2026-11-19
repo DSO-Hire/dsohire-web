@@ -217,7 +217,7 @@ export default function HelpPage() {
               .map(([key, e]) => (
                 <div key={key}>
                   <dt className="text-xs font-bold text-ink">{e.title}</dt>
-                  <dd className="mt-0.5 text-[12.5px] text-slate-body leading-relaxed">
+                  <dd className="mt-0.5 text-xs text-slate-body leading-relaxed">
                     {e.tip}
                   </dd>
                 </div>

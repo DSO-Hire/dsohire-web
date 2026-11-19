@@ -73,17 +73,17 @@ export function VisibilityForm() {
   }
 
   return (
-    <div className="min-h-screen bg-ivory flex flex-col items-center justify-center px-5 py-16">
+    <div className="min-h-dvh bg-ivory flex flex-col items-center justify-center px-5 py-16">
       <div className="w-full max-w-[680px]">
         <header className="text-center mb-10">
           <span className="inline-flex items-center gap-2 bg-heritage/10 px-3.5 py-1.5 text-xs font-semibold text-heritage">
             <ShieldCheck className="h-4 w-4" />
             You&apos;re private by default
           </span>
-          <h1 className="mt-5 text-[32px] sm:text-[40px] font-extrabold tracking-[-0.5px] text-ink leading-tight">
+          <h1 className="mt-5 text-[1.778rem] sm:text-[2.222rem] font-extrabold tracking-[-0.5px] text-ink leading-tight">
             Choose who can find you
           </h1>
-          <p className="mt-4 text-[16px] sm:text-[17px] text-slate-body max-w-[560px] mx-auto leading-relaxed">
+          <p className="mt-4 text-[0.889rem] sm:text-[0.944rem] text-slate-body max-w-[560px] mx-auto leading-relaxed">
             Right now, no employer can see you. Pick how discoverable you want to
             be — most people choose anonymous, so they get found for great-fit
             roles without showing their name. You can change this anytime in
@@ -121,7 +121,7 @@ export function VisibilityForm() {
                   {opt.icon}
                 </span>
                 <span className="flex-1">
-                  <span className="flex flex-wrap items-center gap-2 text-[16px] sm:text-[17px] font-bold text-foreground leading-snug">
+                  <span className="flex flex-wrap items-center gap-2 text-[0.889rem] sm:text-[0.944rem] font-bold text-foreground leading-snug">
                     {opt.label}
                     {opt.recommended && (
                       <Tag tone="heritage">Recommended</Tag>

@@ -237,7 +237,7 @@ export function PermissionsEditorButton({
                                 {m.label}
                               </span>
                               {isCustom && (
-                                <span className="inline-flex items-center px-1.5 py-0.5 bg-heritage-light border border-heritage text-[9px] font-bold tracking-[1px] uppercase text-ink">
+                                <span className="inline-flex items-center px-1.5 py-0.5 bg-heritage-light border border-heritage text-2xs font-bold tracking-[1px] uppercase text-ink">
                                   Custom
                                 </span>
                               )}

@@ -43,7 +43,7 @@ export function YourMarketCard({
       </Eyebrow>
 
       <div className="mt-2 flex items-baseline gap-2">
-        <span className="text-[22px] font-extrabold tracking-[-0.5px] text-ink leading-none tabular">
+        <span className="text-[1.222rem] font-extrabold tracking-[-0.5px] text-ink leading-none tabular">
           {band}
           <span className="text-xs font-bold text-slate-meta">
             {unitLabel}

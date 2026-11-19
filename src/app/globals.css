@@ -47,7 +47,8 @@
 
   /* Slate — body text on light */
   --slate-body: #4A6278;
-  --slate-meta: #6E8395;
+  /* 2026-11-19 unslop: was #6E8395 (3.58:1 on ivory, fails AA). Now 4.81:1. */
+  --slate-meta: #5A6E80;
 
   /* Gold — sparkle / ★ accent */
   --gold: #B8902F;
@@ -467,6 +468,13 @@ html, body {
   html {
     @apply font-sans;
   }
+  /* 2026-11-19 unslop: headlines wrap evenly, paragraphs avoid orphans. */
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+  }
+  p, li, blockquote, figcaption {
+    text-wrap: pretty;
+  }
 }
 
 /* ─────────────────────────────────────────
@@ -726,8 +734,8 @@ html, body {
     opacity: 0;
     transform: translateY(12px);
     transition:
-      opacity 0.45s var(--ease-settle),
-      transform 0.45s var(--ease-settle);
+      opacity 0.3s var(--ease-settle),
+      transform 0.3s var(--ease-settle);
     transition-delay: var(--mk-delay, 0ms);
     /* Safety net: if a page carries [data-reveal] but never mounts
        <MotionMount /> (the /pricing gray-slab incident), content fades
@@ -762,7 +770,7 @@ html, body {
    --mk-delay). Reduced motion: no animation, content simply visible. */
 @media (prefers-reduced-motion: no-preference) {
   .mk-hero {
-    animation: mk-hero-rise 0.45s var(--ease-settle) both;
+    animation: mk-hero-rise 0.3s var(--ease-settle) both;
     animation-delay: var(--mk-delay, 0ms);
   }
 }
@@ -1056,7 +1064,7 @@ html, body {
 /* badge-pulse — an unread/count badge changes value */
 @media (prefers-reduced-motion: no-preference) {
   .badge-pulse {
-    animation: badge-pulse 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: badge-pulse 0.4s var(--ease-settle);
   }
 }
 @keyframes badge-pulse {
@@ -1409,16 +1417,12 @@ html, body {
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
-  /* Sampled critically-damped spring, ~4% overshoot. Buttons and cards
-     "land" instead of sliding linearly. Falls back to ease-settle where
-     linear() is unsupported. */
+  /* Formerly a sampled overshoot spring; now the settle curve (no bounce). */
   --spring: var(--ease-settle);
 }
-@supports (transition-timing-function: linear(0, 1)) {
-  :root {
-    --spring: linear(0, 0.009, 0.035 2.1%, 0.141 4.4%, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%, 1.017 19.4%, 1.041 22.1%, 1.043 24.8%, 1.035 27.7%, 1.012 34.8%, 1.001 42.4%, 0.998 56.9%, 1);
-  }
-}
+/* 2026-11-19 unslop: the sampled ~4% overshoot spring was removed. Everyday
+   UI settles, it does not bounce. --spring now aliases the settle curve so
+   every existing consumer keeps working. */
 
 /* Route changes jump; in-page anchors (#calculator) glide. Pairs with
    data-scroll-behavior="smooth" on <html> (Next reads it and disables
@@ -1433,8 +1437,8 @@ html {
 /* ── Button lift: hover rises 2px on the spring, press compresses ── */
 .btn-lift {
   transition:
-    transform 0.32s var(--spring),
-    box-shadow 0.32s var(--ease-settle),
+    transform 0.18s var(--ease-settle),
+    box-shadow 0.18s var(--ease-settle),
     background-color var(--duration-fast) ease,
     color var(--duration-fast) ease,
     border-color var(--duration-fast) ease;
@@ -1446,8 +1450,8 @@ html {
   }
 }
 .btn-lift:active {
-  transform: translateY(0) scale(0.985);
-  transition-duration: 0.08s;
+  transform: translateY(0) scale(0.97);
+  transition-duration: 0.1s;
 }
 
 /* ── Grain: kills gradient banding on the dark bands ── */
@@ -1879,7 +1883,7 @@ html {
 
 .hd-door {
   box-shadow: 0 34px 70px -36px rgba(7, 15, 28, 0.55), 0 14px 28px -16px rgba(7, 15, 28, 0.22);
-  transition: transform 0.5s var(--spring), box-shadow 0.5s ease;
+  transition: transform 0.25s var(--ease-settle), box-shadow 0.25s ease;
 }
 .hd-door-ink { background: linear-gradient(165deg, #1b2d4d 0%, #14233f 55%, #0f1b31 100%); }
 .hd-door-green { background: linear-gradient(165deg, #5a8a6e 0%, #4d7a60 45%, #2f5d4f 100%); }

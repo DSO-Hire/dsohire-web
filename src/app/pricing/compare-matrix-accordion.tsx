@@ -241,7 +241,7 @@ function ValueCell({
           </>
         ) : (
           <span
-            className={`text-[18px] leading-none font-light ${
+            className={`text-[1rem] leading-none font-light ${
               featured ? "text-hero-foreground/30" : "text-slate-meta/30"
             }`}
           >

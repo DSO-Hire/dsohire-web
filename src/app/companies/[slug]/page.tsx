@@ -327,7 +327,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
           {/* Mission as pull-quote */}
           {dsoRow.mission && (
             <p
-              className="mt-6 max-w-[700px] border-l-[3px] pl-5 text-[18px] sm:text-[20px] font-medium text-ink leading-snug"
+              className="mt-6 max-w-[700px] border-l-[3px] pl-5 text-[1rem] sm:text-[1.111rem] font-medium text-ink leading-snug"
               style={{ borderColor: brandColor }}
             >
               {dsoRow.mission}
@@ -439,7 +439,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
                       className="border-l-[3px] pl-5"
                       style={{ borderColor: brandColor }}
                     >
-                      <h3 className="text-[18px] font-bold text-ink leading-tight mb-2">
+                      <h3 className="text-[1rem] font-bold text-ink leading-tight mb-2">
                         {b.title}
                       </h3>
                       <p className="text-sm text-slate-body leading-relaxed">
@@ -674,7 +674,7 @@ function JobRowItem({
                 {EMP_LABELS[job.employment_type] ?? job.employment_type}
               </span>
             </div>
-            <div className="text-[17px] font-extrabold tracking-[-0.3px] text-ink leading-tight mb-1">
+            <div className="text-[0.944rem] font-extrabold tracking-[-0.3px] text-ink leading-tight mb-1">
               {job.title}
             </div>
             {locations.length > 0 && (
@@ -692,7 +692,7 @@ function JobRowItem({
                   {formatCompensation(job)}
                 </div>
                 {job.compensation_period && (
-                  <div className="text-[9px] tracking-[1.2px] uppercase text-slate-meta mt-1.5 font-semibold">
+                  <div className="text-2xs tracking-[1.2px] uppercase text-slate-meta mt-1.5 font-semibold">
                     {compensationPeriodLabel(job.compensation_period)}
                   </div>
                 )}

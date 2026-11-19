@@ -58,7 +58,7 @@ function Hero() {
         className="text-4xl sm:text-6xl font-extrabold tracking-[-2px] leading-[1.05] text-ink mb-7 max-w-[820px]"
       >
         Dentistry professionalized everything —{" "}
-        <em className="not-italic text-heritage-light">except hiring.</em>
+        <em className="not-italic">except hiring.</em>
       </h1>
       <p
         data-reveal
@@ -89,7 +89,7 @@ function FounderLetter() {
           <div className="text-2xs font-bold tracking-[3.5px] uppercase text-heritage-deep mb-5">
             A letter from the founder
           </div>
-          <p className="text-[19px] font-extrabold tracking-[-0.3px] leading-[1.4] text-ink mb-6">
+          <p className="text-[1.056rem] font-extrabold tracking-[-0.3px] leading-[1.4] text-ink mb-6">
             Ten years on the business side of dentistry. One conclusion.
           </p>
           <div className="space-y-4.5 text-sm text-ink leading-[1.85]">
@@ -175,7 +175,7 @@ function SideFact({ n, label, delay }: { n: string; label: string; delay: number
       style={{ "--mk-delay": `${delay}ms` } as React.CSSProperties}
       className="border-l-2 border-heritage pl-4.5 py-1"
     >
-      <div className="text-[30px] font-extrabold tracking-[-1px] leading-none text-ink tabular-nums">
+      <div className="text-[1.667rem] font-extrabold tracking-[-1px] leading-none text-ink tabular-nums">
         {n}
       </div>
       <div className="mt-1.5 text-2xs font-bold tracking-[1.4px] uppercase text-slate-meta leading-[1.5]">
@@ -252,10 +252,10 @@ function Timeline() {
               <div className="text-2xs font-bold tracking-[1.8px] uppercase text-heritage-deep">
                 {t.yr}
               </div>
-              <div className="text-[18px] font-extrabold tracking-[-0.2px] text-ink mt-1 mb-1.5">
+              <div className="text-[1rem] font-extrabold tracking-[-0.2px] text-ink mt-1 mb-1.5">
                 {t.title}
               </div>
-              <p className="text-[14.5px] text-slate-body leading-[1.7] max-w-[560px]">{t.body}</p>
+              <p className="text-sm text-slate-body leading-[1.7] max-w-[560px]">{t.body}</p>
             </div>
           ))}
         </div>
@@ -331,10 +331,10 @@ function Promises() {
               {i + 1}
             </span>
             <div>
-              <h3 className="text-[15.5px] font-extrabold tracking-[-0.2px] text-ink mb-1.5">
+              <h3 className="text-sm font-extrabold tracking-[-0.2px] text-ink mb-1.5">
                 {p.title}
               </h3>
-              <p className="text-[13.5px] text-slate-body leading-[1.65]">{p.body}</p>
+              <p className="text-xs text-slate-body leading-[1.65]">{p.body}</p>
             </div>
           </div>
         ))}

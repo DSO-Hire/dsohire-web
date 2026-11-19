@@ -230,18 +230,18 @@ export function EmployerShell({
   })).filter((group) => group.items.length > 0);
 
   return (
-    <div className="min-h-screen flex bg-ivory">
+    <div className="min-h-dvh flex bg-ivory">
       {/* Realtime listener — bumps the Inbox nav badge when a candidate
           message arrives without requiring navigation. */}
       <NavBadgeRealtime audience="employer" />
       {/* ── Desktop sidebar — Lane S, Model H (Day 32 verdict) ──
            Navy throughout, drawn-on logo, named groups, settle-edge active
            state, compact footer row, collapse-to-72px icon rail. sticky top-0
-           + h-screen pins the rail so the footer cluster stays in view even
+           + h-dvh pins the rail so the footer cluster stays in view even
            when content scrolls past the viewport height. */}
       <aside
         id="employer-rail"
-        className="hidden lg:flex w-[240px] flex-shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border sticky top-0 h-screen relative transition-[width] duration-[450ms]"
+        className="hidden lg:flex w-[240px] flex-shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border sticky top-0 h-dvh relative transition-[width] duration-[450ms]"
       >
         <RailCollapse />
         {/* Brand zone — the D-form mark drawn on in ivory + heritage
@@ -275,10 +275,10 @@ export function EmployerShell({
           {/* Wordmark: HIRE justifies to span DSO's full width (matches the
               true lockup). aria-hidden — the Link itself is labeled. */}
           <span className="rail-word inline-flex flex-col leading-none" aria-hidden="true">
-            <span className="text-[23px] font-extrabold tracking-[-0.5px] text-sidebar-foreground">
+            <span className="text-[1.278rem] font-extrabold tracking-[-0.5px] text-sidebar-foreground">
               DSO
             </span>
-            <span className="block w-full text-[8.5px] font-bold text-[#8db8a3] mt-[3px] text-justify [text-align-last:justify]">
+            <span className="block w-full text-2xs font-bold text-heritage-bright mt-[3px] text-justify [text-align-last:justify]">
               H I R E
             </span>
           </span>

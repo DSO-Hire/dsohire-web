@@ -78,7 +78,7 @@ export function CareerStrength({
           />
         </svg>
         <span className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-[19px] font-extrabold tracking-[-0.5px] text-ink leading-none tabular">
+          <span className="text-[1.056rem] font-extrabold tracking-[-0.5px] text-ink leading-none tabular">
             {filled}%
           </span>
         </span>

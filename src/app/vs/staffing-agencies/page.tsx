@@ -97,7 +97,7 @@ export default function VsStaffingAgenciesPage() {
         title={
           <>
             Stop paying placement fees{" "}
-            <em className="not-italic text-heritage-light">
+            <em className="not-italic">
               for your own hires.
             </em>
           </>

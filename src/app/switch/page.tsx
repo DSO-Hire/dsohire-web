@@ -57,7 +57,7 @@ export default function SwitchPage() {
           style={{ "--mk-delay": "70ms" } as React.CSSProperties}
           className="text-4xl sm:text-6xl font-extrabold tracking-[-2px] leading-[1.05] text-ink mb-5 max-w-[860px]"
         >
-          We move you in. <em className="not-italic text-heritage-light">Free.</em>
+          We move you in. <em className="not-italic">Free.</em>
         </h1>
         <p
           data-reveal
@@ -81,10 +81,10 @@ export default function SwitchPage() {
               style={{ "--mk-delay": `${i * 90}ms` } as React.CSSProperties}
               className="bg-card p-8"
             >
-              <div className="text-[28px] font-extrabold tracking-[-1px] text-heritage/40 mb-3">
+              <div className="text-[1.556rem] font-extrabold tracking-[-1px] text-heritage/40 mb-3">
                 {s.n}
               </div>
-              <h2 className="text-[17px] font-extrabold tracking-[-0.4px] leading-tight text-ink mb-2.5">
+              <h2 className="text-[0.944rem] font-extrabold tracking-[-0.4px] leading-tight text-ink mb-2.5">
                 {s.title}
               </h2>
               <p className="text-sm text-slate-body leading-[1.65]">{s.body}</p>
@@ -165,10 +165,10 @@ export default function SwitchPage() {
               >
                 <c.icon className="h-5 w-5" />
               </span>
-              <h3 className="text-[16px] font-extrabold tracking-[-0.3px] leading-tight text-ink mb-2">
+              <h3 className="text-[0.889rem] font-extrabold tracking-[-0.3px] leading-tight text-ink mb-2">
                 {c.title}
               </h3>
-              <p className="text-[13.5px] text-slate-body leading-[1.6]">{c.body}</p>
+              <p className="text-xs text-slate-body leading-[1.6]">{c.body}</p>
             </div>
           ))}
         </div>

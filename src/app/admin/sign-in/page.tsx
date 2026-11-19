@@ -37,7 +37,7 @@ export default async function AdminSignInPage({
   }
 
   return (
-    <main className="min-h-screen bg-ink flex items-center justify-center px-4 py-16">
+    <main className="min-h-dvh bg-ink flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-md">
         <div className="flex items-center gap-3 mb-8">
           <div className="flex h-10 w-10 items-center justify-center bg-white/10 border border-white/20">

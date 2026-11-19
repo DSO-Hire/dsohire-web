@@ -162,7 +162,7 @@ function PendingOfferCard({ offer }: { offer: PendingOffer }) {
         </div>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h2 className="text-[16px] font-extrabold tracking-[-0.3px] text-ink">
+            <h2 className="text-[0.889rem] font-extrabold tracking-[-0.3px] text-ink">
               {offer.candidateName}
             </h2>
             <div className="text-xs text-slate-body">{offer.jobTitle}</div>

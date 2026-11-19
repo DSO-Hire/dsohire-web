@@ -228,7 +228,7 @@ export function AssessmentWizard({
         </p>
         <ul className="mt-5 space-y-2.5">
           {[
-            "See your best-fit roles ranked — not just a keyword search.",
+            "See your best-fit roles ranked by fit instead of keywords.",
             "Get found by practices whose culture + priorities match yours.",
             "We pre-fill what we can from your profile, so it's fast.",
           ].map((b) => (

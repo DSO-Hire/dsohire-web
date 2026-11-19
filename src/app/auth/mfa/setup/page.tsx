@@ -64,7 +64,7 @@ export default async function ForcedMfaSetupPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-start justify-center bg-cream/30 px-6 py-12">
+    <main className="flex min-h-dvh items-start justify-center bg-cream/30 px-6 py-12">
       <div className="w-full max-w-[640px] rounded border border-[var(--rule)] bg-card p-8 sm:p-10 my-8">
         <div className="mb-6 inline-flex items-center gap-2.5 text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep">
           <ShieldCheck className="size-3.5" />

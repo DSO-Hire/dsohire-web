@@ -123,7 +123,7 @@ export default async function ResumeTemplatesLanding() {
           <h1 className="mx-auto max-w-[820px] text-4xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink">
             Free dental resume templates.
           </h1>
-          <p className="mx-auto mt-5 max-w-[640px] text-[16px] leading-relaxed text-slate-body">
+          <p className="mx-auto mt-5 max-w-[640px] text-[0.889rem] leading-relaxed text-slate-body">
             Six clean, ATS-safe templates built for hygienists, assistants,
             front desk, dentists, and DSO leaders. Fill it once, switch styles
             with one click, and download a polished PDF. Free forever with a

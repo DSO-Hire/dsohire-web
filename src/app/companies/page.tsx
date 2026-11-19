@@ -499,7 +499,7 @@ function DsoCard({
         {/* Brand-tinted pill — single-line, modern, ditches the awkward
             two-line "DSO Hire / Member" stack the narrow column forced. */}
         <span
-          className="inline-flex items-center px-2.5 py-1 text-[9px] font-bold tracking-[1.8px] uppercase rounded-full whitespace-nowrap"
+          className="inline-flex items-center px-2.5 py-1 text-2xs font-bold tracking-[1.8px] uppercase rounded-full whitespace-nowrap"
           style={{
             background: `color-mix(in srgb, ${accentColor} 12%, transparent)`,
             color: accentColor,
@@ -575,7 +575,7 @@ function DsoCard({
           style={{ borderTopColor: accentColor }}
         >
           <div
-            className="text-[9px] font-bold tracking-[1.5px] uppercase mb-2.5"
+            className="text-2xs font-bold tracking-[1.5px] uppercase mb-2.5"
             style={{ color: accentColor }}
           >
             Recent openings
@@ -601,20 +601,20 @@ function DsoCard({
       <div className="mt-auto pt-4 border-t border-[var(--rule)] flex justify-between items-center">
         <div className="flex items-center gap-2">
           <div
-            className="text-[18px] font-extrabold leading-none"
+            className="text-[1rem] font-extrabold leading-none"
             style={{ color: "var(--card-accent)" }}
           >
             {openJobs}
           </div>
           <div className="flex flex-col">
-            <div className="text-[9px] font-semibold tracking-[1.5px] uppercase text-slate-meta leading-tight">
+            <div className="text-2xs font-semibold tracking-[1.5px] uppercase text-slate-meta leading-tight">
               {openJobs === 1 ? "Open role" : "Open roles"}
             </div>
             {/* Hiring-now pulse only renders when there's actual hiring
                 activity. Cards with 0 roles (paying members between
                 postings) stay visible but without the misleading badge. */}
             {openJobs > 0 ? (
-              <div className="inline-flex items-center gap-1 text-[9px] font-bold tracking-[1px] uppercase mt-0.5" style={{ color: accentColor }}>
+              <div className="inline-flex items-center gap-1 text-2xs font-bold tracking-[1px] uppercase mt-0.5" style={{ color: accentColor }}>
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: accentColor }} />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full" style={{ background: accentColor }} />
@@ -622,7 +622,7 @@ function DsoCard({
                 Hiring now
               </div>
             ) : (
-              <div className="text-[9px] font-semibold tracking-[1px] uppercase text-slate-meta mt-0.5">
+              <div className="text-2xs font-semibold tracking-[1px] uppercase text-slate-meta mt-0.5">
                 Not hiring now
               </div>
             )}
@@ -787,7 +787,7 @@ function FeaturedDsoSpotlight({
         <div className="lg:border-l lg:border-[var(--rule)] lg:pl-8 flex flex-col gap-4 lg:min-w-[200px]">
           <div>
             <div
-              className="text-[40px] font-extrabold leading-none"
+              className="text-[2.222rem] font-extrabold leading-none"
               style={{ color: "var(--card-accent)" }}
             >
               {openJobs}

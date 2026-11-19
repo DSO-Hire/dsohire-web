@@ -123,7 +123,7 @@ export function PipelineFunnel({
           const isWorst = i === worstIdx && conv !== null && conv < 100;
           return (
             <div key={stage.key} className="flex flex-col">
-              <div className="text-[28px] sm:text-[32px] font-black tracking-[-1.2px] leading-none text-ink mb-2 tabular">
+              <div className="text-[1.556rem] sm:text-[1.778rem] font-black tracking-[-1.2px] leading-none text-ink mb-2 tabular">
                 {count}
               </div>
               <div className="h-4 bg-cream relative mb-2.5">

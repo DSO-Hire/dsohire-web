@@ -206,7 +206,7 @@ export function LensToggle() {
 
           <div
             role="menu"
-            className={`invisible opacity-0 absolute top-full right-0 mt-3 min-w-[360px] max-w-[calc(100vw-2rem)] max-h-[calc(100vh-7rem)] overflow-y-auto bg-popover border border-[var(--rule-strong)] ${MENU_SHADOW} group-hover/pros:visible group-hover/pros:opacity-100 transition-all duration-150 z-50`}
+            className={`invisible opacity-0 absolute top-full right-0 mt-3 min-w-[360px] max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-7rem)] overflow-y-auto bg-popover border border-[var(--rule-strong)] ${MENU_SHADOW} group-hover/pros:visible group-hover/pros:opacity-100 transition-all duration-150 z-50`}
           >
             <MenuList links={ROLE_LINKS} />
           </div>

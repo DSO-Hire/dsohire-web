@@ -184,7 +184,7 @@ export default function DentalHiringSoftwarePage() {
         title={
           <>
             Hiring software for dental groups:{" "}
-            <em className="not-italic text-heritage-light">the 2026 landscape.</em>
+            <em className="not-italic">the 2026 landscape.</em>
           </>
         }
         intro="Dental groups hire through job boards, temp staffing marketplaces, general job sites, applicant tracking systems, and agencies. Each model charges differently and solves a different problem. This page groups the options by how they work and what they publish, quoting each company's own pages. We make DSO Hire, so we say where it fits and where it does not."

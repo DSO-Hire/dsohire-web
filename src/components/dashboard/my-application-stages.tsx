@@ -194,12 +194,12 @@ function Card({ card }: { card: MyApplicationCard }) {
           </span>
         ) : null}
         {card.stage === "open" && card.daysSinceApplied >= 0 && (
-          <span className="text-[9px] text-slate-meta tracking-[0.3px]">
+          <span className="text-2xs text-slate-meta tracking-[0.3px]">
             Applied {timestampLabel(card.daysSinceApplied)}
           </span>
         )}
         {card.hideStageBadge && card.stage !== "open" && (
-          <span className="text-[9px] text-slate-meta tracking-[0.3px] italic">
+          <span className="text-2xs text-slate-meta tracking-[0.3px] italic">
             In review
           </span>
         )}

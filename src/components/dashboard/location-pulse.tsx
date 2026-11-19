@@ -48,7 +48,7 @@ export function LocationPulse({
         </Link>
       </header>
       {ranked.length === 0 ? (
-        <div className="px-5 py-8 text-[12.5px] text-slate-body leading-relaxed">
+        <div className="px-5 py-8 text-xs text-slate-body leading-relaxed">
           Add locations and they&apos;ll rank here by application volume.
         </div>
       ) : (
@@ -63,7 +63,7 @@ export function LocationPulse({
                 title={cityState ?? undefined}
                 className="flex items-center gap-3 px-2.5 py-2.5 hover:bg-cream/70 transition-colors"
               >
-                <span className="text-[12.5px] font-bold text-ink w-[38%] truncate">
+                <span className="text-xs font-bold text-ink w-[38%] truncate">
                   {l.name || cityState || "Location"}
                 </span>
                 <span className="flex-1 h-[10px] bg-cream relative">

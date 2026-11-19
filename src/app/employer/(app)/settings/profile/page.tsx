@@ -265,7 +265,7 @@ function ProfilePreviewPane({ slug }: { slug: string }) {
         src={`/companies/${slug}`}
         title="Public profile preview"
         className="block w-full"
-        style={{ height: "min(2400px, calc(100vh - 220px))", minHeight: "640px" }}
+        style={{ height: "min(2400px, calc(100dvh - 220px))", minHeight: "640px" }}
       />
     </div>
   );

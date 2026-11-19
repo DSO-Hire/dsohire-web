@@ -190,7 +190,7 @@ export function CandidateProfileView({
           </div>
 
           {/* Meta row */}
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12.5px] text-slate-meta">
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-meta">
             {data.current_title && (
               <span className="inline-flex items-center gap-1.5">
                 <Briefcase className="h-3.5 w-3.5" /> {data.current_title}
@@ -241,7 +241,7 @@ export function CandidateProfileView({
                         {w.company_name ?? "—"}
                         {w.is_dso ? " · DSO" : ""}
                       </div>
-                      <div className="text-[11.5px] text-slate-meta mt-0.5">
+                      <div className="text-2xs text-slate-meta mt-0.5">
                         {formatDateRange(w.start_date, w.end_date, w.is_current)}
                       </div>
                       {w.description && (
@@ -274,7 +274,7 @@ export function CandidateProfileView({
                       <div className="text-xs text-slate-body">
                         {[e.degree, e.field_of_study].filter(Boolean).join(", ")}
                       </div>
-                      <div className="text-[11.5px] text-slate-meta mt-0.5">
+                      <div className="text-2xs text-slate-meta mt-0.5">
                         {formatYearRange(e.start_year, e.end_year)}
                       </div>
                     </div>
@@ -446,7 +446,7 @@ function CredentialRow({
           {primary}
         </div>
         {secondary && (
-          <div className="text-[11.5px] text-slate-meta mt-0.5">{secondary}</div>
+          <div className="text-2xs text-slate-meta mt-0.5">{secondary}</div>
         )}
       </div>
       <Tag tone={badge.tone} className="shrink-0">
@@ -592,7 +592,7 @@ function Avatar({
   fullName: string | null;
   avatarUrl: string | null;
 }) {
-  const cls = "h-20 w-20 sm:h-24 sm:w-24 text-[24px] ring-4 ring-card";
+  const cls = "h-20 w-20 sm:h-24 sm:w-24 text-[1.333rem] ring-4 ring-card";
   if (avatarUrl) {
     return (
       // eslint-disable-next-line @next/next/no-img-element

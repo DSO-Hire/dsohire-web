@@ -389,7 +389,7 @@ function ResultCard({
           think the AI output got "locked." Banner appears for ~3.5s
           after any apply action and links the eye to the editor below. */}
       {appliedFlash && (
-        <div className="mt-3 px-3 py-2 bg-heritage/10 border-l-2 border-heritage text-[12.5px] text-heritage-deep">
+        <div className="mt-3 px-3 py-2 bg-heritage/10 border-l-2 border-heritage text-xs text-heritage-deep">
           ✓ Applied to the editor below. Scroll down to tweak the wording —
           everything stays editable.
         </div>

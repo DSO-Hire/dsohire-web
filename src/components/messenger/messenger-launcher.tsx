@@ -76,7 +76,7 @@ export function MessengerLauncher({
           "fixed bottom-0 right-6 z-[56] print:hidden" + (open ? "" : " hidden")
         }
       >
-        <div className="w-[380px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[calc(100vh-5rem)] bg-card border border-[var(--rule-strong)] border-b-0 shadow-2xl rounded-t-lg overflow-hidden flex flex-col">
+        <div className="w-[380px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[calc(100dvh-5rem)] bg-card border border-[var(--rule-strong)] border-b-0 shadow-2xl rounded-t-lg overflow-hidden flex flex-col">
           {/* Tab strip (navy) — the panel's header bar. */}
           <div className="bg-hero text-hero-foreground flex items-stretch shrink-0">
             {TABS.map(({ key, label }) => {

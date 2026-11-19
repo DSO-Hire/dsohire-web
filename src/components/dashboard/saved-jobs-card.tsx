@@ -49,11 +49,11 @@ export function SavedJobsCard({
           >
             <span className="block h-1.5 w-1.5 shrink-0 rounded-full bg-stage-mist" />
             <div className="min-w-0 flex-1">
-              <div className="truncate text-[13.5px] font-bold leading-tight text-ink group-hover:text-heritage-deep transition-colors">
+              <div className="truncate text-xs font-bold leading-tight text-ink group-hover:text-heritage-deep transition-colors">
                 {it.title}
               </div>
               {it.location && (
-                <div className="text-[11.5px] text-slate-meta">{it.location}</div>
+                <div className="text-2xs text-slate-meta">{it.location}</div>
               )}
             </div>
             <ArrowRight className="h-3.5 w-3.5 shrink-0 text-slate-meta group-hover:translate-x-0.5 transition-transform" />

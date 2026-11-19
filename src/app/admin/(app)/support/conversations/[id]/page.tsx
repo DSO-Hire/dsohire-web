@@ -164,7 +164,7 @@ export default async function AdminConversationPage({ params }: PageProps) {
   }, 0);
 
   return (
-    <main className="min-h-screen bg-cream/30 px-6 py-10">
+    <main className="min-h-dvh bg-cream/30 px-6 py-10">
       <div className="mx-auto max-w-[820px] space-y-6">
         <Link
           href="/admin/support/conversations"

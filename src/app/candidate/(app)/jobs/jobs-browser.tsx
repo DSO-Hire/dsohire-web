@@ -353,7 +353,7 @@ function Row({ job }: { job: BrowseJob }) {
                     <PracticeFitMark className="h-2.5 w-2.5" />
                   )}
                   {style.label}
-                  <span className="font-mono text-[9px] opacity-70">
+                  <span className="font-mono text-2xs opacity-70">
                     {job.fitScore}
                   </span>
                 </span>
@@ -364,7 +364,7 @@ function Row({ job }: { job: BrowseJob }) {
                 </span>
               )}
             </div>
-            <div className="text-[17px] font-extrabold tracking-[-0.3px] text-ink leading-tight mb-1 transition-colors group-hover:text-heritage-deep">
+            <div className="text-[0.944rem] font-extrabold tracking-[-0.3px] text-ink leading-tight mb-1 transition-colors group-hover:text-heritage-deep">
               {job.title}
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-meta">
@@ -387,7 +387,7 @@ function Row({ job }: { job: BrowseJob }) {
                   {job.compLabel}
                 </div>
                 {job.compPeriodLabel && (
-                  <div className="text-[9px] tracking-[1.2px] uppercase text-slate-meta mt-1.5 font-semibold">
+                  <div className="text-2xs tracking-[1.2px] uppercase text-slate-meta mt-1.5 font-semibold">
                     {job.compPeriodLabel}
                   </div>
                 )}

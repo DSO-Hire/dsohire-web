@@ -114,7 +114,7 @@ export function KpiTile({
 
       {/* Big value — FOH-9: integers count up on view (700ms, settles fast
           so daily users never wait); pre-formatted values render as-is. */}
-      <div className={`text-[56px] font-black tracking-[-2.5px] leading-[0.95] mb-2 tabular-nums ${navy ? "text-hero-foreground" : "text-ink"}`}>
+      <div className={`text-[3.111rem] font-black tracking-[-2.5px] leading-[0.95] mb-2 tabular-nums ${navy ? "text-hero-foreground" : "text-ink"}`}>
         <StatValue value={value} />
       </div>
 

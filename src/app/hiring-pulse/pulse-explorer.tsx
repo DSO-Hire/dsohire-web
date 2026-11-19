@@ -45,7 +45,7 @@ export function PulseExplorer({ roles }: { roles: PulseRoleStat[] }) {
             key={role.key}
             type="button"
             onClick={() => setActive(i)}
-            className={`px-4 py-2 text-[12.5px] font-bold border transition-colors ${
+            className={`px-4 py-2 text-xs font-bold border transition-colors ${
               i === active
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-card text-slate-body border-[var(--rule-strong)] hover:border-ink hover:text-ink"
@@ -58,7 +58,7 @@ export function PulseExplorer({ roles }: { roles: PulseRoleStat[] }) {
 
       <div className="bg-card border border-[var(--rule-strong)] px-7 py-8 sm:px-9">
         <div className="flex flex-wrap items-baseline justify-between gap-2 mb-7">
-          <span className="text-[17px] font-extrabold tracking-[-0.3px] text-ink">
+          <span className="text-[0.944rem] font-extrabold tracking-[-0.3px] text-ink">
             {r.label}
           </span>
           <span className="text-2xs font-bold tracking-[1.2px] uppercase text-slate-meta">
@@ -70,7 +70,7 @@ export function PulseExplorer({ roles }: { roles: PulseRoleStat[] }) {
         <div className="relative h-[78px] mx-1">
           <div className="absolute top-[38px] inset-x-0 h-[10px] bg-ivory-deep" />
           <div
-            className="absolute top-[38px] h-[10px] transition-all duration-700"
+            className="absolute top-[38px] h-[10px] transition-all duration-200 ease-out"
             style={{
               left: pct(r.p25),
               width: widthPct,
@@ -79,7 +79,7 @@ export function PulseExplorer({ roles }: { roles: PulseRoleStat[] }) {
             }}
           />
           <div
-            className="absolute top-[28px] w-[3px] h-[30px] bg-ink transition-all duration-700"
+            className="absolute top-[28px] w-[3px] h-[30px] bg-ink transition-all duration-200 ease-out"
             style={{ left: pct(r.median) }}
           >
             <span className="absolute -top-[24px] left-1/2 -translate-x-1/2 whitespace-nowrap text-sm font-extrabold tabular-nums text-ink">
@@ -88,13 +88,13 @@ export function PulseExplorer({ roles }: { roles: PulseRoleStat[] }) {
             </span>
           </div>
           <span
-            className="absolute top-[56px] -translate-x-1/2 whitespace-nowrap text-2xs font-bold text-slate-meta transition-all duration-700"
+            className="absolute top-[56px] -translate-x-1/2 whitespace-nowrap text-2xs font-bold text-slate-meta transition-all duration-200 ease-out"
             style={{ left: pct(r.p25) }}
           >
             p25 · {fmt(r.p25, r.unit)}
           </span>
           <span
-            className="absolute top-[56px] -translate-x-1/2 whitespace-nowrap text-2xs font-bold text-slate-meta transition-all duration-700"
+            className="absolute top-[56px] -translate-x-1/2 whitespace-nowrap text-2xs font-bold text-slate-meta transition-all duration-200 ease-out"
             style={{ left: pct(r.p75) }}
           >
             p75 · {fmt(r.p75, r.unit)}

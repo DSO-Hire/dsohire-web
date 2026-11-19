@@ -150,7 +150,7 @@ function JourneyRow({ journey: j }: { journey: ApplicationJourney }) {
             >
               <div className="flex flex-col items-center gap-1">
                 <span
-                  className={`grid place-items-center h-5 w-5 rounded-full border text-[9px] font-extrabold ${
+                  className={`grid place-items-center h-5 w-5 rounded-full border text-2xs font-extrabold ${
                     done
                       ? "bg-heritage border-heritage text-primary-foreground"
                       : current

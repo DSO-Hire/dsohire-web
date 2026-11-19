@@ -144,7 +144,7 @@ export function JobLeaderboard({
                     showLastDot
                   />
                   <div className="flex flex-col items-end gap-1">
-                    <span className="text-[16px] font-extrabold tracking-[-0.5px] text-ink leading-none tabular">
+                    <span className="text-[0.889rem] font-extrabold tracking-[-0.5px] text-ink leading-none tabular">
                       {j.thisWeek}
                     </span>
                     {(j.thisWeek > 0 || j.lastWeek > 0) && (

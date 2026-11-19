@@ -90,7 +90,6 @@ function Door({
       style={{ "--mk-delay": `${delay}ms` } as React.CSSProperties}
     >
       <span aria-hidden className="hd-grid absolute inset-0 -z-10" />
-      <span aria-hidden className="hd-glow absolute -z-10" />
 
       {/* row 1 */}
       <div className="flex items-center gap-2 text-2xs font-bold uppercase tracking-[1.6px] text-ivory/65">

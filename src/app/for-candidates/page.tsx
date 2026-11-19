@@ -118,15 +118,6 @@ function Hero({ ctaHref }: { ctaHref: string }) {
   return (
     <section className="relative overflow-hidden pt-[140px] pb-24 px-6 sm:px-14">
       {/* Heritage glow — soft, lighter than /for-dental-groups */}
-      <div
-        aria-hidden
-        className="absolute -top-[10%] -right-[15%] w-[60vw] h-[60vw] pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle, var(--heritage-glow), transparent 60%)",
-          filter: "blur(40px)",
-        }}
-      />
       {/* Subtle dotted accent in lower-left */}
       <div
         aria-hidden
@@ -163,13 +154,8 @@ function Hero({ ctaHref }: { ctaHref: string }) {
           Find the dental practice{" "}
           <br className="hidden sm:inline" />
           that actually{" "}
-          <em className="not-italic relative text-heritage-light">
+          <em className="not-italic">
             fits
-            <span
-              aria-hidden
-              className="hidden lg:block absolute left-0 right-0 bottom-1.5 h-2 -z-10"
-              style={{ background: "var(--heritage-tint)" }}
-            />
           </em>{" "}
           you.
         </h1>
@@ -251,7 +237,7 @@ function PracticeFitCandidateBand({
           {/* The wordmark IS the eyebrow — large and load-bearing. (It embeds
               its own sparkle mark; never pair it with a standalone mark.) */}
           <div data-reveal className="mb-5">
-            <PracticeFitWordmark surface="light" tm className="text-[30px]" />
+            <PracticeFitWordmark surface="light" tm className="text-[1.667rem]" />
           </div>
           <h2
             data-reveal
@@ -278,8 +264,8 @@ function PracticeFitCandidateBand({
             style={{ "--mk-delay": "180ms" } as React.CSSProperties}
             className="flex flex-wrap items-center gap-x-3 gap-y-2 border-l-2 border-heritage bg-cream/70 px-5 py-4 mb-8 max-w-[560px]"
           >
-            <DsoFitWordmark surface="light" tm className="text-[17px]" />
-            <span className="text-[13.5px] text-slate-body leading-snug">
+            <DsoFitWordmark surface="light" tm className="text-[0.944rem]" />
+            <span className="text-xs text-slate-body leading-snug">
               On the corporate track? DSOFit scores DSO HQ roles (finance,
               ops, marketing, HR) the same way.{" "}
               <Link
@@ -432,7 +418,7 @@ function CandidateApplicationsPreview() {
                       {app.dso}
                     </span>
                     <span
-                      className={`inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-bold tracking-[0.6px] whitespace-nowrap ${stage.pill}`}
+                      className={`inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-bold tracking-[0.6px] whitespace-nowrap ${stage.pill}`}
                     >
                       <span
                         className={`block w-1 h-1 rounded-full ${stage.dot}`}
@@ -521,7 +507,7 @@ function Promises() {
               <div className="h-10 w-10 rounded-full bg-heritage/15 flex items-center justify-center mb-5">
                 <Icon className="h-5 w-5 text-heritage-deep" />
               </div>
-              <h3 className="text-[20px] font-extrabold tracking-[-0.4px] leading-tight text-ink mb-2.5">
+              <h3 className="text-[1.111rem] font-extrabold tracking-[-0.4px] leading-tight text-ink mb-2.5">
                 {title}
               </h3>
               <p className="text-sm text-slate-body leading-[1.7]">
@@ -642,7 +628,7 @@ function RoleBreakdown() {
                 <Eyebrow className="text-heritage-deep">
                   {eyebrow}
                 </Eyebrow>
-                <h3 className="text-[16px] font-extrabold tracking-[-0.3px] text-ink leading-tight">
+                <h3 className="text-[0.889rem] font-extrabold tracking-[-0.3px] text-ink leading-tight">
                   {title}
                 </h3>
               </div>
@@ -685,12 +671,12 @@ function RoleBreakdown() {
               <Eyebrow className="text-heritage-deep">
                 Finance · HR · Marketing · Ops · Business Development
               </Eyebrow>
-              <h3 className="text-[16px] font-extrabold tracking-[-0.3px] text-ink leading-tight">
+              <h3 className="text-[0.889rem] font-extrabold tracking-[-0.3px] text-ink leading-tight">
                 Corporate &amp; Administrative Roles
               </h3>
             </div>
           </div>
-          <p className="text-[13.5px] text-slate-body leading-[1.6] mb-4 max-w-[760px]">
+          <p className="text-xs text-slate-body leading-[1.6] mb-4 max-w-[760px]">
             The non-clinical side of a growing DSO: build a career in dental
             without the clinical license.
           </p>
@@ -734,15 +720,6 @@ function HonestTake() {
       style={{ background: "var(--heritage-tint)" }}
     >
       {/* Decorative heritage glow on the right */}
-      <div
-        aria-hidden
-        className="absolute -top-[20%] -right-[15%] w-[50vw] h-[50vw] pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle, var(--heritage-glow), transparent 60%)",
-          filter: "blur(40px)",
-        }}
-      />
 
       <div className="relative max-w-[820px] mx-auto">
         <Eyebrow className="text-heritage-deep mb-3.5">
@@ -752,7 +729,7 @@ function HonestTake() {
           An honest read on DSO life.
         </h2>
 
-        <div className="space-y-7 text-[16px] sm:text-[17px] text-ink leading-[1.75]">
+        <div className="space-y-7 text-[0.889rem] sm:text-[0.944rem] text-ink leading-[1.75]">
           <p>
             You&apos;ve probably heard it. Dental school faculty, op-eds in
             industry pubs, and senior practice owners often frame DSO
@@ -845,13 +822,12 @@ function CandidateBenefits() {
           On the Candidate Side
         </Eyebrow>
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink max-w-[760px] mb-4">
-          Built for you, not just the employer.
+          What DSO Hire does for the person applying.
         </h2>
         <p className="text-sm text-slate-body leading-[1.7] max-w-[640px] mb-12">
-          A two-sided marketplace only works when both sides win. Here&apos;s
-          the candidate side: the parts of DSO Hire designed to make your
-          job hunt and your career easier, not just to fill the employer&apos;s
-          inbox.
+          Employers pay for DSO Hire. You never do. These are the parts built
+          to make your search faster and keep it private until you decide
+          otherwise.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -864,7 +840,7 @@ function CandidateBenefits() {
                 <div className="h-9 w-9 rounded-full bg-heritage flex items-center justify-center flex-shrink-0">
                   <Icon className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <h3 className="text-[16px] font-extrabold tracking-[-0.3px] text-ink">
+                <h3 className="text-[0.889rem] font-extrabold tracking-[-0.3px] text-ink">
                   {title}
                 </h3>
               </div>
@@ -908,7 +884,7 @@ function FinalCta({ ctaHref }: { ctaHref: string }) {
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-5">
           Browse open roles, or just see what&apos;s out there.
         </h2>
-        <p className="text-sm sm:text-[16px] text-slate-body leading-[1.7] mb-9 max-w-[560px] mx-auto">
+        <p className="text-sm sm:text-[0.889rem] text-slate-body leading-[1.7] mb-9 max-w-[560px] mx-auto">
           Free profile takes a couple minutes. Browse without an account if
           you&apos;d rather. No upsells, no premium tier, no agency calls.
           Just dental jobs at real dental groups.

@@ -105,7 +105,7 @@ export default function VsJobBoardsPage() {
         title={
           <>
             A job board hands you an inbox.{" "}
-            <em className="not-italic text-heritage-light">
+            <em className="not-italic">
               You needed a pipeline.
             </em>
           </>

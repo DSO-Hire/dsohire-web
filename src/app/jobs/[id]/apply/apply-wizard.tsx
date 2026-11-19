@@ -548,7 +548,7 @@ export function ApplyWizard(props: ApplyWizardProps) {
         {!submitted.alreadyApplied && (
           <div className="mt-6 border border-heritage/40 bg-heritage/[0.06] p-6">
             <Eyebrow className="text-heritage-deep mb-2">Next: get matched</Eyebrow>
-            <h3 className="text-[17px] font-bold text-ink leading-snug">
+            <h3 className="text-[0.944rem] font-bold text-ink leading-snug">
               See which roles fit you best with PracticeFit
             </h3>
             <p className="mt-1.5 text-sm text-slate-body leading-relaxed">

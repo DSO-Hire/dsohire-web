@@ -195,7 +195,7 @@ export default async function CandidateProfilePage() {
         // solid fill ensures candidates SEE the CTA on first load.
         <a
           href="/candidate/profile/import"
-          className="mb-6 flex max-w-[820px] items-start gap-4 rounded-lg bg-heritage-deep p-5 text-ivory shadow-sm transition hover:bg-[#2A5346] sm:items-center"
+          className="mb-6 flex max-w-[820px] items-start gap-4 rounded-lg bg-heritage-deep p-5 text-ivory shadow-sm transition hover:bg-heritage-deep/90 sm:items-center"
         >
           <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ivory/20">
             <svg

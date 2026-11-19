@@ -856,7 +856,7 @@ function NoteTakerModal({
               <Sparkles className="h-3 w-3" />
               AI note-taker
             </Eyebrow>
-            <h2 className="text-[18px] font-extrabold tracking-[-0.4px] text-ink">
+            <h2 className="text-[1rem] font-extrabold tracking-[-0.4px] text-ink">
               Draft a scorecard from your interview notes
             </h2>
             <p className="mt-1 text-xs text-slate-meta leading-relaxed max-w-[460px]">

@@ -204,7 +204,7 @@ export function CandidateFitSummary({
               <p className="text-xs font-semibold text-slate-meta mb-2">
                 Average across active apps
               </p>
-              <p className="text-[28px] font-extrabold text-ink leading-none tabular">
+              <p className="text-[1.556rem] font-extrabold text-ink leading-none tabular">
                 {avgScore}
                 <span className="text-sm tabular text-slate-meta ml-1">
                   /100

@@ -177,7 +177,7 @@ export function HelpDrawer({
                       {s.heading}
                     </div>
                   )}
-                  <p className="mt-1 text-[13.5px] leading-relaxed text-slate-body">
+                  <p className="mt-1 text-xs leading-relaxed text-slate-body">
                     {s.body}
                   </p>
                 </li>
@@ -190,7 +190,7 @@ export function HelpDrawer({
               {entry.bullets.map((b, i) => (
                 <li
                   key={i}
-                  className="flex items-start gap-2 text-[13.5px] leading-snug text-slate-body"
+                  className="flex items-start gap-2 text-xs leading-snug text-slate-body"
                 >
                   <span className="mt-[2px] flex-shrink-0 font-bold text-heritage-deep">
                     ·

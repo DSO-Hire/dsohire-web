@@ -87,7 +87,7 @@ export default async function HelpEntryPage({ params }: PageProps) {
           <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-[-0.8px] text-ink leading-tight">
             {entry.title}
           </h1>
-          <p className="mt-4 text-[16px] text-slate-body leading-relaxed">
+          <p className="mt-4 text-[0.889rem] text-slate-body leading-relaxed">
             {entry.tip}
           </p>
         </header>
@@ -101,7 +101,7 @@ export default async function HelpEntryPage({ params }: PageProps) {
                     {step.heading}
                   </h2>
                 )}
-                <p className="text-[14.5px] text-slate-body leading-relaxed">
+                <p className="text-sm text-slate-body leading-relaxed">
                   {step.body}
                 </p>
               </div>
@@ -113,7 +113,7 @@ export default async function HelpEntryPage({ params }: PageProps) {
           <section className="mb-10">
             <ul className="list-disc pl-6 space-y-2">
               {entry.bullets.map((b, i) => (
-                <li key={i} className="text-[14.5px] text-slate-body leading-relaxed">
+                <li key={i} className="text-sm text-slate-body leading-relaxed">
                   {b}
                 </li>
               ))}

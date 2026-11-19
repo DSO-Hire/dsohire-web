@@ -67,7 +67,7 @@ export default async function CandidateResumePage() {
                 <Sparkles className="h-3.5 w-3.5" />
                 Free
               </span>
-              <h2 className="mt-2 text-[17px] font-extrabold text-ink">
+              <h2 className="mt-2 text-[0.944rem] font-extrabold text-ink">
                 Build one for free
               </h2>
               <p className="mt-1 text-xs leading-relaxed text-slate-body">
@@ -89,7 +89,7 @@ export default async function CandidateResumePage() {
                 <FileUp className="h-3.5 w-3.5" />
                 Upload
               </span>
-              <h2 className="mt-2 text-[17px] font-extrabold text-ink">
+              <h2 className="mt-2 text-[0.944rem] font-extrabold text-ink">
                 Upload your own
               </h2>
               <p className="mt-1 text-xs leading-relaxed text-slate-body">
@@ -118,7 +118,7 @@ export default async function CandidateResumePage() {
   }
 
   return (
-    <div className="resume-screen-bg min-h-screen bg-muted py-8">
+    <div className="resume-screen-bg min-h-dvh bg-muted py-8">
       <style>{PRINT_CSS}</style>
 
       <ResumeToolbar />

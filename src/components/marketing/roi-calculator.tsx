@@ -255,7 +255,7 @@ export function RoiCalculator({
               onChange={setCostPerListing}
             />
 
-            <p className="mt-5 text-[11.5px] text-slate-meta leading-snug max-w-[440px]">
+            <p className="mt-5 text-2xs text-slate-meta leading-snug max-w-[440px]">
               Illustrative math: your inputs, our flat fees. The one published
               dental agency rate card lists 20–30% of first-year salary.
               Indeed and LinkedIn bill per click or per started application
@@ -297,14 +297,14 @@ export function RoiCalculator({
                 <BarRow label="Today">
                   {agencySpend > 0 && (
                     <span
-                      className="h-full bg-ivory/40 transition-all duration-500"
+                      className="h-full bg-ivory/40 transition-all duration-200 ease-out"
                       style={{ width: `${pct(agencySpend)}%` }}
                       title={`Agencies: ${fmtUsd(agencySpend)}`}
                     />
                   )}
                   {boardSpend > 0 && (
                     <span
-                      className="h-full bg-ivory/20 transition-all duration-500"
+                      className="h-full bg-ivory/20 transition-all duration-200 ease-out"
                       style={{ width: `${pct(boardSpend)}%` }}
                       title={`Job boards: ${fmtUsd(boardSpend)}`}
                     />
@@ -312,7 +312,7 @@ export function RoiCalculator({
                 </BarRow>
                 <BarRow label="DSO Hire">
                   <span
-                    className="h-full transition-all duration-500"
+                    className="h-full transition-all duration-200 ease-out"
                     style={{
                       width: `${pct(dsoHireAnnual)}%`,
                       background: "var(--heritage-bright)",
@@ -340,11 +340,11 @@ export function RoiCalculator({
                 {savings >= 0 ? "Estimated kept in your pocket" : "Difference"}
               </div>
               <div
-                className="text-[44px] font-extrabold tracking-[-2px] leading-none tabular"
+                className="text-[2.444rem] font-extrabold tracking-[-2px] leading-none tabular"
                 style={{ color: savings >= 0 ? "var(--heritage-bright)" : "var(--ivory)" }}
               >
                 {fmtUsd(Math.abs(savings))}
-                <span className="text-[16px] font-bold text-hero-foreground/50 ml-1.5">/yr</span>
+                <span className="text-[0.889rem] font-bold text-hero-foreground/50 ml-1.5">/yr</span>
               </div>
             </div>
 
@@ -454,7 +454,7 @@ export function RoiCalculator({
 function ChannelLabel({ n, label }: { n: string; label: string }) {
   return (
     <div className="flex items-center gap-2.5 mt-7 mb-4">
-      <span className="text-[9px] font-extrabold tracking-[1.5px] text-heritage-deep">
+      <span className="text-2xs font-extrabold tracking-[1.5px] text-heritage-deep">
         {n}
       </span>
       <Eyebrow as="span">{label}</Eyebrow>
@@ -472,7 +472,7 @@ function BarRow({
 }) {
   return (
     <div className="flex items-center gap-3 mb-1.5">
-      <Eyebrow as="span" className="w-[64px] shrink-0 text-[9px] tracking-[1.2px] text-right text-hero-foreground/50">
+      <Eyebrow as="span" className="w-[64px] shrink-0 text-2xs tracking-[1.2px] text-right text-hero-foreground/50">
         {label}
       </Eyebrow>
       <span className="flex-1 h-[16px] bg-ivory/[0.07] flex gap-px overflow-hidden">
@@ -505,7 +505,7 @@ function CalcSlider({
         <label className="text-xs font-semibold text-slate-body">
           {label}
         </label>
-        <span className="text-[17px] font-extrabold tracking-[-0.4px] text-ink tabular">
+        <span className="text-[0.944rem] font-extrabold tracking-[-0.4px] text-ink tabular">
           {display}
         </span>
       </div>
@@ -536,7 +536,7 @@ function OutputRow({
     <div className="flex items-baseline justify-between gap-4">
       <span className="text-xs text-hero-foreground/65 leading-snug">{label}</span>
       <span
-        className={`text-[20px] font-extrabold tracking-[-0.6px] tabular whitespace-nowrap ${
+        className={`text-[1.111rem] font-extrabold tracking-[-0.6px] tabular whitespace-nowrap ${
           accent ? "text-heritage-bright" : "text-hero-foreground"
         }`}
       >

@@ -45,7 +45,9 @@ next-env.d.ts
 .env*.local
 
 # Claude Code local workflow config (never committed)
-.claude/
+.claude/*
+# ...except project skills, which are shared design/writing rules (2026-11-19)
+!.claude/skills/
 
 # scoped temp tsconfig (agent verification only, never committed)
 tsconfig.scope.json

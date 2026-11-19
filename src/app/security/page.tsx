@@ -122,7 +122,7 @@ export default function SecurityPage() {
               >
                 <p.icon className="h-5 w-5" />
               </span>
-              <h2 className="text-[17px] font-extrabold tracking-[-0.4px] leading-tight text-ink mb-2.5">
+              <h2 className="text-[0.944rem] font-extrabold tracking-[-0.4px] leading-tight text-ink mb-2.5">
                 {p.title}
               </h2>
               <p className="text-sm text-slate-body leading-[1.65]">{p.body}</p>

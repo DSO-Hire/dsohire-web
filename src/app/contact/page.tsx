@@ -88,7 +88,7 @@ export default function ContactPage() {
             </ul>
 
             <div className="mt-12 pt-8 border-t border-[var(--rule)]">
-              <div className="text-[9px] font-bold tracking-[2.5px] uppercase text-slate-meta mb-2">
+              <div className="text-2xs font-bold tracking-[2.5px] uppercase text-slate-meta mb-2">
                 DSO Hire LLC
               </div>
               <p className="text-sm text-slate-body leading-[1.7]">
@@ -111,7 +111,7 @@ function ContactRow({
 }) {
   return (
     <li>
-      <div className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta mb-1.5">
+      <div className="text-2xs font-bold tracking-[2px] uppercase text-slate-meta mb-1.5">
         {label}
       </div>
       <div>{children}</div>

@@ -53,13 +53,13 @@ export function TrackChooser() {
   }
 
   return (
-    <div className="min-h-screen bg-ivory flex flex-col items-center justify-center px-5 py-16">
+    <div className="min-h-dvh bg-ivory flex flex-col items-center justify-center px-5 py-16">
       <div className="w-full max-w-[1080px]">
         <header className="text-center mb-12">
-          <h1 className="text-[34px] sm:text-[44px] font-extrabold tracking-[-0.5px] text-ink leading-tight">
+          <h1 className="text-[1.889rem] sm:text-[2.444rem] font-extrabold tracking-[-0.5px] text-ink leading-tight">
             Which side of dental are you?
           </h1>
-          <p className="mt-4 text-[17px] sm:text-[18px] text-slate-body max-w-[640px] mx-auto leading-relaxed">
+          <p className="mt-4 text-[0.944rem] sm:text-[1rem] text-slate-body max-w-[640px] mx-auto leading-relaxed">
             We match two very different kinds of talent. Pick the one that fits
             you best. It tailors your assessment and your matches, and you can
             switch anytime in Settings.
@@ -70,7 +70,7 @@ export function TrackChooser() {
           <Panel
             tone="navy"
             wordmark={
-              <PracticeFitWordmark surface="dark" className="text-[34px] sm:text-[40px]" tm />
+              <PracticeFitWordmark surface="dark" className="text-[1.889rem] sm:text-[2.222rem]" tm />
             }
             tagline="You work IN a dental practice, chairside or front office."
             examples={PRACTICE_EXAMPLES}
@@ -82,7 +82,7 @@ export function TrackChooser() {
           <Panel
             tone="heritage"
             wordmark={
-              <DsoFitWordmark surface="heritage" className="text-[34px] sm:text-[40px]" tm />
+              <DsoFitWordmark surface="heritage" className="text-[1.889rem] sm:text-[2.222rem]" tm />
             }
             tagline="You work at the DSO / corporate level, running the business."
             examples={DSO_EXAMPLES}
@@ -134,7 +134,7 @@ function Panel({
   const fgCheck = tone === "navy" ? "text-hero-foreground/55" : "text-primary-foreground/55";
   // The CTA pill is always a light/white surface, so its text is fixed dark in
   // both modes (the ink/heritage-deep tokens would flip light and vanish).
-  const ctaText = tone === "navy" ? "text-[#14233F]" : "text-[#2F5D4F]";
+  const ctaText = tone === "navy" ? "text-ink" : "text-heritage-deep";
   return (
     <button
       type="button"
@@ -147,19 +147,19 @@ function Panel({
       }`}
     >
       <div className="mb-5">{wordmark}</div>
-      <p className={`text-[19px] sm:text-[21px] font-bold ${fg} leading-snug mb-7`}>
+      <p className={`text-[1.056rem] sm:text-[1.167rem] font-bold ${fg} leading-snug mb-7`}>
         {tagline}
       </p>
       <ul className="list-none space-y-3 mb-9 flex-1">
         {examples.map((e) => (
-          <li key={e} className={`flex items-start gap-2.5 text-sm sm:text-[16px] ${fgFaint}`}>
+          <li key={e} className={`flex items-start gap-2.5 text-sm sm:text-[0.889rem] ${fgFaint}`}>
             <Check className={`h-5 w-5 flex-shrink-0 mt-0.5 ${fgCheck}`} />
             <span>{e}</span>
           </li>
         ))}
       </ul>
       <span
-        className={`inline-flex items-center gap-2 self-start bg-[#F7F4ED] px-6 py-3 text-sm font-bold tracking-wide ${ctaText} group-hover:bg-[#F7F4ED]/90 transition-colors`}
+        className={`inline-flex items-center gap-2 self-start bg-ivory px-6 py-3 text-sm font-bold tracking-wide ${ctaText} group-hover:bg-ivory/90 transition-colors`}
       >
         {busy ? "Setting up…" : cta}
         {!busy && <ArrowRight className="h-[18px] w-[18px]" />}

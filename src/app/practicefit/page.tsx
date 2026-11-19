@@ -70,19 +70,11 @@ function Hero({ ctaHref }: { ctaHref: string }) {
           WebkitMaskImage: "radial-gradient(ellipse at 35% 35%, #000 0%, transparent 72%)",
         }}
       />
-      <div
-        aria-hidden
-        className="absolute -top-[15%] -right-[10%] w-[55vw] h-[55vw] pointer-events-none"
-        style={{
-          background: "radial-gradient(circle, var(--heritage-glow), transparent 60%)",
-          filter: "blur(40px)",
-        }}
-      />
 
       <div className="relative z-10 max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-14 lg:gap-20 items-center">
         <div>
           <div data-reveal className="mb-6">
-            <PracticeFitWordmark surface="light" tm className="text-[34px] sm:text-[40px]" />
+            <PracticeFitWordmark surface="light" tm className="text-[1.889rem] sm:text-[2.222rem]" />
           </div>
           <h1
             data-reveal
@@ -90,7 +82,7 @@ function Hero({ ctaHref }: { ctaHref: string }) {
             className="text-4xl sm:text-6xl font-extrabold tracking-[-2px] leading-[1.05] text-ink mb-6 max-w-[640px]"
           >
             The fit score built{" "}
-            <em className="not-italic text-heritage-light">only for dentistry.</em>
+            <em className="not-italic">only for dentistry.</em>
           </h1>
           <p
             data-reveal
@@ -139,7 +131,7 @@ function Hero({ ctaHref }: { ctaHref: string }) {
                 <Eyebrow className="text-heritage-deep mb-1">
                   Your Fit · Hygienist
                 </Eyebrow>
-                <div className="text-[16px] font-bold tracking-[-0.3px] text-ink leading-tight">
+                <div className="text-[0.889rem] font-bold tracking-[-0.3px] text-ink leading-tight">
                   Greenfield Dental Group
                 </div>
                 <div className="text-xs text-slate-body mt-0.5">
@@ -162,7 +154,7 @@ function Hero({ ctaHref }: { ctaHref: string }) {
                 ]}
               />
             </div>
-            <div className="px-6 py-4 border-t border-[var(--rule)] bg-cream/50 text-[12.5px] text-slate-body leading-relaxed">
+            <div className="px-6 py-4 border-t border-[var(--rule)] bg-cream/50 text-xs text-slate-body leading-relaxed">
               <strong className="text-heritage-deep font-bold">Why this match:</strong>{" "}
               your 4-day week lines up · mentorship-forward team · 12-minute
               commute from your preferred area.
@@ -273,7 +265,7 @@ function WhatItScores() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <div data-reveal>
           <div className="mb-4">
-            <PracticeFitWordmark surface="light" tm className="text-[20px]" />
+            <PracticeFitWordmark surface="light" tm className="text-[1.111rem]" />
             <span className="block text-xs text-slate-meta mt-1 tracking-[0.4px]">
               Clinical + practice-side roles
             </span>
@@ -282,7 +274,7 @@ function WhatItScores() {
             {CLINICAL_DIMS.map((d) => (
               <li
                 key={d}
-                className="py-3 border-b border-[var(--rule)] text-[14.5px] text-slate-body flex items-center gap-3"
+                className="py-3 border-b border-[var(--rule)] text-sm text-slate-body flex items-center gap-3"
               >
                 <span className="block w-1.5 h-1.5 bg-heritage shrink-0" />
                 {d}
@@ -292,7 +284,7 @@ function WhatItScores() {
         </div>
         <div data-reveal style={{ "--mk-delay": "90ms" } as React.CSSProperties}>
           <div className="mb-4">
-            <DsoFitWordmark surface="light" tm className="text-[20px]" />
+            <DsoFitWordmark surface="light" tm className="text-[1.111rem]" />
             <span className="block text-xs text-slate-meta mt-1 tracking-[0.4px]">
               Corporate + DSO HQ roles
             </span>
@@ -301,7 +293,7 @@ function WhatItScores() {
             {CORPORATE_DIMS.map((d) => (
               <li
                 key={d}
-                className="py-3 border-b border-[var(--rule)] text-[14.5px] text-slate-body flex items-center gap-3"
+                className="py-3 border-b border-[var(--rule)] text-sm text-slate-body flex items-center gap-3"
               >
                 <span className="block w-1.5 h-1.5 bg-heritage-deep shrink-0" />
                 {d}
@@ -321,7 +313,7 @@ function DsoFitBand() {
     <section className="bg-card border-y border-[var(--rule)] px-6 sm:px-14 py-24">
       <div className="max-w-[1240px] mx-auto">
         <div data-reveal className="mb-5">
-          <DsoFitWordmark surface="light" tm className="text-[30px]" />
+          <DsoFitWordmark surface="light" tm className="text-[1.667rem]" />
         </div>
         <h2
           data-reveal
@@ -415,10 +407,10 @@ function HonestyBand() {
               style={{ "--mk-delay": `${i * 70}ms` } as React.CSSProperties}
               className="bg-hero p-8"
             >
-              <h3 className="text-[18px] font-extrabold tracking-[-0.4px] text-hero-foreground mb-2.5">
+              <h3 className="text-[1rem] font-extrabold tracking-[-0.4px] text-hero-foreground mb-2.5">
                 {p.title}
               </h3>
-              <p className="text-[14.5px] text-hero-foreground/70 leading-[1.65]">{p.body}</p>
+              <p className="text-sm text-hero-foreground/70 leading-[1.65]">{p.body}</p>
             </div>
           ))}
         </div>

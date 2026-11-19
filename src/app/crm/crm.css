@@ -28,7 +28,7 @@
   font-size: 0.875rem;
   color: #14233f;
   background: var(--dk-paper);
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 .crm-root a {
   text-decoration: none;
@@ -42,7 +42,7 @@
 .crm-app {
   display: grid;
   grid-template-columns: 236px 1fr;
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 .crm-side {
   background: linear-gradient(180deg, var(--dk-ink), #14233f);
@@ -52,7 +52,7 @@
   flex-direction: column;
   position: sticky;
   top: 0;
-  height: 100vh;
+  height: 100dvh;
 }
 .side-brand {
   display: flex;
@@ -357,7 +357,7 @@
 
 /* ---------- gate ---------- */
 .gate-wrap {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;

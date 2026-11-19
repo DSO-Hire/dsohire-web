@@ -93,7 +93,7 @@ function Hero({ pulse }: { pulse: PulseSnapshot }) {
           className="text-4xl sm:text-6xl font-extrabold tracking-[-2px] leading-[1.05] text-ink mb-5"
         >
           The Dental Hiring{" "}
-          <em className="not-italic text-heritage-light">Pulse.</em>
+          <em className="not-italic">Pulse.</em>
         </h1>
         <p
           data-reveal
@@ -123,7 +123,7 @@ function Hero({ pulse }: { pulse: PulseSnapshot }) {
 function HeroStat({ value, label }: { value: number; label: string }) {
   return (
     <div className="text-center">
-      <div className="text-[38px] font-extrabold tracking-[-1.5px] leading-none text-ink tabular-nums">
+      <div className="text-[2.111rem] font-extrabold tracking-[-1.5px] leading-none text-ink tabular-nums">
         <CountUp to={value} duration={900} />
       </div>
       <div className="mt-1.5 text-2xs font-bold tracking-[1.6px] uppercase text-slate-meta">
@@ -219,10 +219,10 @@ function DemandSection({ pulse }: { pulse: PulseSnapshot }) {
                 className="absolute top-0 left-0 right-0 h-[3px] bg-heritage"
                 style={{ opacity: Math.max(0.12, s.count / max) }}
               />
-              <div className="text-[16px] font-extrabold tracking-[-0.3px] text-ink">
+              <div className="text-[0.889rem] font-extrabold tracking-[-0.3px] text-ink">
                 {s.state}
               </div>
-              <div className="text-[10.5px] text-slate-meta mt-0.5 tabular-nums">
+              <div className="text-2xs text-slate-meta mt-0.5 tabular-nums">
                 {s.count} open {s.count === 1 ? "role" : "roles"}
               </div>
             </div>
@@ -241,7 +241,7 @@ function WarmingUp() {
   return (
     <section className="px-6 sm:px-14 py-24">
       <div className="max-w-[640px] mx-auto text-center border border-[var(--rule-strong)] bg-cream px-10 py-14">
-        <h2 className="text-[20px] font-extrabold tracking-[-0.4px] text-ink mb-3">
+        <h2 className="text-[1.111rem] font-extrabold tracking-[-0.4px] text-ink mb-3">
           The Pulse is warming up.
         </h2>
         <p className="text-sm text-slate-body leading-[1.75]">

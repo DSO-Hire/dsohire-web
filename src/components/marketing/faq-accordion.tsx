@@ -34,7 +34,7 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
               aria-controls={`faq-answer-${i}`}
               className="w-full flex items-start justify-between gap-6 py-7 text-left group transition-colors"
             >
-              <h3 className="text-[15.5px] font-extrabold tracking-[-0.2px] text-ink leading-snug pr-4">
+              <h3 className="text-sm font-extrabold tracking-[-0.2px] text-ink leading-snug pr-4">
                 {item.q}
               </h3>
               <span
@@ -55,7 +55,7 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
               }`}
             >
               <div className="overflow-hidden">
-                <p className="text-[14.5px] text-slate-body leading-[1.7] pb-7 pr-12 max-w-[760px]">
+                <p className="text-sm text-slate-body leading-[1.7] pb-7 pr-12 max-w-[760px]">
                   {item.a}
                 </p>
               </div>

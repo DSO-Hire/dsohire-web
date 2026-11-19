@@ -120,7 +120,7 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
             <div className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep mb-2">
               Selected plan
             </div>
-            <div className="text-[20px] font-extrabold tracking-[-0.4px] text-ink">
+            <div className="text-[1.111rem] font-extrabold tracking-[-0.4px] text-ink">
               {tierConfig.name}
             </div>
             <div className="text-sm text-slate-body mt-1">

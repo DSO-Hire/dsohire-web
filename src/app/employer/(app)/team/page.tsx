@@ -446,7 +446,7 @@ function MemberRowItem({
             {member.full_name || (email ?? "Teammate")}
           </span>
           {isCurrentUser && (
-            <span className="text-[9px] font-bold tracking-[1.2px] uppercase text-heritage-deep">
+            <span className="text-2xs font-bold tracking-[1.2px] uppercase text-heritage-deep">
               You
             </span>
           )}

@@ -543,7 +543,7 @@ function RequestModal({
         <header className="flex items-start justify-between p-5 border-b border-[var(--rule)]">
           <div>
             <Eyebrow className="mb-1">Reference request</Eyebrow>
-            <h2 className="text-[18px] font-extrabold tracking-[-0.4px] text-ink">
+            <h2 className="text-[1rem] font-extrabold tracking-[-0.4px] text-ink">
               Request a reference
               {candidateName ? ` for ${candidateName}` : ""}
             </h2>
@@ -666,7 +666,7 @@ function DeclineModal({
         <header className="flex items-start justify-between p-5 border-b border-[var(--rule)]">
           <div>
             <Eyebrow className="mb-1">Mark declined</Eyebrow>
-            <h2 className="text-[16px] font-extrabold tracking-[-0.3px] text-ink">
+            <h2 className="text-[0.889rem] font-extrabold tracking-[-0.3px] text-ink">
               Mark this request as declined?
             </h2>
           </div>

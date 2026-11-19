@@ -21,3 +21,14 @@ The per-job applications surface is the working pipeline. Architecture spans `sr
 **dnd-kit conventions.** PointerSensor (5px activation distance) + KeyboardSensor with default coordinate getter, which walks droppables in DOM order and matches our left-to-right column layout. Custom `Announcements` reads candidate name + stage label aloud rather than dnd-kit's generic defaults. DragOverlay is the visible drag artifact; the in-place card dims to 30% opacity. Drop animation is a 150ms ease-out so cards land softly. Withdrawn rows are intentionally not draggable and not selectable — withdraw is a candidate-side action.
 
 **Bulk selection.** `use-bulk-selection.ts` is a pure UI primitive with no Supabase coupling. `selected: ReadonlySet<string>` plus `toggle()` / `shiftClick()` / `clear()`. The board owns the column-major id-order array passed to `shiftClick()` so range-select traverses the visual layout. Bulk-action mutations layer on top without touching the hook.
+
+## Design and writing skills (unslop, 2026-11-19)
+
+Project skills live in `.claude/skills/`: `charles-unslop` (audit and fix order), `charles-ux-animation` (motion values), `charles-design-tips`, `frontend-design` (Anthropic), and `humanizer` (prose). Use them on any UI or copy work. **House rules override the skills** wherever they conflict:
+
+- Square corners everywhere (`--radius: 0`). Ignore concentric-radius advice; the principle becomes "consistent hairlines".
+- Ivory/cream paper, navy ink, heritage green as the single earned accent. No new palettes, gradients-as-decoration, glows, or blur blobs.
+- Text uses the rem scale (`text-2xs` / `text-xs` / `text-sm`, then Tailwind sizes or rem). Never `text-[Npx]`. Never raw hex in Tailwind classes. Use `dvh`, never `100vh` / `h-screen`. ESLint (`unslop/design-tokens`) enforces all three.
+- Motion: everyday UI settles with `--ease-settle`, no overshoot. Hover/press 100 to 150ms, reveals at most 300ms, press scale 0.97 (built into `<Button>`). Choreographed marketing showcases may run longer.
+- Copy: no em dashes in user-facing text (rare, deliberate exceptions only), no "not just X" contrasts, no highlighted keyword in headlines, no filler eyebrow chips. Specific headlines, one primary CTA per surface.
+- The homepage's two equal doors (employer and candidate) are intentional. Do not collapse them to one primary CTA.

@@ -1014,7 +1014,7 @@ export function MessagesThread({
                           className="h-3 w-3 text-warning self-center shrink-0"
                           aria-hidden
                         />
-                        <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-warning shrink-0">
+                        <span className="text-2xs font-bold tracking-[1.5px] uppercase text-warning shrink-0">
                           Internal note
                         </span>
                         <span className="text-sm font-bold text-ink truncate">
@@ -1077,7 +1077,7 @@ export function MessagesThread({
                         <span className="text-sm font-bold text-ink truncate">
                           {senderLabel}
                         </span>
-                        <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+                        <span className="text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep">
                           {roleLabel(m.sender_role)}
                         </span>
                         <span
@@ -1156,7 +1156,7 @@ export function MessagesThread({
                       <span className="text-sm font-bold text-ink truncate">
                         {senderLabel}
                       </span>
-                      <span className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep">
+                      <span className="text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep">
                         {senderRoleLabel}
                       </span>
                       <span

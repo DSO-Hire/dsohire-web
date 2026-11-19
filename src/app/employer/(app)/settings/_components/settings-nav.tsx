@@ -150,7 +150,7 @@ export function SettingsNav() {
                   />
                 )}
                 {entry.comingSoon && !isActive && (
-                  <span className="text-[9px] font-bold tracking-[0.5px] uppercase text-slate-meta">
+                  <span className="text-2xs font-bold tracking-[0.5px] uppercase text-slate-meta">
                     soon
                   </span>
                 )}

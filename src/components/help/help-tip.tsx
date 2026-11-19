@@ -94,7 +94,7 @@ export function HelpTip({
               {title}
             </span>
           )}
-          <span className="block text-[12.5px] leading-relaxed text-slate-body">
+          <span className="block text-xs leading-relaxed text-slate-body">
             {tip}
           </span>
         </span>

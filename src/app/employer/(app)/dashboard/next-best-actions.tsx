@@ -100,7 +100,7 @@ export function NextBestActions({ items }: { items: NbaItem[] }) {
               <div className="text-xs font-extrabold tracking-[-0.2px] text-ink leading-snug">
                 {item.title}
               </div>
-              <div className="text-[11.5px] text-slate-body leading-[1.55] mt-0.5">
+              <div className="text-2xs text-slate-body leading-[1.55] mt-0.5">
                 {item.why}
               </div>
               <div className="flex flex-wrap gap-1.5 mt-2">

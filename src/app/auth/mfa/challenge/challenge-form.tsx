@@ -44,7 +44,7 @@ export function ChallengeForm({ next }: { next: string | null }) {
             autoFocus
             placeholder="123456 or xxxx-xxxx-xxxx"
             maxLength={20}
-            className="w-full border border-[var(--rule-strong)] bg-card pl-9 pr-3 py-3 font-mono text-[16px] text-ink focus:border-heritage focus:outline-none"
+            className="w-full border border-[var(--rule-strong)] bg-card pl-9 pr-3 py-3 font-mono text-[0.889rem] text-ink focus:border-heritage focus:outline-none"
           />
         </div>
         <p className="mt-1.5 text-2xs text-slate-meta">

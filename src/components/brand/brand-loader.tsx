@@ -56,7 +56,7 @@ export function BrandLoader({
       aria-live="polite"
       className={
         fullScreen
-          ? "min-h-screen flex items-center justify-center bg-ivory"
+          ? "min-h-dvh flex items-center justify-center bg-ivory"
           : "flex items-center justify-center py-16"
       }
     >

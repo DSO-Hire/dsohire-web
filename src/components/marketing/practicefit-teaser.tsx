@@ -107,7 +107,7 @@ export function PracticeFitTeaser({
           <Eyebrow className="mb-2">
             {QUESTIONS[step].signal} · question {step + 1} of {QUESTIONS.length}
           </Eyebrow>
-          <div className="text-[19px] font-extrabold tracking-[-0.4px] text-ink mb-5">
+          <div className="text-[1.056rem] font-extrabold tracking-[-0.4px] text-ink mb-5">
             {QUESTIONS[step].prompt}
           </div>
           <div className="flex flex-col gap-2.5">
@@ -122,7 +122,7 @@ export function PracticeFitTeaser({
               </button>
             ))}
           </div>
-          <p className="mt-5 text-[11.5px] text-slate-meta leading-snug">
+          <p className="mt-5 text-2xs text-slate-meta leading-snug">
             No sign-up needed for the preview. No wrong answers.
           </p>
         </div>
@@ -151,7 +151,7 @@ export function PracticeFitTeaser({
             </Eyebrow>
             <ul className="list-none space-y-1.5 mb-5">
               {QUESTIONS.map((q, i) => (
-                <li key={q.signal} className="flex items-center gap-2 text-[13.5px] text-ink">
+                <li key={q.signal} className="flex items-center gap-2 text-xs text-ink">
                   <Check className="h-3.5 w-3.5 text-heritage-deep shrink-0" />
                   <span className="font-semibold">{q.signal}:</span>
                   <span className="text-slate-body">{answers[i]}</span>

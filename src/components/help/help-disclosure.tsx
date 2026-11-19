@@ -136,7 +136,7 @@ export function HelpBody({
   return (
     <div className="space-y-3">
       {tip && (
-        <p className="text-[13.5px] leading-relaxed text-slate-body">{tip}</p>
+        <p className="text-xs leading-relaxed text-slate-body">{tip}</p>
       )}
 
       {entry?.steps && entry.steps.length > 0 && (

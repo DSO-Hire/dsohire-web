@@ -162,7 +162,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
 
         {jobs.length === 0 ? (
           <div className="border border-[var(--rule)] bg-cream p-12 text-center max-w-[640px] mx-auto">
-            <h3 className="text-[18px] font-extrabold tracking-[-0.4px] text-ink mb-2">
+            <h3 className="text-[1rem] font-extrabold tracking-[-0.4px] text-ink mb-2">
               No {fn.label} roles open right now.
             </h3>
             <p className="text-sm text-slate-body leading-relaxed mb-4">
@@ -197,7 +197,7 @@ export default async function CorporateFunctionPage({ params }: PageProps) {
                     <Building2 className="h-3 w-3" />
                     {fn.label}
                   </div>
-                  <h3 className="text-[18px] font-extrabold tracking-[-0.3px] leading-snug text-ink mb-2">
+                  <h3 className="text-[1rem] font-extrabold tracking-[-0.3px] leading-snug text-ink mb-2">
                     {job.title}
                   </h3>
                   <div className="text-xs text-slate-body mb-3">

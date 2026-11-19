@@ -92,7 +92,7 @@ export function JobHealth({
                     </span>
                   )}
                 </div>
-                <div className="text-[10.5px] text-slate-meta mt-0.5 tabular">
+                <div className="text-2xs text-slate-meta mt-0.5 tabular">
                   {r.daysOpen != null ? `${r.daysOpen} days open · ` : ""}
                   {r.subline}
                   {r.thisWeek > 0 ? ` · ${r.thisWeek} apps this week` : ""}

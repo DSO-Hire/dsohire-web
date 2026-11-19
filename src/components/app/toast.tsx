@@ -137,7 +137,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             }`}
           >
             <div className="flex items-start justify-between gap-3">
-              <div className="text-[12.5px] font-bold leading-snug">
+              <div className="text-xs font-bold leading-snug">
                 {t.title}
               </div>
               <button
@@ -150,7 +150,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               </button>
             </div>
             {t.body && (
-              <div className="text-[11.5px] text-sidebar-foreground/65 leading-[1.55] mt-1">
+              <div className="text-2xs text-sidebar-foreground/65 leading-[1.55] mt-1">
                 {t.body}
               </div>
             )}

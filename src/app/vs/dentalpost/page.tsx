@@ -133,7 +133,7 @@ export default function VsDentalPostPage() {
         title={
           <>
             DSO Hire vs DentalPost.{" "}
-            <em className="not-italic text-heritage-light">
+            <em className="not-italic">
               Two dental-only tools, priced differently.
             </em>
           </>

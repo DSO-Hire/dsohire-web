@@ -67,7 +67,7 @@ export default async function OnboardingPage() {
   // (it's the redirect target for users with no DSO row, so nesting it under
   // the shell layout would loop). A slim brand bar replaces the full nav.
   return (
-    <div className="min-h-screen bg-ivory">
+    <div className="min-h-dvh bg-ivory">
       <div className="border-b border-[var(--rule)] bg-ivory/95 px-6 sm:px-10 h-[64px] flex items-center">
         <Link href="/employer/dashboard" aria-label="DSO Hire">
           <BrandLockup height={28} />
@@ -100,7 +100,7 @@ export default async function OnboardingPage() {
           <div className="text-2xs font-bold tracking-[2.5px] uppercase text-heritage-deep mb-3">
             Your DSO
           </div>
-          <div className="text-[20px] font-extrabold tracking-[-0.4px] text-ink mb-1">
+          <div className="text-[1.111rem] font-extrabold tracking-[-0.4px] text-ink mb-1">
             {dso?.name}
           </div>
           <div className="text-xs font-mono text-slate-meta tracking-[0.3px] mb-6">

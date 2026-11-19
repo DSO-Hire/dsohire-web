@@ -134,10 +134,10 @@ export function DsoFitAssessmentWizard({
         <div className="mb-5">
           <DsoFitWordmark className="text-3xl sm:text-4xl" tm />
         </div>
-        <h1 className="text-[26px] sm:text-[31px] font-extrabold tracking-[-0.5px] leading-tight text-ink mb-3">
+        <h1 className="text-[1.444rem] sm:text-[1.722rem] font-extrabold tracking-[-0.5px] leading-tight text-ink mb-3">
           The fit score DSOs see — built in 5 minutes.
         </h1>
-        <p className="text-sm sm:text-[16px] text-slate-body leading-relaxed mb-6 max-w-[580px]">
+        <p className="text-sm sm:text-[0.889rem] text-slate-body leading-relaxed mb-6 max-w-[580px]">
           DSOFit ranks every open DSO and corporate role by how well it fits
           your function, level, multi-site experience, and how you want to
           work — the things a resume can&apos;t show. Take it once and you&apos;ll:
@@ -160,7 +160,7 @@ export function DsoFitAssessmentWizard({
         {/* Prominent resume drop-zone — the time-saver, hard to miss. */}
         <div className="border-2 border-dashed border-heritage/45 bg-cream/50 rounded-xl p-7 mb-6 text-center">
           <UploadCloud className="mx-auto mb-2 h-8 w-8 text-heritage-deep" />
-          <div className="text-[16px] font-extrabold text-ink">
+          <div className="text-[0.889rem] font-extrabold text-ink">
             Drop your resume to save time
           </div>
           <p className="mx-auto mt-1 mb-4 max-w-[420px] text-xs text-slate-meta">

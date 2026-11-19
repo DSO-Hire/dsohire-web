@@ -131,10 +131,10 @@ function BoardCardItem({ card: c, tone }: { card: BoardCard; tone: ColTone }) {
           : "border-[var(--rule)] bg-cream/40"
       }`}
     >
-      <div className="text-[13.5px] font-bold leading-tight text-ink">
+      <div className="text-xs font-bold leading-tight text-ink">
         {c.role}
       </div>
-      <div className="mt-0.5 text-[11.5px] text-slate-meta">
+      <div className="mt-0.5 text-2xs text-slate-meta">
         {c.dsoName}
         {c.locationName ? ` · ${c.locationName}` : ""}
       </div>
@@ -146,7 +146,7 @@ function BoardCardItem({ card: c, tone }: { card: BoardCard; tone: ColTone }) {
       </div>
       {status && (
         <div
-          className={`mt-2.5 flex items-start gap-1.5 text-[11.5px] leading-snug ${
+          className={`mt-2.5 flex items-start gap-1.5 text-2xs leading-snug ${
             status.tone === "you"
               ? "font-semibold text-warning"
               : status.tone === "move"

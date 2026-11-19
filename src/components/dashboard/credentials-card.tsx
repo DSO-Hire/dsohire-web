@@ -123,7 +123,7 @@ export function CredentialsCard({
                     <span className="font-normal text-slate-meta"> · {it.detail}</span>
                   ) : null}
                 </div>
-                <div className="text-[11.5px] text-slate-meta">{st.text}</div>
+                <div className="text-2xs text-slate-meta">{st.text}</div>
               </div>
               {st.action ? (
                 <Link

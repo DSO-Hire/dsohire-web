@@ -380,7 +380,7 @@ function StatusBadge({ status }: { status: string }) {
   const m = map[status] ?? { label: status, cls: "bg-cream text-slate-body" };
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 text-[9px] font-bold tracking-[1.5px] uppercase ${m.cls}`}
+      className={`inline-flex items-center px-2 py-0.5 text-2xs font-bold tracking-[1.5px] uppercase ${m.cls}`}
     >
       {m.label}
     </span>

@@ -37,7 +37,7 @@ const buttonVariants = cva(
   // Every variant carries a border (transparent on filled ones) so filled
   // and outline buttons sit at IDENTICAL heights side by side — no more
   // py-[13px] optical compensation hacks.
-  "inline-flex shrink-0 items-center justify-center gap-2.5 whitespace-nowrap border border-transparent font-bold transition-colors outline-none select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-2.5 whitespace-nowrap border border-transparent font-bold transition-[color,background-color,border-color,transform] duration-150 ease-out active:scale-[0.97] motion-reduce:active:scale-100 outline-none select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {

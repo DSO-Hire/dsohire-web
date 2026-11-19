@@ -192,11 +192,11 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
             >
               <div className="min-w-0">
                 <div className="flex items-center gap-3 mb-2">
-                  <h2 className="text-[18px] font-bold text-ink truncate">
+                  <h2 className="text-[1rem] font-bold text-ink truncate">
                     {dso.name}
                   </h2>
                   <span
-                    className={`text-[9px] font-bold tracking-[1.5px] uppercase px-2.5 py-1 ${statusBadgeClass(dso.status)}`}
+                    className={`text-2xs font-bold tracking-[1.5px] uppercase px-2.5 py-1 ${statusBadgeClass(dso.status)}`}
                   >
                     {dso.status}
                   </span>
@@ -208,7 +208,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
 
                 <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2 text-xs">
                   <div>
-                    <dt className="text-slate-meta font-bold tracking-[1px] uppercase text-[9px] mb-0.5">
+                    <dt className="text-slate-meta font-bold tracking-[1px] uppercase text-2xs mb-0.5">
                       Owner
                     </dt>
                     <dd className="text-ink truncate">
@@ -216,7 +216,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-slate-meta font-bold tracking-[1px] uppercase text-[9px] mb-0.5">
+                    <dt className="text-slate-meta font-bold tracking-[1px] uppercase text-2xs mb-0.5">
                       Email
                     </dt>
                     <dd className="text-ink truncate">
@@ -233,13 +233,13 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-slate-meta font-bold tracking-[1px] uppercase text-[9px] mb-0.5">
+                    <dt className="text-slate-meta font-bold tracking-[1px] uppercase text-2xs mb-0.5">
                       Locations
                     </dt>
                     <dd className="text-ink">{dso.locationCount}</dd>
                   </div>
                   <div>
-                    <dt className="text-slate-meta font-bold tracking-[1px] uppercase text-[9px] mb-0.5">
+                    <dt className="text-slate-meta font-bold tracking-[1px] uppercase text-2xs mb-0.5">
                       Active jobs
                     </dt>
                     <dd className="text-ink">{dso.activeJobCount}</dd>
@@ -286,7 +286,7 @@ export default async function AdminDsosPage({ searchParams }: PageProps) {
                       if (isFeatured) {
                         return (
                           <div className="border border-warning bg-warning-bg px-3 py-2 flex flex-col gap-2">
-                            <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-warning">
+                            <div className="text-2xs font-bold tracking-[1.5px] uppercase text-warning">
                               ★ Featured until{" "}
                               {new Date(
                                 dso.featured_until!

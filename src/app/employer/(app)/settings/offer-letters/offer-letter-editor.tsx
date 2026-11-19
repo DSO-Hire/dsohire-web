@@ -550,7 +550,7 @@ function InsertMergeFieldDropdown({
         >
           {grouped.map((g) => (
             <div key={g.id}>
-              <div className="px-3 pt-2.5 pb-1 text-[9px] font-bold tracking-[2px] uppercase text-slate-meta border-b border-[var(--rule)]">
+              <div className="px-3 pt-2.5 pb-1 text-2xs font-bold tracking-[2px] uppercase text-slate-meta border-b border-[var(--rule)]">
                 {g.label}
               </div>
               <ul className="py-1">
@@ -570,7 +570,7 @@ function InsertMergeFieldDropdown({
                           {f.label}
                         </span>
                         {f.required && (
-                          <span className="text-[9px] font-bold tracking-[1px] uppercase text-heritage-deep">
+                          <span className="text-2xs font-bold tracking-[1px] uppercase text-heritage-deep">
                             req
                           </span>
                         )}

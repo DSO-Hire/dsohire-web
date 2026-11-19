@@ -52,7 +52,7 @@ export function MatchabilityMeter({
         <div className="flex items-center justify-between gap-2">
           <span className="inline-flex items-baseline gap-2">
             <FitWordmark product={product} className="text-xs" />
-            <span className="text-[9px] font-bold tracking-[2px] uppercase text-slate-meta">
+            <span className="text-2xs font-bold tracking-[2px] uppercase text-slate-meta">
               Matchability
             </span>
           </span>

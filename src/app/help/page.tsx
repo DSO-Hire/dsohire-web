@@ -167,7 +167,7 @@ function HelpCategoryColumn({
                 <div className="font-semibold text-ink text-sm leading-tight">
                   {e.title}
                 </div>
-                <p className="mt-0.5 text-[12.5px] text-slate-meta leading-snug line-clamp-2">
+                <p className="mt-0.5 text-xs text-slate-meta leading-snug line-clamp-2">
                   {e.tip}
                 </p>
               </div>

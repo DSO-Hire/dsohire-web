@@ -152,7 +152,7 @@ export default async function ResumeBuilderPage({
   ).id;
 
   return (
-    <div className="min-h-screen bg-ivory">
+    <div className="min-h-dvh bg-ivory">
       <ResumeBuilder
         data={data}
         returnTo={returnTo}

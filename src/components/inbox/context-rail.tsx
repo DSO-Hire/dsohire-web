@@ -130,7 +130,7 @@ export function ContextRail({
 
       {/* Pipeline journey */}
       <div className="border border-[var(--rule)] bg-card px-3 py-3">
-        <p className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-2">
+        <p className="text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep mb-2">
           Pipeline
         </p>
         <ol className="space-y-0">

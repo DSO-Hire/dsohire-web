@@ -204,7 +204,7 @@ function RoleCard({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
             <div>
-              <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-heritage-deep mb-1.5">
+              <div className="text-2xs font-bold tracking-[1.5px] uppercase text-heritage-deep mb-1.5">
                 Can do
               </div>
               <ul className="list-none space-y-1">
@@ -223,7 +223,7 @@ function RoleCard({
             </div>
             {role.cantDo.length > 0 && (
               <div>
-                <div className="text-[9px] font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
+                <div className="text-2xs font-bold tracking-[1.5px] uppercase text-slate-meta mb-1.5">
                   Can&apos;t do
                 </div>
                 <ul className="list-none space-y-1">

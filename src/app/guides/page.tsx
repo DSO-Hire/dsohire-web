@@ -42,7 +42,7 @@ export default function GuidesIndexPage() {
           </div>
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-[-2px] leading-[1.05] text-ink mb-7 max-w-[720px]">
             How dental groups actually{" "}
-            <em className="not-italic text-heritage-light">hire.</em>
+            <em className="not-italic">hire.</em>
           </h1>
           <p className="text-lg sm:text-xl text-slate-body leading-relaxed max-w-[620px] mb-14">
             Practical, no-fluff guides to the hardest parts of dental hiring,

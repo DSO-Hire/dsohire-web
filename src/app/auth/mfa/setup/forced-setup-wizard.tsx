@@ -192,7 +192,7 @@ export function ForcedSetupWizard() {
             }}
             maxLength={6}
             placeholder="123456"
-            className="w-40 border border-[var(--rule-strong)] bg-card px-3 py-2 font-mono text-[18px] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
+            className="w-40 border border-[var(--rule-strong)] bg-card px-3 py-2 font-mono text-[1rem] tracking-[4px] text-ink focus:border-heritage focus:outline-none"
           />
           {error && (
             <p

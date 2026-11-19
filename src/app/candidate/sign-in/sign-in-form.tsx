@@ -72,7 +72,7 @@ export function CandidateSignInForm({ next }: { next?: string }) {
               maxLength={10}
               pattern="[0-9 ]{6,16}"
               placeholder="Enter code from email"
-              className="w-full px-4 py-4 bg-cream border border-[var(--rule-strong)] text-ink text-[22px] font-bold tracking-[6px] text-center placeholder:text-slate-meta placeholder:font-medium placeholder:text-sm placeholder:tracking-[1px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
+              className="w-full px-4 py-4 bg-cream border border-[var(--rule-strong)] text-ink text-[1.222rem] font-bold tracking-[6px] text-center placeholder:text-slate-meta placeholder:font-medium placeholder:text-sm placeholder:tracking-[1px] focus:outline-none focus:border-heritage focus:ring-1 focus:ring-heritage transition-colors"
             />
           </div>
 

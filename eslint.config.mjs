@@ -91,6 +91,52 @@ const useServerExportsPlugin = {
   },
 };
 
+
+/**
+ * Unslop guard (2026-11-19). Keeps the design system honest:
+ *   - no text-[Npx]: px text ignores the text-size toggle; use text-2xs/xs/sm
+ *     or a rem value.
+ *   - no hex in Tailwind arbitrary values (text-[#...], bg-[#...]): use tokens.
+ *   - no 100vh / h-screen: mobile browser chrome makes them overflow; use dvh.
+ * Scans string literals and template chunks, so it catches className strings,
+ * cn() args and inline style values alike. Pixel-locked files are exempted
+ * in the config block below.
+ */
+const UNSLOP_CHECKS = [
+  [/\btext-\[\d+(?:\.\d+)?px\]/, "pxText"],
+  [/\b(?:text|bg|border|from|via|to|fill|stroke|ring|outline|decoration|divide)-\[#[0-9a-fA-F]{3,8}\]/, "hexClass"],
+  [/\b100vh\b|(?:^|[\s"'`:])(?:min-h-|max-h-|h-)screen\b/, "vh"],
+];
+const unslopPlugin = {
+  rules: {
+    "design-tokens": {
+      meta: {
+        type: "problem",
+        docs: { description: "Enforce DSO Hire design tokens (no px text, raw hex classes, 100vh)" },
+        schema: [],
+        messages: {
+          pxText: "Pixel font size (text-[Npx]) ignores the text-size toggle. Use text-2xs / text-xs / text-sm or a rem value.",
+          hexClass: "Raw hex in a Tailwind class. Use a design token (text-heritage, bg-ink, text-heritage-bright, ...).",
+          vh: "100vh / h-screen overflows behind mobile browser chrome. Use dvh (h-dvh, min-h-dvh, 100dvh).",
+        },
+      },
+      create(context) {
+        const check = (node, text) => {
+          if (typeof text !== "string") return;
+          for (const [re, messageId] of UNSLOP_CHECKS) {
+            if (re.test(text)) context.report({ node, messageId });
+          }
+        };
+        return {
+          Literal(node) { check(node, node.value); },
+          TemplateElement(node) { check(node, node.value.cooked); },
+          JSXText(node) { /* visible copy, not styling */ },
+        };
+      },
+    },
+  },
+};
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -100,6 +146,31 @@ const eslintConfig = defineConfig([
     rules: {
       "use-server-exports/no-unsafe-use-server-exports": "error",
     },
+  },
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    plugins: { "unslop": unslopPlugin },
+    rules: { "unslop/design-tokens": "error" },
+  },
+  {
+    // Pixel-locked by design: print/PDF resume, fixed-size marketing
+    // gauges, OG image routes, the avatar palette, third-party brand marks.
+    files: [
+      "src/components/resume/**",
+      "src/app/candidate/resume/build/**",
+      "src/app/candidate/(app)/resume/resume-toolbar.tsx",
+      "src/components/marketing/fit-dial.tsx",
+      "src/components/marketing/film-strip.tsx",
+      "src/components/ui/avatar.tsx",
+      "src/components/auth/linkedin-oauth-button.tsx",
+      "src/components/analytics/apps-sparkline.tsx",
+      "src/app/**/opengraph-image.tsx",
+      "src/app/**/twitter-image.tsx",
+      "src/app/**/og/**",
+      "src/lib/**/__tests__/**",
+      "**/*.test.{ts,tsx}",
+    ],
+    rules: { "unslop/design-tokens": "off" },
   },
   // Override default ignores of eslint-config-next.
   globalIgnores([

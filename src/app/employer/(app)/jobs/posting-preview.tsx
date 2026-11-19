@@ -137,7 +137,7 @@ export function PostingPreview(props: PostingPreviewProps) {
     <div className="border border-[var(--rule-strong)] bg-card">
       <div className="flex items-center gap-2 px-4 py-2 border-b border-[var(--rule)] bg-cream/60">
         <Eye className="h-3.5 w-3.5 text-heritage-deep" aria-hidden />
-        <span className="text-[9px] font-bold tracking-[2px] uppercase text-heritage-deep">
+        <span className="text-2xs font-bold tracking-[2px] uppercase text-heritage-deep">
           Live preview
         </span>
         <span className="text-2xs text-slate-meta">
@@ -146,7 +146,7 @@ export function PostingPreview(props: PostingPreviewProps) {
       </div>
 
       <div className="px-5 py-4">
-        <h3 className="text-[19px] font-extrabold tracking-[-0.4px] leading-tight text-ink">
+        <h3 className="text-[1.056rem] font-extrabold tracking-[-0.4px] leading-tight text-ink">
           {props.title.trim() || (
             <span className="text-slate-meta font-semibold">
               Your job title…
@@ -262,7 +262,7 @@ export function PostingPreview(props: PostingPreviewProps) {
                   props.questionCount === 1 ? "" : "s"
                 }`}
           </span>
-          <span className="px-3 py-1.5 bg-primary text-primary-foreground text-[9px] font-bold tracking-[1.5px] uppercase select-none">
+          <span className="px-3 py-1.5 bg-primary text-primary-foreground text-2xs font-bold tracking-[1.5px] uppercase select-none">
             Apply
           </span>
         </div>

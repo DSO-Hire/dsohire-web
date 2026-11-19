@@ -144,7 +144,7 @@ export function AffiliationPolicyForm({
                       {opt.label}
                     </span>
                     {isCurrent && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-heritage text-primary-foreground text-[9px] font-bold tracking-[1.2px] uppercase">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-heritage text-primary-foreground text-2xs font-bold tracking-[1.2px] uppercase">
                         <Check className="h-2.5 w-2.5" />
                         Current
                       </span>

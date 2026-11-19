@@ -153,7 +153,7 @@ export default function VsCloudDentistryPage() {
         title={
           <>
             DSO Hire vs Cloud Dentistry.{" "}
-            <em className="not-italic text-heritage-light">
+            <em className="not-italic">
               Temp coverage and permanent hiring are different jobs.
             </em>
           </>

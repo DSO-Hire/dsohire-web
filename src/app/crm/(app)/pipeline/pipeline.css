@@ -541,7 +541,7 @@
     right: 16px;
     top: 70px;
     width: auto;
-    max-height: calc(100vh - 90px);
+    max-height: calc(100dvh - 90px);
     overflow-y: auto;
   }
 }

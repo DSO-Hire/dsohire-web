@@ -76,15 +76,6 @@ function Hero({
 
   return (
     <section className="relative overflow-hidden pt-[140px] pb-20 px-6 sm:px-14">
-      <div
-        aria-hidden
-        className="absolute -top-[10%] -right-[15%] w-[60vw] h-[60vw] pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle, var(--heritage-glow), transparent 60%)",
-          filter: "blur(40px)",
-        }}
-      />
 
       <div className="relative z-10 max-w-[1100px] mx-auto">
         <Link
@@ -115,7 +106,7 @@ function Hero({
             // on each line). The old absolute bar required whitespace-nowrap,
             // which pushed long accent phrases off the right edge on phones.
             <em
-              className="not-italic text-heritage-light"
+              className="not-italic"
               style={{
                 backgroundImage:
                   "linear-gradient(var(--heritage-tint), var(--heritage-tint))",
@@ -180,7 +171,7 @@ function Advantages({ config }: { config: RoleConfig }) {
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-[16px] font-extrabold tracking-[-0.3px] text-ink mb-2 leading-tight">
+                  <h3 className="text-[0.889rem] font-extrabold tracking-[-0.3px] text-ink mb-2 leading-tight">
                     {adv.title}
                   </h3>
                   <p className="text-sm text-slate-body leading-[1.7]">
@@ -205,7 +196,7 @@ function CareerPath({ config }: { config: RoleConfig }) {
       <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.6px] leading-[1.1] text-ink mb-10">
         {config.careerPath.title}
       </h2>
-      <div className="space-y-6 text-[16px] sm:text-[17px] text-ink leading-[1.75]">
+      <div className="space-y-6 text-[0.889rem] sm:text-[0.944rem] text-ink leading-[1.75]">
         {config.careerPath.paragraphs.map((p, i) => (
           <p key={i}>{p}</p>
         ))}
@@ -222,15 +213,6 @@ function Compensation({ config }: { config: RoleConfig }) {
       className="px-6 sm:px-14 py-20 relative overflow-hidden"
       style={{ background: "var(--heritage-tint)" }}
     >
-      <div
-        aria-hidden
-        className="absolute -bottom-[20%] -left-[15%] w-[50vw] h-[50vw] pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle, var(--heritage-glow), transparent 60%)",
-          filter: "blur(40px)",
-        }}
-      />
       <div className="relative max-w-[820px] mx-auto">
         <Eyebrow className="text-heritage-deep mb-3.5">How compensation is structured</Eyebrow>
         <h2 className="text-3xl sm:text-4xl font-extrabold tracking-[-1.2px] leading-[1.1] text-ink mb-6">
@@ -376,7 +358,7 @@ function FinalCta({
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] leading-[1.05] text-ink mb-5">
           Ready to see what&apos;s open?
         </h2>
-        <p className="text-sm sm:text-[16px] text-slate-body leading-[1.7] mb-9 max-w-[560px] mx-auto">
+        <p className="text-sm sm:text-[0.889rem] text-slate-body leading-[1.7] mb-9 max-w-[560px] mx-auto">
           Browse current {config.label.toLowerCase()} roles at multi-location DSOs,
           or create a free profile so the right openings find you.
         </p>

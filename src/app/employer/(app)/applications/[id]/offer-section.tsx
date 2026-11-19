@@ -864,7 +864,7 @@ function ConfirmRevisionDialog({
             <AlertCircle className="h-3 w-3" />
             Already accepted
           </Eyebrow>
-          <h2 className="text-[17px] font-extrabold tracking-[-0.4px] text-ink">
+          <h2 className="text-[0.944rem] font-extrabold tracking-[-0.4px] text-ink">
             Send a revised offer to {candidateName}?
           </h2>
         </header>
@@ -1211,7 +1211,7 @@ function SendOfferModal({
               <FileSignature className="h-3 w-3" />
               Offer letter
             </Eyebrow>
-            <h2 className="text-[18px] font-extrabold tracking-[-0.4px] text-ink">
+            <h2 className="text-[1rem] font-extrabold tracking-[-0.4px] text-ink">
               Send an offer to {candidateName}
             </h2>
             <div className="mt-1 text-xs text-slate-meta tabular">
@@ -1999,7 +1999,7 @@ function PendingSubmittedPanel({
       <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center bg-warning-bg">
         <Clock className="h-6 w-6 text-warning" />
       </div>
-      <h3 className="text-[17px] font-extrabold tracking-[-0.4px] text-ink">
+      <h3 className="text-[0.944rem] font-extrabold tracking-[-0.4px] text-ink">
         Submitted for approval
       </h3>
       <p className="mx-auto mt-2 max-w-[440px] text-xs text-slate-body leading-relaxed">

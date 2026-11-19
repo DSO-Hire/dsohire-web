@@ -84,7 +84,7 @@ export function PlanFinder({ seatPacks = false }: { seatPacks?: boolean }) {
 
         {!done && (
           <div>
-            <div className="text-[16px] font-extrabold tracking-[-0.2px] mb-4">
+            <div className="text-[0.889rem] font-extrabold tracking-[-0.2px] mb-4">
               {QUESTIONS[step].q}
             </div>
             <div className="flex flex-wrap gap-2.5">
@@ -118,7 +118,7 @@ export function PlanFinder({ seatPacks = false }: { seatPacks?: boolean }) {
         {done && rec !== null && (
           <div className="text-center py-1">
             <Eyebrow className="text-heritage-bright mb-1.5">Your fit</Eyebrow>
-            <div className="text-[28px] font-extrabold tracking-[-0.8px] mb-2">
+            <div className="text-[1.556rem] font-extrabold tracking-[-0.8px] mb-2">
               {TIER_NAMES[rec]}
             </div>
             <p className="text-xs text-hero-foreground/65 leading-[1.65] max-w-[440px] mx-auto mb-5">
