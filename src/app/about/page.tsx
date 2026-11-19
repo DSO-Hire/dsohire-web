@@ -10,7 +10,7 @@
  *
  * Structure: letter + photo sidebar → timeline → "What we will never do"
  * promises band (claims map 1:1 to real architecture) → navy closing with
- * the ivory signature. Assets: public/about/founder.jpg + signature*.png
+ * the ivory signature. Assets: public/about/founder-2026.jpg + signature*.png
  * (processed from Brand Assets, Day 32).
  */
 
@@ -151,10 +151,10 @@ function FounderLetter() {
         <aside className="flex flex-col gap-7">
           <div data-reveal style={{ "--mk-delay": "100ms" } as React.CSSProperties}>
             <Image
-              src="/about/founder.jpg"
+              src="/about/founder-2026.jpg"
               alt="Cam Eslinger, founder of DSO Hire"
-              width={1200}
-              height={1500}
+              width={1000}
+              height={1250}
               className="w-full h-auto border border-[var(--rule-strong)]"
               priority={false}
             />

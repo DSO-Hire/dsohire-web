@@ -6,8 +6,8 @@ import type { CSSProperties } from "react";
  * background; anyone else on file keeps the plain initials chip.
  */
 const PHOTOS: Record<string, string> = {
-  "cameron@eslingerdental.com": "/crm/cam-avatar.jpg",
-  "cam@dsohire.com": "/crm/cam-avatar.jpg",
+  "cameron@eslingerdental.com": "/crm/cam-avatar-2026.jpg",
+  "cam@dsohire.com": "/crm/cam-avatar-2026.jpg",
 };
 
 type Person = { email?: string | null } | null | undefined;
