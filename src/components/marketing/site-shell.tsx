@@ -142,7 +142,7 @@ export async function SiteNav({
     <nav className="site-nav fixed top-0 inset-x-0 z-50 h-[80px] px-6 sm:px-10 xl:px-14 flex items-center justify-between gap-6 backdrop-blur-xl backdrop-saturate-150 bg-ivory/80 border-b border-[var(--rule)]">
       <NavScrollState />
       <Link href="/" className="flex items-center shrink-0" aria-label="DSO Hire, home">
-        <BrandLockup height={42} draw />
+        <BrandLockup height={50} draw />
       </Link>
       <ul className="nav-links hidden lg:flex items-center gap-5 xl:gap-7 list-none">
         {/* Dual-lens segmented control — "For DSOs | Job Candidates".
