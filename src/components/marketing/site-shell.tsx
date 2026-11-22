@@ -21,6 +21,7 @@ import { LensToggle } from "./lens-toggle";
 import { MotionMount } from "./motion";
 import { NavScrollState } from "./nav-scroll-state";
 import { NavActiveLink } from "./nav-active-link";
+import { NavLogo } from "./nav-logo";
 import { DEMO_URL } from "@/lib/marketing/demo";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { ToastProvider } from "@/components/app/toast";
@@ -149,9 +150,9 @@ export async function SiteNav({
       >
         Skip to content
       </a>
-      <Link href="/" className="flex items-center shrink-0" aria-label="DSO Hire, home">
+      <NavLogo>
         <BrandLockup height={50} draw />
-      </Link>
+      </NavLogo>
       <ul className="nav-links hidden lg:flex items-center gap-5 xl:gap-7 list-none">
         {/* Dual-lens segmented control — "For DSOs | Job Candidates".
             Client island (needs usePathname for active-lens state); the
@@ -421,14 +422,31 @@ export function BrandLockup({
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+      {/* Hover trace (header only): a short heritage stroke that runs once
+          around the arch when the pointer arrives. Hidden at rest. */}
+      {draw && (
+        <path
+          className="lockup-trace stroke-heritage"
+          d="M 5 5 L 28 5 Q 40 5 40 17 L 40 27 Q 40 39 28 39 L 5 39"
+          fill="none"
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          pathLength="100"
+          aria-hidden
+        />
+      )}
       {/* Heritage horizontal crossbar — implied H. Sits at the vertical
           midpoint of the mark, extending from inside the open left side to
-          just shy of the inner curve on the right. */}
+          just shy of the inner curve on the right. The line runs to x=36
+          but only 16 units are drawn (`.lockup-bar` dasharray in
+          globals.css), so the header can extend it on hover with the round
+          caps intact. Rest appearance is the locked 8 to 24. */}
       <line
         className="lockup-bar stroke-heritage"
         x1="8"
         y1="22"
-        x2="24"
+        x2="36"
         y2="22"
         strokeWidth="3"
         strokeLinecap="round"

@@ -792,14 +792,18 @@ html, body {
     animation: mk-draw 0.9s var(--ease-settle) 0.15s forwards;
   }
   .lockup-draw .lockup-bar {
-    stroke-dasharray: 18;
-    stroke-dashoffset: 18;
-    animation: mk-draw 0.45s var(--ease-settle) 0.8s forwards;
+    animation: lockup-bar-draw 0.45s var(--ease-settle) 0.8s backwards;
   }
   .lockup-draw .lockup-fade {
     opacity: 0;
     animation: mk-fade 0.5s ease-out 0.55s forwards;
   }
+}
+/* Crossbar geometry runs 8 to 36; only 16 units are drawn at rest so the
+   locked mark reads 8 to 24 everywhere (see BrandLockup). */
+.lockup-bar { stroke-dasharray: 16 100; }
+@keyframes lockup-bar-draw {
+  from { stroke-dasharray: 0 100; }
 }
 @keyframes mk-draw {
   to { stroke-dashoffset: 0; }
@@ -2218,4 +2222,36 @@ html {
     .m-drawer-root[data-open="true"] .m-panel { transform: none; transition: opacity 200ms ease-out; opacity: 0; }
     .m-drawer-root[data-open="true"] .m-panel { opacity: 1; }
   }
+}
+
+/* ── Header logo hover life (nav-logo.tsx), 2026-11-22 ──────────────────
+   The crossbar reaches toward the arch spine as the pointer crosses the
+   lockup (--reach 0..1 from NavLogo): the drawn dash grows from 16 to 28
+   units, ending at x=36 (cap edge 37.5), just inside the spine (x=38). It eases after the
+   pointer on --ease-settle, and settles home slower when the pointer
+   leaves. A heritage trace runs once around the arch on entry. Press
+   scales the lockup to 0.97. Hover devices + full motion only. */
+.lockup-trace { opacity: 0; stroke-dasharray: 0 100; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .nav-logo .lockup-bar {
+    stroke-dasharray: calc(16px + var(--reach, 0) * 12px) 100px;
+    transition: stroke-dasharray 420ms var(--ease-settle);
+  }
+  .nav-logo:hover .lockup-bar {
+    transition-duration: 180ms;
+  }
+  .nav-logo:hover .lockup-trace {
+    animation: lockup-trace 720ms var(--ease-settle) both;
+  }
+  .nav-logo svg {
+    transition: transform 150ms ease-out;
+  }
+  .nav-logo:active svg {
+    transform: scale(0.97);
+  }
+}
+@keyframes lockup-trace {
+  0% { opacity: 1; stroke-dasharray: 0 100; stroke-dashoffset: 0; }
+  45% { opacity: 1; stroke-dasharray: 28 100; stroke-dashoffset: -30; }
+  100% { opacity: 0; stroke-dasharray: 6 100; stroke-dashoffset: -100; }
 }
