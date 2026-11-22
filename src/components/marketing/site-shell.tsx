@@ -20,6 +20,7 @@ import { MobileMenu } from "./mobile-menu";
 import { LensToggle } from "./lens-toggle";
 import { MotionMount } from "./motion";
 import { NavScrollState } from "./nav-scroll-state";
+import { NavActiveLink } from "./nav-active-link";
 import { DEMO_URL } from "@/lib/marketing/demo";
 import { PracticeFitWordmark } from "@/components/practice-fit/brand/practice-fit-wordmark";
 import { ToastProvider } from "@/components/app/toast";
@@ -48,7 +49,7 @@ export function SiteShell({
           scroll-settle on the marketing surfaces. */}
       <MotionMount />
       <SiteNav ctaIntent={ctaIntent} />
-      <main className="flex-1">
+      <main id="main" tabIndex={-1} className="flex-1 outline-none">
         {/* Toast layer for public pages — the job-detail SaveJobButton lives
             here (not under the candidate shell), so its "Job saved" toast had
             no provider. The <main> is a sibling of the backdrop-blurred nav, so
@@ -139,8 +140,15 @@ export async function SiteNav({
   }
 
   return (
-    <nav className="site-nav fixed top-0 inset-x-0 z-50 h-[80px] px-6 sm:px-10 xl:px-14 flex items-center justify-between gap-6 backdrop-blur-xl backdrop-saturate-150 bg-ivory/80 border-b border-[var(--rule)]">
+    <nav className="site-nav fixed top-0 inset-x-0 z-50 h-[80px] px-6 sm:px-10 xl:px-14 flex items-center justify-between gap-6 backdrop-blur-md backdrop-saturate-150 bg-ivory/85 border-b border-[var(--rule)]">
       <NavScrollState />
+      {/* Keyboard users skip the bar straight to the page. */}
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[70] focus:px-4 focus:py-2.5 focus:bg-ink focus:text-ivory focus:text-xs focus:font-semibold"
+      >
+        Skip to content
+      </a>
       <Link href="/" className="flex items-center shrink-0" aria-label="DSO Hire, home">
         <BrandLockup height={50} draw />
       </Link>
@@ -154,20 +162,20 @@ export async function SiteNav({
             beside the button. On DSO pages (CTA = "Post a Job") the link
             stays, keeping Browse Jobs one click away. */}
         {primaryCtaLabel !== "Browse jobs" && (
-          <NavLink href="/jobs">Browse Jobs</NavLink>
+          <NavLink href="/jobs">Browse jobs</NavLink>
         )}
         {/* #115 FOH (Cam, Day 31) — the proprietary wow-feature gets the nav
             slot: the trademarked PracticeFit wordmark links its dedicated
             page (which covers DSOFit too). Companies moved to the footer +
             mobile menu — the directory is a browse surface, not a headline. */}
         <li>
-          <Link
+          <NavActiveLink
             href="/practicefit"
             aria-label="PracticeFit"
-            className="flex items-center hover:opacity-75 transition-opacity"
+            className="nav-link relative flex items-center"
           >
             <PracticeFitWordmark surface="light" tm className="text-sm" />
-          </Link>
+          </NavActiveLink>
         </li>
         <NavLink href="/pricing">Pricing</NavLink>
         {/* The self-serve demo is the lowest-commitment step a DSO can
@@ -200,13 +208,13 @@ export async function SiteNav({
         </div>
         <Link
           href={signInHref}
-          className="hidden sm:inline-flex text-xs font-semibold text-slate-body hover:text-ink transition-colors whitespace-nowrap"
+          className="nav-link relative hidden sm:inline-flex text-xs font-semibold text-slate-body hover:text-ink transition-colors duration-150 whitespace-nowrap"
         >
           {signInLabel}
         </Link>
         <Link
           href={primaryCtaHref}
-          className="btn-lift px-3.5 py-2 text-xs sm:px-5 sm:py-2.5 sm:text-sm bg-primary text-primary-foreground font-bold hover:bg-primary/90 whitespace-nowrap"
+          className="btn-lift inline-flex items-center h-9 sm:h-10 px-3.5 sm:px-5 text-xs sm:text-sm bg-primary text-primary-foreground font-bold hover:bg-primary/90 whitespace-nowrap"
         >
           {primaryCtaLabel}
         </Link>
@@ -229,12 +237,12 @@ export async function SiteNav({
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <li>
-      <Link
+      <NavActiveLink
         href={href}
-        className="nav-link relative text-xs font-semibold text-slate-body hover:text-ink transition-colors whitespace-nowrap"
+        className="nav-link relative text-xs font-semibold text-slate-body hover:text-ink aria-[current=page]:text-ink whitespace-nowrap"
       >
         {children}
-      </Link>
+      </NavActiveLink>
     </li>
   );
 }

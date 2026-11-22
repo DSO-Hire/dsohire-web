@@ -1520,7 +1520,7 @@ html {
 /* ── Live dot + demo rows ── */
 @media (prefers-reduced-motion: no-preference) {
   .live-dot {
-    animation: live-pulse 2.2s var(--ease-settle) infinite;
+    animation: live-pulse 2.2s var(--ease-settle) 1.2s 3;
   }
   [data-reveal].mk-in .demo-row {
     animation: demo-row-in 0.55s var(--spring) both;
@@ -1552,16 +1552,30 @@ html {
 
 /* ── Marketing nav: glass that firms up once you scroll, and gets out
    of the way while you read (hides scrolling down, returns on any
-   scroll up). Driven by NavScrollState (data attributes on <nav>). ── */
+   scroll up). Driven by NavScrollState (data attributes on <nav>).
+   Header pass 2026-11-22: layered hairline shadow, 300ms return /
+   240ms tuck, underline 200ms, current page keeps its underline. ── */
 .site-nav {
   transition:
-    transform 0.42s var(--ease-settle),
-    background-color 0.24s ease,
-    box-shadow 0.24s ease,
-    border-color 0.24s ease;
+    transform 0.24s var(--ease-in),
+    background-color 0.2s ease-out,
+    box-shadow 0.2s ease-out,
+    border-color 0.2s ease-out;
+}
+.site-nav[data-hidden="false"] {
+  transition-property: transform, background-color, box-shadow, border-color;
+  transition-duration: 0.3s, 0.2s, 0.2s, 0.2s;
+  transition-timing-function: var(--ease-settle), ease-out, ease-out, ease-out;
 }
 .site-nav[data-scrolled="true"] {
-  box-shadow: 0 8px 28px -18px rgba(20, 35, 63, 0.35);
+  box-shadow:
+    0 1px 0 rgb(20 35 63 / 0.04),
+    0 8px 24px -16px rgb(20 35 63 / 0.16);
+}
+.dark .site-nav[data-scrolled="true"] {
+  box-shadow:
+    0 1px 0 rgb(0 0 0 / 0.2),
+    0 8px 24px -16px rgb(0 0 0 / 0.5);
 }
 @media (prefers-reduced-motion: no-preference) {
   .site-nav[data-hidden="true"] {
@@ -1572,15 +1586,15 @@ html {
   transform: none;
 }
 
-/* Nav micro-interactions: hovered link keeps focus, siblings recede;
-   underline draws from the left on the spring. */
+/* Nav micro-interactions: the hovered item keeps focus, siblings recede;
+   underline draws from the left. */
 @media (hover: hover) {
   .nav-links:has(> li > a:hover) > li > a:not(:hover) {
     opacity: 0.55;
   }
 }
 .nav-links > li > a {
-  transition: opacity 0.2s ease, color 0.12s ease;
+  transition: opacity 150ms ease-out, color 120ms ease-out;
 }
 .nav-link::after {
   content: "";
@@ -1592,10 +1606,11 @@ html {
   background: var(--heritage);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.35s var(--spring);
+  transition: transform 200ms var(--ease-settle);
 }
 .nav-link:hover::after,
-.nav-link:focus-visible::after {
+.nav-link:focus-visible::after,
+.nav-link[aria-current="page"]::after {
   transform: scaleX(1);
 }
 
@@ -2002,61 +2017,66 @@ html {
   18%, 100% { stroke-dashoffset: calc(var(--c) * (1 - var(--fit) / 100)); }
 }
 
-/* ── Nav lens menus (lens-toggle.tsx), unslop pass 2026-11-20 ──────────
-   Open on hover or keyboard focus. Panel settles in (fade + 4px rise),
-   leaves faster than it arrives. Rows stagger 18ms apart, capped at the
-   7th, so the panel feels assembled rather than flashed. Layered so the
-   Tailwind left/right/width utilities on the element still win. */
+/* ── Marketing header menus (lens-toggle.tsx + mobile-menu.tsx) ───────
+   Header pass 2026-11-22, values from the ux-animation skill:
+   dropdown 160ms in (--ease-settle) / 120ms out (ease-in), fade + 4px
+   rise + 0.98 scale from the trigger; drawer 280ms in / 200ms out;
+   expanders 250 / 190ms on grid rows. Rows ride in with their container
+   (no stagger). Shadows are three thin layers, never one big blur.
+   State comes from data attributes set by the components. */
+:root {
+  --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --menu-shadow:
+    0 0 0 1px rgb(20 35 63 / 0.04),
+    0 2px 4px rgb(20 35 63 / 0.06),
+    0 16px 28px -8px rgb(20 35 63 / 0.16);
+}
+.dark {
+  --menu-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.2),
+    0 2px 4px rgb(0 0 0 / 0.16),
+    0 16px 28px -8px rgb(0 0 0 / 0.16);
+}
+
 @layer components {
+  .lens-trigger { transition: color 120ms ease-out, background-color 120ms ease-out; }
+  .lens-trigger[aria-expanded="true"] { color: var(--ink); background: color-mix(in srgb, var(--cream) 70%, transparent); }
+  .lens-chevron { transition: transform 160ms var(--ease-settle); }
+  .lens-trigger[aria-expanded="true"] .lens-chevron { transform: rotate(180deg); }
+
   .lens-menu {
     position: absolute;
     top: 100%;
     margin-top: 0.75rem;
     z-index: 50;
+    display: flex;
+    flex-direction: column;
     max-width: calc(100vw - 2rem);
     max-height: calc(100dvh - 7rem);
     overflow-y: auto;
     background: var(--popover);
     border: 1px solid var(--rule-strong);
-    box-shadow: var(--elevation-3);
+    box-shadow: var(--menu-shadow);
     visibility: hidden;
     opacity: 0;
-    transform: translateY(-4px);
-    transform-origin: top center;
+    transform: translateY(-4px) scale(0.98);
     transition:
-      opacity 120ms ease-out,
-      transform 120ms ease-out,
+      opacity 120ms var(--ease-in),
+      transform 120ms var(--ease-in),
       visibility 0s linear 120ms;
   }
-  .lens-group:hover > .lens-menu,
-  .lens-group:focus-within > .lens-menu {
+  .lens-menu[data-open="true"] {
     visibility: visible;
     opacity: 1;
     transform: none;
     transition:
-      opacity 180ms var(--ease-settle) 40ms,
-      transform 180ms var(--ease-settle) 40ms,
+      opacity 160ms var(--ease-settle),
+      transform 160ms var(--ease-settle),
       visibility 0s;
   }
-
-  .lens-chevron { transition: transform 150ms var(--ease-settle); }
-  .lens-group:hover .lens-chevron,
-  .lens-group:focus-within .lens-chevron { transform: rotate(180deg); }
-
-  .lens-item {
-    opacity: 0;
-    transform: translateY(3px);
-    transition: opacity 0s, transform 0s;
-  }
-  .lens-group:hover .lens-item,
-  .lens-group:focus-within .lens-item {
-    opacity: 1;
-    transform: none;
-    transition:
-      opacity 200ms var(--ease-settle),
-      transform 200ms var(--ease-settle);
-    transition-delay: calc(40ms + min(var(--i, 0), 7) * 18ms);
-  }
+  /* Switching between menus while browsing: no animation at all. */
+  .lens-menu[data-instant="true"] { transition: none; }
 
   .lens-lead,
   .lens-row {
@@ -2064,15 +2084,14 @@ html {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    outline-offset: -2px;
     transition: background-color 120ms ease-out;
   }
-  .lens-lead {
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--rule);
-  }
+  .lens-lead { padding: 1rem 1.25rem; border-bottom: 1px solid var(--rule); }
   .lens-row { padding: 0.55rem 0.75rem; }
 
-  /* Heritage hairline grows on the left edge of the hovered row. */
+  /* Heritage hairline on the left edge: grows on hover, stays for the
+     current page. */
   .lens-lead::before,
   .lens-row::before {
     content: "";
@@ -2092,7 +2111,9 @@ html {
   .lens-lead:hover::before,
   .lens-row:hover::before,
   .lens-lead:focus-visible::before,
-  .lens-row:focus-visible::before { transform: scaleY(1); }
+  .lens-row:focus-visible::before,
+  .lens-lead[aria-current="page"]::before,
+  .lens-row[aria-current="page"]::before { transform: scaleY(1); }
 
   .lens-arrow {
     color: var(--heritage-deep);
@@ -2139,28 +2160,62 @@ html {
     transition: border-color 120ms ease-out;
   }
   .lens-fit:hover, .lens-fit:focus-visible { border-color: var(--heritage); }
-  .lens-fit-ring {
-    stroke-dasharray: 100;
-    stroke-dashoffset: 100;
-    transition: stroke-dashoffset 0s;
-  }
-  .lens-group:hover .lens-fit-ring,
-  .lens-group:focus-within .lens-fit-ring {
+  .lens-fit-ring { stroke-dasharray: 100; stroke-dashoffset: 100; }
+  /* Secondary motion: starts as the panel lands, settles at 82%. */
+  .lens-menu[data-open="true"] .lens-fit-ring {
     stroke-dashoffset: 18;
-    transition: stroke-dashoffset 700ms var(--ease-settle) 220ms;
+    transition: stroke-dashoffset 520ms var(--ease-settle) 120ms;
   }
+  .lens-menu[data-instant="true"] .lens-fit-ring { transition: none; }
+
+  /* ── Mobile drawer ── */
+  .m-drawer-root { position: fixed; inset: 0; z-index: 60; visibility: hidden; transition: visibility 0s linear 200ms; }
+  .m-drawer-root[data-open="true"] { visibility: visible; transition: none; }
+  .m-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgb(6 14 27 / 0.45);
+    opacity: 0;
+    transition: opacity 200ms var(--ease-in);
+  }
+  .m-drawer-root[data-open="true"] .m-backdrop { opacity: 1; transition: opacity 280ms var(--ease-settle); }
+  .m-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    transform: translateX(100%);
+    transition: transform 200ms var(--ease-in);
+    box-shadow: var(--menu-shadow);
+  }
+  .m-drawer-root[data-open="true"] .m-panel { transform: none; transition: transform 280ms var(--ease-settle); }
+
+  .m-expander { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 190ms var(--ease-in-out); }
+  .m-expander[data-open="true"] { grid-template-rows: 1fr; transition-duration: 250ms; }
+  .m-expander > div { min-height: 0; overflow: hidden; }
+
+  .m-row { transition: background-color 120ms ease-out, color 120ms ease-out; }
+  .m-row:active { background: color-mix(in srgb, var(--cream) 80%, transparent); }
+  .m-row[aria-current="page"] { box-shadow: inset 2px 0 0 var(--heritage); }
+
+  /* Hamburger morphs to a close mark while the drawer is open. */
+  .m-burger span { transition: transform 200ms var(--ease-settle), opacity 120ms ease-out; }
+  .m-burger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .m-burger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+  .m-burger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
   @media (prefers-reduced-motion: reduce) {
     .lens-menu,
-    .lens-group:hover > .lens-menu,
-    .lens-group:focus-within > .lens-menu,
-    .lens-item,
-    .lens-group:hover .lens-item,
-    .lens-group:focus-within .lens-item { transform: none; transition-delay: 0s; }
+    .lens-menu[data-open="true"] { transform: none; }
+    .lens-chevron,
     .lens-arrow,
     .lens-lead::before,
-    .lens-row::before { transition: none; }
-    .lens-group:hover .lens-fit-ring,
-    .lens-group:focus-within .lens-fit-ring { transition: none; }
+    .lens-row::before,
+    .lens-menu[data-open="true"] .lens-fit-ring,
+    .m-expander,
+    .m-burger span { transition: none; }
+    .m-panel,
+    .m-drawer-root[data-open="true"] .m-panel { transform: none; transition: opacity 200ms ease-out; opacity: 0; }
+    .m-drawer-root[data-open="true"] .m-panel { opacity: 1; }
   }
 }
