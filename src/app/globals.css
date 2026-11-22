@@ -2001,3 +2001,166 @@ html {
   0%, 3% { stroke-dashoffset: var(--c); }
   18%, 100% { stroke-dashoffset: calc(var(--c) * (1 - var(--fit) / 100)); }
 }
+
+/* ── Nav lens menus (lens-toggle.tsx), unslop pass 2026-11-20 ──────────
+   Open on hover or keyboard focus. Panel settles in (fade + 4px rise),
+   leaves faster than it arrives. Rows stagger 18ms apart, capped at the
+   7th, so the panel feels assembled rather than flashed. Layered so the
+   Tailwind left/right/width utilities on the element still win. */
+@layer components {
+  .lens-menu {
+    position: absolute;
+    top: 100%;
+    margin-top: 0.75rem;
+    z-index: 50;
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100dvh - 7rem);
+    overflow-y: auto;
+    background: var(--popover);
+    border: 1px solid var(--rule-strong);
+    box-shadow: var(--elevation-3);
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-4px);
+    transform-origin: top center;
+    transition:
+      opacity 120ms ease-out,
+      transform 120ms ease-out,
+      visibility 0s linear 120ms;
+  }
+  .lens-group:hover > .lens-menu,
+  .lens-group:focus-within > .lens-menu {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 180ms var(--ease-settle) 40ms,
+      transform 180ms var(--ease-settle) 40ms,
+      visibility 0s;
+  }
+
+  .lens-chevron { transition: transform 150ms var(--ease-settle); }
+  .lens-group:hover .lens-chevron,
+  .lens-group:focus-within .lens-chevron { transform: rotate(180deg); }
+
+  .lens-item {
+    opacity: 0;
+    transform: translateY(3px);
+    transition: opacity 0s, transform 0s;
+  }
+  .lens-group:hover .lens-item,
+  .lens-group:focus-within .lens-item {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 200ms var(--ease-settle),
+      transform 200ms var(--ease-settle);
+    transition-delay: calc(40ms + min(var(--i, 0), 7) * 18ms);
+  }
+
+  .lens-lead,
+  .lens-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: background-color 120ms ease-out;
+  }
+  .lens-lead {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .lens-row { padding: 0.55rem 0.75rem; }
+
+  /* Heritage hairline grows on the left edge of the hovered row. */
+  .lens-lead::before,
+  .lens-row::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 2px;
+    background: var(--heritage);
+    transform: scaleY(0);
+    transition: transform 150ms var(--ease-settle);
+  }
+  .lens-lead:hover,
+  .lens-row:hover,
+  .lens-lead:focus-visible,
+  .lens-row:focus-visible { background: color-mix(in srgb, var(--cream) 70%, transparent); }
+  .lens-lead:hover::before,
+  .lens-row:hover::before,
+  .lens-lead:focus-visible::before,
+  .lens-row:focus-visible::before { transform: scaleY(1); }
+
+  .lens-arrow {
+    color: var(--heritage-deep);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 120ms ease-out, transform 150ms var(--ease-settle);
+  }
+  .lens-lead .lens-arrow { opacity: 0.5; transform: none; }
+  .lens-lead:hover .lens-arrow,
+  .lens-row:hover .lens-arrow,
+  .lens-lead:focus-visible .lens-arrow,
+  .lens-row:focus-visible .lens-arrow { opacity: 1; transform: translateX(2px); }
+
+  .lens-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.8rem 1.25rem;
+    border-top: 1px solid var(--rule);
+    background: color-mix(in srgb, var(--cream) 60%, transparent);
+    font-size: 0.8rem;
+    color: var(--slate-body);
+  }
+  .lens-foot-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-shrink: 0;
+    font-weight: 600;
+    color: var(--heritage-deep);
+    transition: color 120ms ease-out;
+  }
+  .lens-foot-link:hover { color: var(--ink); }
+
+  .lens-fit {
+    display: flex;
+    gap: 0.85rem;
+    align-items: flex-start;
+    margin: 0.75rem 0.75rem 0.25rem;
+    padding: 0.9rem;
+    border: 1px solid var(--rule);
+    background: color-mix(in srgb, var(--cream) 60%, transparent);
+    transition: border-color 120ms ease-out;
+  }
+  .lens-fit:hover, .lens-fit:focus-visible { border-color: var(--heritage); }
+  .lens-fit-ring {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    transition: stroke-dashoffset 0s;
+  }
+  .lens-group:hover .lens-fit-ring,
+  .lens-group:focus-within .lens-fit-ring {
+    stroke-dashoffset: 18;
+    transition: stroke-dashoffset 700ms var(--ease-settle) 220ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lens-menu,
+    .lens-group:hover > .lens-menu,
+    .lens-group:focus-within > .lens-menu,
+    .lens-item,
+    .lens-group:hover .lens-item,
+    .lens-group:focus-within .lens-item { transform: none; transition-delay: 0s; }
+    .lens-arrow,
+    .lens-lead::before,
+    .lens-row::before { transition: none; }
+    .lens-group:hover .lens-fit-ring,
+    .lens-group:focus-within .lens-fit-ring { transition: none; }
+  }
+}

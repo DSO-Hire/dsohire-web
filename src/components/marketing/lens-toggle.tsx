@@ -1,63 +1,64 @@
 "use client";
 
 /**
- * LensToggle — the segmented "For DSOs | Job Candidates" control in the
+ * LensToggle — the segmented "Dental Groups | Job Candidates" control in the
  * marketing nav. DSO Hire is a dual-lens site (employers vs. job candidates);
  * this control makes switching lenses an obvious, deliberate action rather
  * than two loose nav items.
  *
- * Structure:
- *   - One bordered container holding two segments joined by a vertical divider.
- *   - Left segment "For DSOs" → /for-dental-groups, AND a hover trigger for the
- *     size→tier guidance dropdown (which tier fits a group of your size).
- *   - Right segment "Job Candidates" → /for-candidates, AND a hover trigger
- *     for the role-specific dropdown. (Renamed from "For Dental Pros" on
- *     2026-05-22 — "dental pros" excluded corporate/non-clinical seekers.)
+ * Each segment links to its lens overview and opens a menu on hover OR
+ * keyboard focus (:focus-within). Menu motion and row states live in
+ * globals.css under `.lens-*` (unslop pass 2026-11-20):
+ *   - Panel settles in (fade + 4px rise, --ease-settle, 180ms), leaves fast.
+ *   - Rows stagger in 18ms apart, capped, so the menu feels assembled.
+ *   - Row hover: heritage hairline grows on the left, arrow nudges in.
+ *   - Reduced motion: opacity only.
  *
- * Both dropdowns are pure CSS group-hover. Active-lens state reads the current
- * path via usePathname() and highlights whichever lens the visitor is in.
- * Neutral paths (/, /about, /contact, /legal) highlight neither.
+ * Copy rules: one sanctioned Eyebrow per column header; row meta is sentence
+ * case (Eyebrow doctrine: max one all-caps label per card). Tier prices come
+ * from PRICING_TIERS so the menu can't drift from the pricing page.
  *
- * This is a client island (needs usePathname) — rendered by the async server
- * component SiteNav, never the other way around.
- *
- * ROLE_LINKS mirrors src/app/for-[role]/role-config.ts and the mobile drawer's
- * copy (plus the corporate-roles entry). Update all when adding a role page.
+ * Role lists mirror src/lib/roles/role-config.ts and the mobile drawer
+ * (mobile-menu.tsx). Update all when adding a role page.
  */
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { CSSProperties, ReactNode } from "react";
 
 import { Eyebrow } from "@/components/brand/eyebrow";
+import { DEMO_URL } from "@/lib/marketing/demo";
+import { PRICING_TIERS, type PricingTier } from "@/lib/stripe/prices";
 
-const ROLE_LINKS = [
-  { href: "/for-candidates", label: "For Dental Professionals", eyebrow: "Overview" },
-  { href: "/for-dentists", label: "For Dentists", eyebrow: "DDS / DMD" },
-  { href: "/for-specialists", label: "For Specialists", eyebrow: "Endo · Perio · Pedo · OS · Ortho" },
-  { href: "/for-hygienists", label: "For Hygienists", eyebrow: "RDH" },
-  { href: "/for-dental-assistants", label: "For Dental Assistants", eyebrow: "DA · EFDA" },
-  { href: "/for-dental-therapists", label: "For Dental Therapists", eyebrow: "Expanded-scope clinical" },
-  { href: "/for-front-desk", label: "For Front Desk + Treatment Coordinators", eyebrow: "Patient-facing ops" },
-  { href: "/for-office-managers", label: "For Office Managers", eyebrow: "OM · Operations Leadership" },
-  { href: "/for-practice-administrators", label: "For Practice Administrators", eyebrow: "Non-clinical leadership" },
-  { href: "/for-dental-lab-technicians", label: "For Dental Lab Technicians", eyebrow: "CDT · Dental laboratory" },
-  { href: "/for-sterilization-technicians", label: "For Sterilization Technicians", eyebrow: "Instrument processing" },
-  // Corporate / non-clinical seekers — the rename to "Job Candidates"
-  // (2026-05-22) is partly to include these roles; give them a home here.
-  { href: "/for-corporate", label: "Corporate & Administrative Roles", eyebrow: "Non-clinical · DSO support center" },
+type MenuLink = { href: string; label: string; meta: string };
+
+const CLINICAL_ROLES: MenuLink[] = [
+  { href: "/for-dentists", label: "Dentists", meta: "DDS / DMD" },
+  { href: "/for-specialists", label: "Specialists", meta: "Endo, perio, pedo, OS, ortho" },
+  { href: "/for-hygienists", label: "Hygienists", meta: "RDH" },
+  { href: "/for-dental-assistants", label: "Dental assistants", meta: "DA, EFDA" },
+  { href: "/for-dental-therapists", label: "Dental therapists", meta: "Expanded-scope clinical" },
+  { href: "/for-dental-lab-technicians", label: "Lab technicians", meta: "CDT, dental laboratory" },
+  { href: "/for-sterilization-technicians", label: "Sterilization technicians", meta: "Instrument processing" },
 ];
 
-/**
- * Left-lens "For DSOs" menu — maps DSO size to the tier that fits. Open-ended
- * at the top (no practice-count ceiling, per the brand copy rule). Size rows
- * link to /pricing; the overview links to /for-dental-groups.
- */
-const DSO_SIZE_LINKS = [
-  { href: "/for-dental-groups", label: "Why DSO Hire", eyebrow: "Overview" },
-  { href: "/pricing/solo", label: "Solo plan", eyebrow: "Solo practice · 2–5 locations" },
-  { href: "/pricing/growth", label: "Growth plan", eyebrow: "Midsize group" },
-  { href: "/pricing/scale", label: "Scale plan", eyebrow: "Larger · multi-region" },
-  { href: "/pricing/enterprise", label: "Enterprise plan", eyebrow: "Largest · most complex" },
+const OFFICE_ROLES: MenuLink[] = [
+  { href: "/for-front-desk", label: "Front desk & TCs", meta: "Treatment coordinators, patient-facing" },
+  { href: "/for-office-managers", label: "Office managers", meta: "Operations leadership" },
+  { href: "/for-practice-administrators", label: "Practice administrators", meta: "Non-clinical leadership" },
+  // Corporate / non-clinical seekers: part of why the lens is "Job Candidates".
+  { href: "/for-corporate", label: "Corporate & support center", meta: "DSO support center roles" },
 ];
+
+const TIER_ROWS: { tier: PricingTier; meta: string }[] = [
+  { tier: "solo", meta: "Privately-owned, 2 to 5 locations" },
+  { tier: "growth", meta: "Growing groups and DSOs" },
+  { tier: "scale", meta: "Multi-region groups" },
+  { tier: "enterprise", meta: "35+ practices, account manager" },
+];
+
+function formatPrice(n: number) {
+  return `$${n.toLocaleString("en-US")}`;
+}
 
 /**
  * Which lens does this path belong to?
@@ -81,8 +82,7 @@ function resolveLens(pathname: string): "dso" | "candidate" | "neutral" {
   if (
     pathname === "/for-candidates" ||
     pathname.startsWith("/for-candidates/") ||
-    // /for-* role pages (dentists, hygienists, etc.) — but NOT /for-dental-groups,
-    // which is handled above and would have returned already.
+    // /for-* role pages; /for-dental-groups already returned above.
     pathname.startsWith("/for-") ||
     pathname === "/jobs" ||
     pathname.startsWith("/jobs/") ||
@@ -97,14 +97,13 @@ function resolveLens(pathname: string): "dso" | "candidate" | "neutral" {
   return "neutral";
 }
 
-const MENU_SHADOW =
-  "shadow-3";
+const stagger = (i: number) => ({ "--i": i }) as CSSProperties;
 
-function Chevron({ group }: { group: string }) {
+function Chevron() {
   return (
     <svg
       aria-hidden
-      className={`h-2.5 w-2.5 transition-transform ${group}`}
+      className="lens-chevron h-2.5 w-2.5"
       viewBox="0 0 12 12"
       fill="none"
       stroke="currentColor"
@@ -117,36 +116,163 @@ function Chevron({ group }: { group: string }) {
   );
 }
 
-function MenuList({
-  links,
-}: {
-  links: ReadonlyArray<{ href: string; label: string; eyebrow: string }>;
-}) {
+function Arrow({ className = "lens-arrow" }: { className?: string }) {
   return (
-    <ul className="list-none p-2">
-      {links.map((link, i) => (
-        <li key={`${link.href}-${link.label}`}>
-          <Link
-            href={link.href}
-            role="menuitem"
-            className="block px-4 py-2.5 hover:bg-cream/60 transition-colors"
-            style={{
-              // Subtle separator between the overview and the rest of the list.
-              borderTop: i === 1 ? "1px solid var(--rule)" : undefined,
-              marginTop: i === 1 ? "4px" : undefined,
-              paddingTop: i === 1 ? "10px" : undefined,
-            }}
+    <svg
+      aria-hidden
+      className={`${className} h-3 w-3 shrink-0`}
+      viewBox="0 0 12 12"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M2.5 6h7M6.5 3l3 3-3 3" />
+    </svg>
+  );
+}
+
+function Row({ href, label, meta, aside, i }: MenuLink & { aside?: ReactNode; i: number }) {
+  return (
+    <li className="lens-item" style={stagger(i)}>
+      <Link href={href} role="menuitem" className="lens-row">
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold leading-snug tracking-[-0.1px] text-ink">
+            {label}
+          </span>
+          <span className="block text-2xs leading-snug text-slate-meta mt-0.5">{meta}</span>
+        </span>
+        {aside ?? <Arrow />}
+      </Link>
+    </li>
+  );
+}
+
+function Lead({ href, label, meta }: MenuLink) {
+  return (
+    <Link href={href} role="menuitem" className="lens-lead lens-item" style={stagger(0)}>
+      <span className="min-w-0 flex-1">
+        <span className="block text-base font-bold tracking-[-0.2px] text-ink">{label}</span>
+        <span className="block text-xs text-slate-body mt-0.5">{meta}</span>
+      </span>
+      <Arrow />
+    </Link>
+  );
+}
+
+function Foot({ children }: { children: ReactNode }) {
+  return (
+    <div className="lens-item lens-foot" style={stagger(6)}>
+      {children}
+    </div>
+  );
+}
+
+function DsoMenu() {
+  return (
+    <>
+      <Lead
+        href="/for-dental-groups"
+        label="Why DSO Hire"
+        meta="One flat fee for every location. No placement fees."
+      />
+      <div className="px-2 pb-2">
+        <Eyebrow as="p" className="px-3 pt-3 pb-1.5">
+          Plans by group size
+        </Eyebrow>
+        <ul className="list-none">
+          {TIER_ROWS.map(({ tier, meta }, idx) => {
+            const t = PRICING_TIERS[tier];
+            return (
+              <Row
+                key={tier}
+                i={idx + 1}
+                href={`/pricing/${tier}`}
+                label={t.name}
+                meta={meta}
+                aside={
+                  <span className="text-xs font-semibold text-ink tabular shrink-0">
+                    {formatPrice(t.monthlyPrice)}
+                    <span className="font-normal text-slate-meta">/mo</span>
+                  </span>
+                }
+              />
+            );
+          })}
+        </ul>
+      </div>
+      <Foot>
+        <span>Click through a real hiring workspace.</span>
+        <a href={DEMO_URL} role="menuitem" className="lens-foot-link">
+          Live demo
+          <svg
+            aria-hidden
+            className="h-3 w-3"
+            viewBox="0 0 12 12"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <Eyebrow className="mb-0.5">
-              {link.eyebrow}
-            </Eyebrow>
-            <div className="text-xs font-semibold tracking-[-0.1px] text-ink">
-              {link.label}
-            </div>
+            <path d="M4 8l4-4M4.5 4H8v3.5" />
+          </svg>
+        </a>
+      </Foot>
+    </>
+  );
+}
+
+function CandidateMenu() {
+  return (
+    <>
+      <Lead
+        href="/for-candidates"
+        label="For dental professionals"
+        meta="Free forever. Apply straight to the group, never through an agency."
+      />
+      <div className="grid grid-cols-2 gap-x-2 px-2 pb-2">
+        <div>
+          <Eyebrow as="p" className="px-3 pt-3 pb-1.5">
+            Clinical
+          </Eyebrow>
+          <ul className="list-none">
+            {CLINICAL_ROLES.map((r, idx) => (
+              <Row key={r.href} i={idx + 1} {...r} />
+            ))}
+          </ul>
+        </div>
+        <div>
+          <Eyebrow as="p" className="px-3 pt-3 pb-1.5">
+            Office &amp; leadership
+          </Eyebrow>
+          <ul className="list-none">
+            {OFFICE_ROLES.map((r, idx) => (
+              <Row key={r.href} i={idx + 1} {...r} />
+            ))}
+          </ul>
+          {/* The menu's one product moment: fills the short column with the
+              PracticeFit promise. The ring draws in as the menu opens. */}
+          <Link href="/jobs" role="menuitem" className="lens-fit lens-item" style={stagger(6)}>
+            <svg aria-hidden viewBox="0 0 40 40" className="h-10 w-10 shrink-0 -rotate-90">
+              <circle cx="20" cy="20" r="16" fill="none" stroke="var(--rule-strong)" strokeWidth="3" />
+              <circle className="lens-fit-ring" cx="20" cy="20" r="16" fill="none" stroke="var(--heritage)" strokeWidth="3" pathLength="100" />
+            </svg>
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold text-ink">See how you fit</span>
+              <span className="block text-2xs leading-snug text-slate-body mt-0.5">
+                PracticeFit™ scores every opening to how you like to work.
+              </span>
+              <span className="lens-foot-link mt-2 text-xs">
+                Browse jobs
+                <Arrow className="" />
+              </span>
+            </span>
           </Link>
-        </li>
-      ))}
-    </ul>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -155,16 +281,14 @@ export function LensToggle() {
   const lens = resolveLens(pathname);
 
   const baseSegment =
-    "inline-flex items-center gap-1.5 px-3.5 h-9 text-xs font-semibold whitespace-nowrap transition-colors";
+    "inline-flex items-center gap-1.5 px-3.5 h-9 text-xs font-semibold whitespace-nowrap transition-colors duration-150";
   const activeSegment = "text-ink font-bold shadow-[inset_0_-2px_0_0_var(--heritage)]";
   const idleSegment = "text-slate-body hover:text-ink hover:bg-cream/60";
 
   return (
     <li>
       <div className="flex items-stretch border border-[var(--rule-strong)]">
-        {/* Left lens — For DSOs. Owns its own hover group (group/dsos) so the
-            size→tier dropdown fires only from here. */}
-        <div className="relative group/dsos flex">
+        <div className="lens-group relative flex">
           <Link
             href="/for-dental-groups"
             aria-current={lens === "dso" ? "true" : undefined}
@@ -172,26 +296,18 @@ export function LensToggle() {
             className={`${baseSegment} ${lens === "dso" ? activeSegment : idleSegment}`}
           >
             Dental Groups
-            <Chevron group="group-hover/dsos:rotate-180" />
+            <Chevron />
           </Link>
-
           {/* Hover bridge so moving the cursor to the menu doesn't drop it. */}
           <span aria-hidden className="absolute left-0 right-0 top-full h-3" />
-
-          <div
-            role="menu"
-            className={`invisible opacity-0 absolute top-full left-0 mt-3 min-w-[320px] max-w-[calc(100vw-2rem)] bg-popover border border-[var(--rule-strong)] ${MENU_SHADOW} group-hover/dsos:visible group-hover/dsos:opacity-100 transition-all duration-150 z-50`}
-          >
-            <MenuList links={DSO_SIZE_LINKS} />
+          <div role="menu" className="lens-menu left-0 w-[420px]">
+            <DsoMenu />
           </div>
         </div>
 
-        {/* Divider joining the two segments */}
         <span aria-hidden className="w-px self-stretch bg-[var(--rule-strong)]" />
 
-        {/* Right lens — Job Candidates. Owns its own hover group (group/pros)
-            so the role dropdown fires only from here. */}
-        <div className="relative group/pros flex">
+        <div className="lens-group relative flex">
           <Link
             href="/for-candidates"
             aria-current={lens === "candidate" ? "true" : undefined}
@@ -199,16 +315,13 @@ export function LensToggle() {
             className={`${baseSegment} ${lens === "candidate" ? activeSegment : idleSegment}`}
           >
             Job Candidates
-            <Chevron group="group-hover/pros:rotate-180" />
+            <Chevron />
           </Link>
-
           <span aria-hidden className="absolute left-0 right-0 top-full h-3" />
-
-          <div
-            role="menu"
-            className={`invisible opacity-0 absolute top-full right-0 mt-3 min-w-[360px] max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-7rem)] overflow-y-auto bg-popover border border-[var(--rule-strong)] ${MENU_SHADOW} group-hover/pros:visible group-hover/pros:opacity-100 transition-all duration-150 z-50`}
-          >
-            <MenuList links={ROLE_LINKS} />
+          {/* Anchored under the whole toggle (shifted left) so the wide
+              two-column panel stays centered on the control. */}
+          <div role="menu" className="lens-menu -left-[200px] w-[600px]">
+            <CandidateMenu />
           </div>
         </div>
       </div>
