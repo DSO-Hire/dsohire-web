@@ -422,20 +422,6 @@ export function BrandLockup({
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* Hover trace (header only): a short heritage stroke that runs once
-          around the arch when the pointer arrives. Hidden at rest. */}
-      {draw && (
-        <path
-          className="lockup-trace stroke-heritage"
-          d="M 5 5 L 28 5 Q 40 5 40 17 L 40 27 Q 40 39 28 39 L 5 39"
-          fill="none"
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          pathLength="100"
-          aria-hidden
-        />
-      )}
       {/* Heritage horizontal crossbar — implied H. Sits at the vertical
           midpoint of the mark, extending from inside the open left side to
           just shy of the inner curve on the right. The line runs to x=36
